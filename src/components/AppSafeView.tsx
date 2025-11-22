@@ -1,14 +1,35 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import React, { ReactNode } from "react";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-const AppSafeView = () => {
-  return (
-    <View>
-      <Text>AppSafeView</Text>
-    </View>
-  )
+interface AppSafeView {
+  children?: ReactNode;
+  style?: ViewStyle;
 }
 
-export default AppSafeView
+const AppSafeView = ({ children, style }: AppSafeView) => {
 
-const styles = StyleSheet.create({})
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView  style={styles.appSafeArea}>
+        <View
+          style={[style, styles.appView, ]}
+        >
+          {children}
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
+};
+
+export default AppSafeView;
+
+const styles = StyleSheet.create({
+  appSafeArea: {
+    flex: 1,
+  },
+
+  appView: {
+    flex: 1,
+  },
+});
