@@ -1,19 +1,13 @@
-import { StyleSheet, Text, View, Image } from "react-native";
 import React from "react";
-import LogoIcon from "../assets/images/logo.svg"
+import { StyleSheet, View } from "react-native";
 
+// chỉnh lại path cho đúng vị trí file svg của bạn
+import LogoIcon from "../assets/images/Logo.svg"; // hoặc "../assets/images/logo.svg"
 
-interface AppLogo {
-  image: string;
-}
-
-const AppLogo = ({} : AppLogo) => {
-
+const AppLogo = () => {
   return (
-    <View style={styles.container}>
-  
-        <LogoIcon width={200} height={200} />
-    
+    <View style={styles.wrapper}>
+      <LogoIcon width={160} height={160} />
     </View>
   );
 };
@@ -21,21 +15,8 @@ const AppLogo = ({} : AppLogo) => {
 export default AppLogo;
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     alignItems: "center",
-    marginBottom: 25,
-    marginTop: 20,
-  },
-  logo_con: {
-    width: 120,
-    height: 120,
-    borderRadius: "50%",
     justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 5,
-    backgroundColor: "#2e2e2eff",
-  },
-  text: {
-    fontSize: 26,
   },
 });

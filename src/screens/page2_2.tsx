@@ -1,6 +1,6 @@
+// src/screens/page2_2.tsx
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
   Dimensions,
@@ -12,21 +12,17 @@ import {
   View,
   type ImageSourcePropType,
 } from "react-native";
-
-// CHÚ Ý: chỉnh lại path này cho đúng vị trí file thật
-// nếu MIY.svg đang nằm ở src/assets/MIY.svg thì dùng "../assets/MIY.svg"
 import MIY from "../assets/MIY.svg";
 
-import E1 from "../assets/eli1.svg";
-import E2 from "../assets/eli2.svg";
-import E3 from "../assets/eli3.svg";
+import type { StackScreenProps } from "@react-navigation/stack";
+import type { RootStackParamList } from "../navigations/AppStackNavigator";
+
+type Props = StackScreenProps<RootStackParamList, "Page2Screen">;
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
-export default function Screen() {
-  const router = useRouter();
-  const { ima } = useLocalSearchParams<{ ima?: string }>();
-
+export default function Page2Screen({ navigation, route }: Props) {
+  const ima = route.params?.ima;
   const urlFromParam =
     typeof ima === "string" && ima.length > 0 ? decodeURIComponent(ima) : undefined;
 
@@ -45,7 +41,10 @@ export default function Screen() {
       />
 
       <Text style={styles.title}>MÓN ĂN CHÂU ÂU</Text>
-      <Text style={styles.subtitle}>Tinh hoa văn hoá phương tây, sang trọng quý phái </Text>
+      <Text style={styles.subtitle}>
+        Tinh hoa văn hoá phương tây, sang trọng quý phái
+      </Text>
+
       <LinearGradient
         colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
         locations={[0, 1]}
@@ -57,20 +56,19 @@ export default function Screen() {
       <View style={styles.dots}>
         <View style={[styles.dot, { opacity: 1 }]} />
         <View style={[styles.dot, styles.dotActive]} />
-        <View style={[styles.dot, { opacity: 1 }]} />        
+        <View style={[styles.dot, { opacity: 1 }]} />
         <View style={[styles.dot, { opacity: 1 }]} />
       </View>
 
-      <Pressable style={[styles.muiten, { left: 24 }]} onPress={() => router.back()}>
+      <Pressable style={[styles.muiten, { left: 24 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={28} color="#fff" />
       </Pressable>
 
       <Pressable
         style={[styles.muiten, { right: 24 }]}
         onPress={() =>
-          router.push({
-            pathname: "/page1-2",
-            params: { ima: encodeURIComponent(urlFromParam ?? "") },
+          navigation.navigate("Intro1Screen", {
+            ima: encodeURIComponent(urlFromParam ?? ""),
           })
         }
       >

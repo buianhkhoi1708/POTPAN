@@ -1,5 +1,11 @@
-import EuropeFoodScreen from "./src/screens/page2_2";
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import AppStackNavigator from "./src/navigations/AppStackNavigator";
 
 export default function App() {
-  return <EuropeFoodScreen />;
+  return (
+    <NavigationContainer>
+      <AppStackNavigator />
+    </NavigationContainer>
+  );
 }
