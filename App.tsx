@@ -1,12 +1,5 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { StartingStackNav } from './src/navigations/AppStackNavigator';
+import EuropeFoodScreen from "./src/screens/page2_2";
 
 export default function App() {
-  return (
-    <NavigationContainer>
-      <StartingStackNav/>
-    </NavigationContainer>
-  );
+  return <EuropeFoodScreen />;
 }
-
-
