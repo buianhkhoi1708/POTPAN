@@ -11,7 +11,7 @@ const AppSafeView = ({ children, style }: AppSafeView) => {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView  style={styles.appSafeArea}>
+      <SafeAreaView  style={[styles.appSafeArea, style]}>
         <View
           style={[style, styles.appView, ]}
         >
