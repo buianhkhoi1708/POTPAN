@@ -34,7 +34,7 @@ export default function Screen() {
         typeof ima === "string" && ima.length > 0 ? decodeURIComponent(ima) : undefined;
 
     const bgSource: ImageSourcePropType =
-        urlFromParam ? { uri: urlFromParam } : require("../assets/images/MIY.svg");
+        urlFromParam ? { uri: urlFromParam } : require("../assets/MIY.svg");
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" />
