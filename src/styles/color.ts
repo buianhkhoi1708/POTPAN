@@ -1,5 +1,5 @@
 export const AppLightColor =  {
-    bgColor: "#FFF",
+    primary_color: "#FF6967",
     primary_text: "#000",
     buttonColor: "#152cffff",
     logoBg: "#2e2e2eff"
