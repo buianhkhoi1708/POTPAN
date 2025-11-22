@@ -16,4 +16,3 @@ const AppLogo = ({width, height} : AppLogo) => {
 };
 
 export default AppLogo;
-
