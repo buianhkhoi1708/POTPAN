@@ -1,5 +1,6 @@
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
+import AppText from "./AppText";
 
 interface AppButton {
   butName: string;
@@ -10,11 +11,9 @@ interface AppButton {
 
 const AppButton = ({ butName, style, style1, onPress}: AppButton) => {
   return (
-    <View style={[styles.container, style]}>
-      <View style = {[styles.button, style1 ]}>
-        <Button title={butName} color='white' onPress={onPress}/>
-      </View>
-    </View>
+    <Pressable style = {style} onPress={onPress}>
+      <AppText variant="bold" style = {style1}> {butName}</AppText>
+    </Pressable>
   );
 };
 
@@ -24,10 +23,5 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 40,
   },
-  button: {
-    backgroundColor: '#fc7f31ff',
-    borderRadius: 10,
-    height: 50,
-    justifyContent: 'center',
-  }
+
 });
