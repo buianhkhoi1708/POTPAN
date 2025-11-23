@@ -18,7 +18,7 @@ import styles from "../styles/screens/page3-2a.styles";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Page3-2a">;
 
-const ORANGE = "#FF782C";
+const COLOR = "#FF6967";
 const PEACH = "#FFE3D1";
 const PWD_PLACEHOLDER = "●".repeat(10);
 
