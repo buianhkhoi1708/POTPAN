@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-const ORANGE = "#FF782C";
+const COLOR = "#FF782C";
 const CARD_W = 270;
 const CARD_R = 22;
 const BADGE = 69;
@@ -50,11 +50,11 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: "700",
-    color: ORANGE,
+    color: COLOR,
   },
   primaryBtn: {
     width: "100%",
-    backgroundColor: ORANGE,
+    backgroundColor: COLOR,
     paddingVertical: 12,
     borderRadius: 16,
     alignItems: "center",

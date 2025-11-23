@@ -34,7 +34,7 @@ export default function Page3_2a({ navigation }: Props) {
 
   const onSubmit = () => {
     const fallbackName = name?.trim() || "Jane Doe";
-    navigation.navigate("RegisterSuccess", { name: fallbackName });
+    navigation.navigate("Page3-2b", { name: fallbackName });
   };
 
   return (

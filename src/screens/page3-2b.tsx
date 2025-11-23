@@ -7,9 +7,9 @@ import { RootStackParamList } from "../navigations/RootNavigator";
 import CheckIcon from "../../assets/images/check.svg";
 import LogoIcon from "../../assets/images/logo.svg";
 
-type Props = NativeStackScreenProps<RootStackParamList, "RegisterSuccess">;
+type Props = NativeStackScreenProps<RootStackParamList, "Page3-2b">;
 
-const ORANGE = "#FF782C";
+const COLOR = "#FF782C";
 
 const CARD_W = 270;
 const CARD_R = 22;
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     top: "32%",
     width: CARD_W,
-    backgroundColor: ORANGE,
+    backgroundColor: COLOR,
     borderRadius: CARD_R,
     borderWidth: 6,
     borderColor: "#fff",
