@@ -8,10 +8,10 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { RootStackParamList } from "../navigations/RootNavigator";
+import { RootStackParamList } from "../navigations/AppStackNavigator";
 
 import CheckIcon from "../../assets/images/check.svg";
-import styles from "../styles/screens/page3-2b.styles";
+import styles from "../styles/page3-2b.styles";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Page3-2b">;
 

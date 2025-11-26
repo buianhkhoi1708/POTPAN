@@ -17,7 +17,7 @@ import E1 from "../../assets/images/eli1.svg";
 import E2 from "../../assets/images/eli2.svg";
 import E3 from "../../assets/images/eli3.svg";
 
-import styles from "../styles/screens/page2-3.styles";
+import styles from "../styles/page2-3.styles";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 

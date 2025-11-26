@@ -13,8 +13,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { RootStackParamList } from "../navigations/RootNavigator";
-import styles from "../styles/screens/page3-2a.styles";
+import { RootStackParamList } from "../navigations/AppStackNavigator";
+import styles from "../styles/page3-2a.styles";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Page3-2a">;
 

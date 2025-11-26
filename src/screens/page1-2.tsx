@@ -10,7 +10,7 @@ const { width: W, height: H } = Dimensions.get("window");
 const TOP_H = Math.round(H * 0.5);
 const BOT_H = H - TOP_H + 10;
 
-import styles from "../styles/screens/page1-2.styles";
+import styles from "../styles/page1-2.styles";
 
 export default function Home() {
   return (
