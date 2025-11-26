@@ -1,4 +1,3 @@
-// src/screens/page3-2b.tsx
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useRef } from "react";
 import {
@@ -10,8 +9,9 @@ import {
 } from "react-native";
 import { RootStackParamList } from "../navigations/AppStackNavigator";
 
-import CheckIcon from "../../assets/images/check.svg";
+import CheckIcon from "../assets/images/check.svg";
 import styles from "../styles/page3-2b.styles";
+
 
 type Props = NativeStackScreenProps<RootStackParamList, "Page3-2b">;
 

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Text, View } from "react-native";
-import Logo from "../../assets/images/Logo2-cropped.svg";
+import Logo from "../assets/images/Logo2-cropped.svg";
 import styles from "../styles/page1-1.styles";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigations/AppStackNavigator";

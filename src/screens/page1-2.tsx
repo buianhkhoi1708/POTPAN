@@ -2,9 +2,9 @@ import React from "react";
 import { Dimensions, Text, TouchableOpacity, View } from "react-native";
 
 // SVG giữ nguyên theo yêu cầu
-import BgImage from "../../assets/images/banhmi.svg";
-import Logo from "../../assets/images/Logo2-cropped.svg";
-import AgImage from "../../assets/images/thit_kho.svg";
+import BgImage from "../assets/images/banhmi.svg";
+import Logo from "../assets/images/Logo2-cropped.svg";
+import AgImage from "../assets/images/thit_kho.svg";
 
 const { width: W, height: H } = Dimensions.get("window");
 const TOP_H = Math.round(H * 0.5);

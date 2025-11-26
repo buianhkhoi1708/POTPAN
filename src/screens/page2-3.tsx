@@ -13,9 +13,9 @@ import {
 
 import { useNavigation, useRoute } from "@react-navigation/native";
 
-import E1 from "../../assets/images/eli1.svg";
-import E2 from "../../assets/images/eli2.svg";
-import E3 from "../../assets/images/eli3.svg";
+import E1 from "../assets/images/eli1.svg";
+import E2 from "../assets/images/eli2.svg";
+import E3 from "../assets/images/eli3.svg";
 
 import styles from "../styles/page2-3.styles";
 
@@ -31,7 +31,7 @@ export default function Screen() {
     typeof ima === "string" && ima.length > 0 ? decodeURIComponent(ima) : undefined;
 
   const bgSource: ImageSourcePropType =
-    urlFromParam ? { uri: urlFromParam } : require("../../assets/images/2-3.png");
+    urlFromParam ? { uri: urlFromParam } : require("../assets/images/2-3.png");
 
   return (
     <View style={styles.container}>
