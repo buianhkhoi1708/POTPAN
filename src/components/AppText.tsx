@@ -1,5 +1,6 @@
-import { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+// src/components/AppText.tsx
+import React, { ReactNode } from "react";
+import { StyleSheet, Text, TextStyle } from "react-native";
 import { AppFonts } from "../styles/fonts";
 
 type AppTextVariant = "bold" | "medium" | "light";
@@ -10,8 +11,12 @@ interface AppTextProps {
   variant?: AppTextVariant;
 }
 
-const AppText = ({ children, style, variant, ...rest }: AppTextProps) => {
-  return <Text style={[styles[variant], style]}>{children}</Text>;
+const AppText = ({ children, style, variant = "medium", ...rest }: AppTextProps) => {
+  return (
+    <Text {...rest} style={[styles[variant], style]}>
+      {children}
+    </Text>
+  );
 };
 
 export default AppText;

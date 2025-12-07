@@ -3,6 +3,7 @@ import StartingScreen from '../screens/StartingScreen';
 
 import Page2 from '../screens/Page2';
 import Introduce1 from '../screens/Introduce1';
+import HomeScreen from '../screens/HomeScreen'
 
 const Stack = createStackNavigator();
 
@@ -12,6 +13,7 @@ export function StartingStackNav() {
       <Stack.Screen name="StartingScreen" component={StartingScreen} />
       <Stack.Screen name="Page2" component={Page2} />
       <Stack.Screen name="Introduce1" component={Introduce1} />
+      <Stack.Screen name="Home" component={HomeScreen} />
     </Stack.Navigator>
   );
 }
