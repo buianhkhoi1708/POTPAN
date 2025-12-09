@@ -8,8 +8,7 @@ export type HomeCategoryKey =
   | "healing"
   | "vegetarian"
   | "snack"
-  | "mom_baby"
-  | "kids";
+  | "mom_baby";
 
 export interface HomeCategory {
   id: HomeCategoryKey;
@@ -40,7 +39,6 @@ export const homeCategories: HomeCategory[] = [
   { id: "vegetarian", label: "Đồ ăn chay" },
   { id: "snack", label: "Mồi hấp dẫn" },
   { id: "mom_baby", label: "Mẹ bầu và con" },
-  { id: "kids", label: "Cho bé" },
 ];
 
 // DỮ LIỆU MẪU – chỉ để demo layout, có thể thay toàn bộ hình + text tại đây
@@ -53,7 +51,7 @@ export const featuredRecipes: HomeRecipe[] = [
     description: "Sự kết hợp giữa tôm và thịt tạo ra bữa cơm đậm đà.",
     time: "30 phút",
     rating: 5,
-    thumbnail: demoImg,
+    thumbnail: require("../assets/images/noibat1.png"),
   },
 ];
 
@@ -64,7 +62,7 @@ export const myRecipes: HomeRecipe[] = [
     description: "Món quen thuộc trong mâm cơm gia đình.",
     time: "60 phút",
     rating: 5,
-    thumbnail: demoImg,
+    thumbnail: require("../assets/images/thitkhotau.png"),
   },
   {
     id: "mine-2",
@@ -72,26 +70,58 @@ export const myRecipes: HomeRecipe[] = [
     description: "Thịt gà thơm, vị gừng ấm.",
     time: "55 phút",
     rating: 5,
-    thumbnail: demoImg,
+    thumbnail: require("../assets/images/gakhorung.png"),
+  },
+  {
+    id: "mine-3",
+    title: "Bánh xèo",
+    description: "Nước cốt dừa cùng bột bánh xèo",
+    time: "25 phút",
+    rating: 5,
+    thumbnail: require("../assets/images/banhxeotay.png"),
+  },
+  {
+    id: "mine-4",
+    title: "Canh chua cá lóc",
+    description: "Canh chua cùng cá lóc",
+    time: "55 phút",
+    rating: 5,
+    thumbnail: require("../assets/images/canhchua.png"),
   },
 ];
 
 export const recentRecipes: HomeRecipe[] = [
   {
     id: "recent-1",
-    title: "Ba rọi chiên giòn",
-    description: "Lớp da giòn rụm, thịt mềm bên trong.",
-    time: "40 phút",
+    title: "Thịt kho tàu",
+    description: "Món quen thuộc trong mâm cơm gia đình.",
+    time: "60 phút",
     rating: 5,
-    thumbnail: demoImg,
+    thumbnail: require("../assets/images/thitkhotau.png"),
   },
   {
     id: "recent-2",
-    title: "Cá kho tộ",
-    description: "Đậm vị, ăn kèm cơm trắng.",
-    time: "45 phút",
+    title: "Gà kho gừng",
+    description: "Thịt gà thơm, vị gừng ấm.",
+    time: "55 phút",
     rating: 5,
-    thumbnail: demoImg,
+    thumbnail: require("../assets/images/gakhorung.png"),
+  },
+  {
+    id: "recent-3",
+    title: "Bánh xèo",
+    description: "Nước cốt dừa cùng bột bánh xèo",
+    time: "25 phút",
+    rating: 5,
+    thumbnail: require("../assets/images/banhxeotay.png"),
+  },
+  {
+    id: "recent-4",
+    title: "Gà kho gừng",
+    description: "Thịt gà thơm, vị gừng ấm.",
+    time: "55 phút",
+    rating: 5,
+    thumbnail: require("../assets/images/gakhorung.png"),
   },
 ];
 
@@ -99,21 +129,21 @@ export const popularChefs: HomeChef[] = [
   {
     id: "chef-1",
     name: "Đầu bếp 1",
-    avatar: demoImg,
+    avatar: require("../assets/images/daubep1.png"),
   },
   {
     id: "chef-2",
     name: "Đầu bếp 2",
-    avatar: demoImg,
+    avatar: require("../assets/images/daubep2.png"),
   },
   {
     id: "chef-3",
     name: "Đầu bếp 3",
-    avatar: demoImg,
+    avatar: require("../assets/images/daubep3.png"),
   },
   {
     id: "chef-4",
     name: "Đầu bếp 4",
-    avatar: demoImg,
+    avatar: require("../assets/images/daubep4.png"),
   },
 ];
