@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   mySectionList: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 32, // thụt vào giống hai section bên dưới
     paddingTop: 4,
   },
 
@@ -432,7 +432,6 @@ const styles = StyleSheet.create({
   },
   // border riêng cho "Công thức thêm gần đây"
   smallCardRecent: {
-    
     borderRadius: 10,
     padding: 4,
     overflow: "visible",
@@ -468,8 +467,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    marginTop: -10,          // đè lên nhẹ phần dưới ảnh
-    marginHorizontal: -6,    // tràn ra hai bên một chút
+    marginTop: -10, // đè lên nhẹ phần dưới ảnh
+    marginHorizontal: -6, // tràn ra hai bên một chút
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
