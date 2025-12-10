@@ -3,7 +3,7 @@ import React, { ReactNode } from "react";
 import { StyleSheet, Text, TextStyle } from "react-native";
 import { AppFonts } from "../styles/fonts";
 
-type AppTextVariant = "bold" | "medium" | "light";
+type AppTextVariant = "bold" | "medium" | "light" | "title" | "subtitle";
 
 interface AppTextProps {
   children: ReactNode;
@@ -11,7 +11,12 @@ interface AppTextProps {
   variant?: AppTextVariant;
 }
 
-const AppText = ({ children, style, variant = "medium", ...rest }: AppTextProps) => {
+const AppText = ({
+  children,
+  style,
+  variant = "medium",
+  ...rest
+}: AppTextProps) => {
   return (
     <Text {...rest} style={[styles[variant], style]}>
       {children}
@@ -22,20 +27,40 @@ const AppText = ({ children, style, variant = "medium", ...rest }: AppTextProps)
 export default AppText;
 
 const styles = StyleSheet.create({
+  // dùng cho heading lớn: "Xin chào Khôi !"
   bold: {
-    fontSize: 20,
+    fontSize: 26,
     fontWeight: "bold",
     fontFamily: AppFonts.RobotoBold,
     color: "#000",
   },
+
+  // body text chung
   medium: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: AppFonts.RobotoMedium,
     color: "#000",
   },
+
   light: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: AppFonts.RobotoLight,
+    color: "#000",
+  },
+
+  // tiêu đề & danh mục: cùng độ đậm, khác size
+  // "Công thức nấu ăn nổi bật"
+  title: {
+    fontSize: 20,
+    fontFamily: AppFonts.RobotoBold,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  // các danh mục: "Cơm gia đình", "Đặc sản Việt", ...
+  subtitle: {
+    fontSize: 18,
+    fontFamily: AppFonts.RobotoBold,
+    fontWeight: "bold",
     color: "#000",
   },
 });

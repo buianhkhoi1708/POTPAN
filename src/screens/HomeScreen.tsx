@@ -1,5 +1,4 @@
-// HomeScreen.tsx
-
+// src/screens/HomeScreen.tsx
 import React, { useState } from "react";
 import {
   Dimensions,
@@ -26,6 +25,9 @@ import {
   type HomeCategoryKey,
 } from "../config/homeData";
 
+import SearchIcon from "../assets/images/search.svg";
+import NotificationIcon from "../assets/images/notification.svg";
+
 const { width: SCREEN_W } = Dimensions.get("window");
 
 const HomeScreen: React.FC = () => {
@@ -40,7 +42,7 @@ const HomeScreen: React.FC = () => {
         <Ionicons name="heart-outline" size={18} color="#fff" />
       </Pressable>
       <View style={styles.featuredInfo}>
-        <AppText variant="bold" style={styles.featuredTitle}>
+        <AppText variant="title" style={styles.featuredTitle}>
           {item.title}
         </AppText>
         <AppText variant="light" style={styles.featuredDesc}>
@@ -98,18 +100,10 @@ const HomeScreen: React.FC = () => {
           </View>
           <View style={styles.headerIcons}>
             <Pressable style={styles.headerIconCircle}>
-              <Ionicons
-                name="search"
-                size={18}
-                color={AppLightColor.primary_text}
-              />
+              <SearchIcon width={18} height={18} />
             </Pressable>
             <Pressable style={styles.headerIconCircle}>
-              <Ionicons
-                name="person-circle-outline"
-                size={20}
-                color={AppLightColor.primary_text}
-              />
+              <NotificationIcon width={18} height={18} />
             </Pressable>
           </View>
         </View>
@@ -132,13 +126,10 @@ const HomeScreen: React.FC = () => {
                 <Pressable
                   key={cat.id}
                   onPress={() => setSelectedCategory(cat.id)}
-                  style={[
-                    styles.categoryChip,
-                    isActive && styles.categoryChipActive,
-                  ]}
+                  style={styles.categoryItem}
                 >
                   <AppText
-                    variant="medium"
+                    variant="subtitle"
                     style={
                       isActive
                         ? [styles.categoryText, styles.categoryTextActive]
@@ -154,7 +145,10 @@ const HomeScreen: React.FC = () => {
 
           {/* CÔNG THỨC NỔI BẬT */}
           <View style={styles.sectionHeader}>
-            <AppText variant="bold" style={styles.sectionTitle}>
+            <AppText
+              variant="title"
+              style={[styles.sectionTitle, styles.sectionTitlePrimary]}
+            >
               Công thức nấu ăn nổi bật
             </AppText>
           </View>
@@ -173,7 +167,7 @@ const HomeScreen: React.FC = () => {
             <View style={styles.sectionPillWrap}>
               <View style={styles.sectionPillBg} />
               <View style={styles.sectionPill}>
-                <AppText variant="bold" style={styles.sectionPillText}>
+                <AppText variant="medium" style={styles.sectionPillText}>
                   Công thức của tôi
                 </AppText>
               </View>
@@ -189,7 +183,7 @@ const HomeScreen: React.FC = () => {
 
           {/* CÁC ĐẦU BẾP NỔI TIẾNG */}
           <View style={styles.sectionHeader}>
-            <AppText variant="bold" style={styles.sectionTitle}>
+            <AppText variant="medium" style={styles.sectionTitle}>
               Các đầu bếp nổi tiếng
             </AppText>
           </View>
@@ -203,7 +197,7 @@ const HomeScreen: React.FC = () => {
 
           {/* CÔNG THỨC THÊM GẦN ĐÂY */}
           <View style={styles.sectionHeader}>
-            <AppText variant="bold" style={styles.sectionTitle}>
+            <AppText variant="medium" style={styles.sectionTitle}>
               Công thức thêm gần đây
             </AppText>
           </View>
@@ -236,6 +230,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+
+  // HEADER
   header: {
     paddingHorizontal: 24,
     paddingTop: 8,
@@ -257,12 +253,11 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#ffd0cf",
+    backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ffffff",
   },
+
   scroll: {
     flex: 1,
   },
@@ -275,25 +270,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
-  categoryChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "#ffd0cf",
-    backgroundColor: "#ffffff",
-    marginRight: 8,
-  },
-  categoryChipActive: {
-    backgroundColor: AppLightColor.primary_color,
-    borderColor: AppLightColor.primary_color,
+  categoryItem: {
+    marginRight: 16,
+    paddingVertical: 4,
   },
   categoryText: {
-    fontSize: 14,
-    color: "#777",
+    color: AppLightColor.primary_color,
   },
   categoryTextActive: {
-    color: "#fff",
+    color: AppLightColor.primary_color,
   },
 
   // SECTION HEADER
@@ -303,8 +288,10 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   sectionTitle: {
-    fontSize: 18,
     color: AppLightColor.primary_text,
+  },
+  sectionTitlePrimary: {
+    color: AppLightColor.primary_color,
   },
 
   // FEATURED
@@ -344,7 +331,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#00000055",
   },
   featuredTitle: {
-    fontSize: 18,
     color: "#fff",
   },
   featuredDesc: {

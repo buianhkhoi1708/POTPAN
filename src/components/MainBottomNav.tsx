@@ -1,22 +1,33 @@
+// src/components/MainBottomNav.tsx
+
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { AppLightColor } from "../styles/color";
+import type { SvgProps } from "react-native-svg";
 
-export type MainTabKey = "home" | "discover" | "world" | "profile";
+// SVG của bạn
+import HomeIcon from "../assets/images/home.svg";
+import CategoryIcon from "../assets/images/category.svg";
+import WorldIcon from "../assets/images/world.svg";
+import ProfileIcon from "../assets/images/profile.svg";
+
+export type MainTabKey = "home" | "world" | "category" | "profile";
 
 interface MainBottomNavProps {
   activeTab: MainTabKey;
   onTabPress?: (tab: MainTabKey) => void;
 }
 
-type IconName = keyof typeof Ionicons.glyphMap;
+type TabConfig = {
+  key: MainTabKey;
+  Icon: React.ComponentType<SvgProps>;
+};
 
-const TABS: { key: MainTabKey; icon: IconName }[] = [
-  { key: "home", icon: "home" as IconName },
-  { key: "discover", icon: "compass-outline" as IconName },
-  { key: "world", icon: "globe-outline" as IconName },
-  { key: "profile", icon: "person-outline" as IconName },
+const TABS: TabConfig[] = [
+  { key: "home", Icon: HomeIcon },
+  { key: "world", Icon: WorldIcon },
+  { key: "category", Icon: CategoryIcon },
+  { key: "profile", Icon: ProfileIcon },
 ];
 
 const MainBottomNav: React.FC<MainBottomNavProps> = ({
@@ -28,6 +39,10 @@ const MainBottomNav: React.FC<MainBottomNavProps> = ({
       <View style={styles.container}>
         {TABS.map((tab) => {
           const isActive = tab.key === activeTab;
+          const IconComponent = tab.Icon;
+
+          const iconColor = isActive ? "#ffffff" : "#ffffffcc";
+
           return (
             <Pressable
               key={tab.key}
@@ -35,10 +50,11 @@ const MainBottomNav: React.FC<MainBottomNavProps> = ({
               onPress={() => onTabPress && onTabPress(tab.key)}
               android_ripple={{ color: "#ffe0dd", borderless: true }}
             >
-              <Ionicons
-                name={tab.icon}
-                size={22}
-                color={isActive ? "#fff" : "#ffffffcc"}
+              <IconComponent
+                width={22}
+                height={22}
+                fill={iconColor}
+                stroke={iconColor}
               />
             </Pressable>
           );
