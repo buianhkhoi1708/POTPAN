@@ -42,7 +42,7 @@ const MainBottomNav: React.FC<MainBottomNavProps> = ({
   onTabPress,
 }) => {
   return (
-    <View style={styles.wrapper}>
+    <View style={styles.wrapper} pointerEvents="box-none">
       <View style={styles.container}>
         {TABS.map((tab) => {
           const isActive = tab.key === activeTab;
@@ -67,14 +67,16 @@ const MainBottomNav: React.FC<MainBottomNavProps> = ({
 export default MainBottomNav;
 
 const styles = StyleSheet.create({
-  // thu hẹp pill, canh giữa màn hình
+  // nav dạng overlay, chỉ còn đúng khối hồng, phần còn lại trong suốt
   wrapper: {
-    paddingBottom: 16,
-    paddingTop: 4,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 24,        // cao hơn thanh gesture một chút
     alignItems: "center",
   },
   container: {
-    width: "78%", // hẹp hơn, không chiếm full ngang
+    width: "78%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

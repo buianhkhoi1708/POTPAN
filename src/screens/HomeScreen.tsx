@@ -37,32 +37,52 @@ const HomeScreen: React.FC = () => {
     useState<HomeCategoryKey>("family");
   const [activeTab, setActiveTab] = useState<MainTabKey>("home");
 
+  // FEATURED CARD – ảnh trên, panel trắng tách riêng và bị đè bởi ảnh
   const renderFeaturedCard = (item: HomeRecipe) => (
     <View key={item.id} style={styles.featuredCard}>
-      <Image source={item.thumbnail} style={styles.featuredImage} />
-      <Pressable style={styles.featuredHeart}>
-        <SaveIcon width={22} height={22} stroke="#ffffff" fill="none" />
-      </Pressable>
+      <View style={styles.featuredImageWrap}>
+        <Image source={item.thumbnail} style={styles.featuredImage} />
+        <Pressable style={styles.featuredHeart}>
+          <SaveIcon width={22} height={22} stroke="#ffffff" fill="none" />
+        </Pressable>
+      </View>
+
       <View style={styles.featuredInfo}>
-        <AppText variant="title" style={styles.featuredTitle}>
+        <AppText variant="bold" style={styles.featuredTitle}>
           {item.title}
         </AppText>
         <AppText variant="light" style={styles.featuredDesc}>
           {item.description}
         </AppText>
-        <View style={styles.metaRow}>
-          <AppText variant="light" style={styles.metaText}>
-            {item.time}
-          </AppText>
-          <AppText variant="light" style={styles.metaText}>
-            {item.rating} ★
-          </AppText>
+
+        <View style={styles.featuredMetaRow}>
+          <View style={styles.featuredMetaLeft}>
+            <Ionicons
+              name="time-outline"
+              size={12}
+              color={AppLightColor.primary_color}
+            />
+            <AppText variant="light" style={styles.featuredMetaText}>
+              {item.time}
+            </AppText>
+          </View>
+
+          <View style={styles.featuredMetaRight}>
+            <AppText variant="light" style={styles.featuredMetaText}>
+              {item.rating}
+            </AppText>
+            <Ionicons
+              name="star"
+              size={12}
+              color={AppLightColor.primary_color}
+            />
+          </View>
         </View>
       </View>
     </View>
   );
 
-  // extraStyle dùng cho card "Công thức thêm gần đây"
+  // CARD NHỎ
   const renderSmallRecipeCard = (item: HomeRecipe, extraStyle?: any) => (
     <View key={item.id} style={[styles.smallCard, extraStyle]}>
       <View style={styles.smallImageWrap}>
@@ -72,7 +92,6 @@ const HomeScreen: React.FC = () => {
         </Pressable>
       </View>
 
-      {/* panel trắng tách riêng, tràn ngang ra một chút */}
       <View style={styles.smallInfo}>
         <AppText variant="bold" style={styles.smallTitle}>
           {item.title}
@@ -223,7 +242,7 @@ const HomeScreen: React.FC = () => {
             {popularChefs.map(renderChefCard)}
           </ScrollView>
 
-          {/* CÔNG THỨC THÊM GẦN ĐÂY – card có border để phân biệt */}
+          {/* CÔNG THỨC THÊM GẦN ĐÂY */}
           <View style={styles.sectionHeader}>
             <AppText
               variant="title"
@@ -243,7 +262,7 @@ const HomeScreen: React.FC = () => {
           </ScrollView>
         </ScrollView>
 
-        {/* NAV BOTTOM DÙNG CHUNG */}
+        {/* NAV BOTTOM */}
         <MainBottomNav
           activeTab={activeTab}
           onTabPress={(tab) => setActiveTab(tab)}
@@ -297,6 +316,7 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
 
+  // CATEGORY
   categoryRow: {
     paddingHorizontal: 16,
     paddingBottom: 8,
@@ -312,6 +332,7 @@ const styles = StyleSheet.create({
     color: AppLightColor.primary_color,
   },
 
+  // SECTION HEADER
   sectionHeader: {
     paddingHorizontal: 20,
     paddingTop: 12,
@@ -324,15 +345,18 @@ const styles = StyleSheet.create({
     color: AppLightColor.primary_color,
   },
 
+  // FEATURED
   featuredRow: {
     paddingHorizontal: 20,
     paddingBottom: 12,
   },
   featuredCard: {
     width: SCREEN_W - 40,
+    marginRight: 16,
+  },
+  featuredImageWrap: {
     borderRadius: 18,
     overflow: "hidden",
-    marginRight: 16,
     backgroundColor: "#eee",
   },
   featuredImage: {
@@ -350,34 +374,54 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
+  // panel trắng tách riêng, thụt vào và bị đè bởi ảnh
   featuredInfo: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: 12,
+    backgroundColor: "#ffffff",
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: AppLightColor.primary_color,
+    paddingHorizontal: 14,
     paddingVertical: 10,
-    backgroundColor: "#00000055",
+    marginTop: -14, // đè lên ảnh
+    marginHorizontal: 8, // thụt vào so với ảnh
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 2,
   },
   featuredTitle: {
-    color: "#fff",
+    fontSize: 18,
+    color: "#000",
   },
   featuredDesc: {
     fontSize: 13,
-    color: "#fefefe",
+    color: "#555",
     marginTop: 2,
   },
-  metaRow: {
+  featuredMetaRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 4,
+    alignItems: "center",
+    marginTop: 6,
   },
-  metaText: {
+  featuredMetaLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 4,
+  },
+  featuredMetaRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 4,
+  },
+  featuredMetaText: {
     fontSize: 12,
-    color: "#fefefe",
+    color: AppLightColor.primary_color,
   },
 
-  // khối "Công thức của tôi" chạm mép màn
+  // "Công thức của tôi"
   mySectionWrapper: {
     marginTop: 8,
     marginHorizontal: -16,
@@ -391,7 +435,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   mySectionList: {
-    paddingHorizontal: 32, // thụt vào giống hai section bên dưới
+    paddingHorizontal: 32,
     paddingTop: 4,
   },
 
@@ -417,6 +461,7 @@ const styles = StyleSheet.create({
     color: AppLightColor.primary_color,
   },
 
+  // LISTS
   horizontalList: {
     paddingHorizontal: 16,
     paddingBottom: 8,
@@ -426,11 +471,11 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 
+  // SMALL CARD
   smallCard: {
     width: 190,
     marginRight: 16,
   },
-  // border riêng cho "Công thức thêm gần đây"
   smallCardRecent: {
     borderRadius: 10,
     padding: 4,
@@ -459,7 +504,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // panel trắng tách riêng + tràn ngang
   smallInfo: {
     borderWidth: 1,
     borderColor: "black",
@@ -467,8 +511,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    marginTop: -10, // đè lên nhẹ phần dưới ảnh
-    marginHorizontal: -6, // tràn ra hai bên một chút
+    marginTop: -10,
+    marginHorizontal: -6,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -500,6 +544,7 @@ const styles = StyleSheet.create({
     color: AppLightColor.primary_color,
   },
 
+  // CHEF CARD
   chefCard: {
     width: 90,
     height: 90,
