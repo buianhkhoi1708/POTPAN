@@ -29,6 +29,7 @@ import {
 import SearchIcon from "../assets/images/search.svg";
 import NotificationIcon from "../assets/images/notification.svg";
 import SaveIcon from "../assets/images/save.svg";
+import SearchRecipeModal from "../components/SearchRecipeModal";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -36,6 +37,7 @@ const HomeScreen: React.FC = () => {
   const [selectedCategory, setSelectedCategory] =
     useState<HomeCategoryKey>("family");
   const [activeTab, setActiveTab] = useState<MainTabKey>("home");
+  const [searchVisible, setSearchVisible] = useState(false);
 
   // FEATURED CARD – ảnh trên, panel trắng tách riêng và bị đè bởi ảnh
   const renderFeaturedCard = (item: HomeRecipe) => (
@@ -141,7 +143,10 @@ const HomeScreen: React.FC = () => {
             </AppText>
           </View>
           <View style={styles.headerIcons}>
-            <Pressable style={styles.headerIconCircle}>
+            <Pressable
+              style={styles.headerIconCircle}
+              onPress={() => setSearchVisible(true)}
+            >
               <SearchIcon width={18} height={18} />
             </Pressable>
             <Pressable style={styles.headerIconCircle}>
@@ -261,6 +266,12 @@ const HomeScreen: React.FC = () => {
             )}
           </ScrollView>
         </ScrollView>
+
+        {/* MODAL TÌM KIẾM */}
+        <SearchRecipeModal
+          visible={searchVisible}
+          onClose={() => setSearchVisible(false)}
+        />
 
         {/* NAV BOTTOM */}
         <MainBottomNav
