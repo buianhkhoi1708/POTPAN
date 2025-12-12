@@ -1,4 +1,4 @@
-// src/screens/HomeScreen.tsx
+// src/screens/HomeScreen.tsx  (cập nhật điều hướng tới FamousChefs + nav home)
 
 import React, { useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
@@ -146,7 +146,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </Pressable>
             <Pressable
               style={styles.headerIconCircle}
-              onPress={() => navigation.navigate("Notification")}
+              onPress={() => navigation.navigate("Notification" as never)}
             >
               <NotificationIcon width={18} height={18} />
             </Pressable>
@@ -230,12 +230,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
           {/* CÁC ĐẦU BẾP NỔI TIẾNG */}
           <View style={styles.sectionHeader}>
-            <AppText
-              variant="title"
-              style={[styles.sectionTitle, styles.sectionTitlePrimary]}
+            <Pressable
+              onPress={() => navigation.navigate("FamousChefs" as never)}
             >
-              Các đầu bếp nổi tiếng
-            </AppText>
+              <AppText
+                variant="title"
+                style={[styles.sectionTitle, styles.sectionTitlePrimary]}
+              >
+                Các đầu bếp nổi tiếng
+              </AppText>
+            </Pressable>
           </View>
           <ScrollView
             horizontal
@@ -274,7 +278,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {/* NAV BOTTOM */}
         <MainBottomNav
           activeTab={activeTab}
-          onTabPress={(tab) => setActiveTab(tab)}
+          onTabPress={(tab) => {
+            setActiveTab(tab);
+            if (tab === "home") {
+              navigation.navigate("Home" as never);
+            }
+          }}
         />
       </View>
     </AppSafeView>
