@@ -1,4 +1,4 @@
-// src/components/CategoriesHeader.tsx
+// src/components/CategoriesHeader.tsx  (chỉnh để sát ảnh)
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,22 +14,18 @@ type Props = {
 export default function CategoriesHeader({ title, onBack, onSearch, onBell }: Props) {
   return (
     <View style={s.header}>
-      <Pressable
-        onPress={onBack}
-        style={s.headerLeftBtn}
-        android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
-      >
-        <Ionicons name="chevron-back" size={20} color="#fff" />
+      <Pressable onPress={onBack} style={s.backBtn} hitSlop={10}>
+        <Ionicons name="chevron-back" size={18} color="#fff" />
       </Pressable>
 
-      <Text style={s.headerTitle}>{title}</Text>
+      <Text style={s.title}>{title}</Text>
 
-      <View style={s.headerRight}>
-        <Pressable onPress={onSearch} style={s.headerIconBtn}>
-          <Ionicons name="search" size={18} color={COLORS.CORAL} />
+      <View style={s.right}>
+        <Pressable onPress={onSearch} style={s.iconBtn} hitSlop={10}>
+          <Ionicons name="search" size={16} color={COLORS.CORAL} />
         </Pressable>
-        <Pressable onPress={onBell} style={s.headerIconBtn}>
-          <Ionicons name="notifications-outline" size={18} color={COLORS.CORAL} />
+        <Pressable onPress={onBell} style={s.iconBtn} hitSlop={10}>
+          <Ionicons name="notifications-outline" size={16} color={COLORS.CORAL} />
         </Pressable>
       </View>
     </View>
@@ -38,34 +34,33 @@ export default function CategoriesHeader({ title, onBack, onSearch, onBell }: Pr
 
 const s = StyleSheet.create({
   header: {
-    height: 64,
+    height: 74,
     paddingHorizontal: 18,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  headerLeftBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  backBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: COLORS.CORAL,
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: {
-    fontSize: 22,
+  title: {
+    fontSize: 20,
     fontWeight: "800",
     color: COLORS.CORAL,
-    letterSpacing: 0.2,
   },
-  headerRight: { flexDirection: "row", gap: 10 },
-  headerIconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  right: { flexDirection: "row", gap: 10 },
+  iconBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "rgba(255,107,107,0.55)",
+    borderWidth: 2,
+    borderColor: COLORS.CORAL,
     alignItems: "center",
     justifyContent: "center",
   },

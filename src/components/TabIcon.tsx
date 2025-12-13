@@ -1,30 +1,31 @@
-// src/components/TabIcon.tsx
+// src/components/TabIcon.tsx  (active giống ảnh)
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../styles/color";
 
-type Props = {
+export default function TabIcon({
+  focused,
+  name,
+}: {
   focused: boolean;
-  name: string;
-};
-
-export default function TabIcon({ focused, name }: Props) {
+  name: any;
+}) {
   if (focused) {
     return (
       <View style={s.active}>
-        <Ionicons name={name as any} size={22} color={COLORS.CORAL} />
+        <Ionicons name={name} size={22} color={COLORS.CORAL} />
       </View>
     );
   }
-  return <Ionicons name={name as any} size={22} color="#fff" />;
+  return <Ionicons name={name} size={22} color="#fff" />;
 }
 
 const s = StyleSheet.create({
   active: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",

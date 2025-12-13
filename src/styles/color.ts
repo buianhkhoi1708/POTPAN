@@ -15,4 +15,5 @@ export const AppDarkColor = {
 export const COLORS = {
   BG: "#FFFFFF",
   CORAL: "#FF6B6B",
+  TEXT: "#111111",
 };
