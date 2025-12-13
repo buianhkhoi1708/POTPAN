@@ -1,12 +1,12 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { StartingStackNav } from './src/navigations/AppStackNavigator';
+// src/App.tsx
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import RootNavigator from "./src/navigations/RootNavigator";
 
 export default function App() {
   return (
     <NavigationContainer>
-      <StartingStackNav/>
+      <RootNavigator />
     </NavigationContainer>
   );
 }
-
-

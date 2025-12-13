@@ -11,3 +11,8 @@ export const AppDarkColor = {
     primary_text: "#FFF",
     buttonColor: "#152cffff"
 }
+// src/theme/colors.ts
+export const COLORS = {
+  BG: "#FFFFFF",
+  CORAL: "#FF6B6B",
+};
