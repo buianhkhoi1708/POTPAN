@@ -2,8 +2,10 @@
 
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
-import { AppLightColor } from "../styles/color";
+import { useNavigation } from "@react-navigation/native";
 import type { SvgProps } from "react-native-svg";
+
+import { AppLightColor } from "../styles/color";
 
 // SVG mặc định
 import HomeIcon from "../assets/images/home.svg";
@@ -41,6 +43,17 @@ const MainBottomNav: React.FC<MainBottomNavProps> = ({
   activeTab,
   onTabPress,
 }) => {
+  const navigation = useNavigation<any>();
+
+  const handlePress = (tab: MainTabKey) => {
+    onTabPress?.(tab);
+
+    if (tab === "home") {
+      navigation.navigate("Home");
+    }
+    // các tab khác tạm thời chỉ đổi trạng thái activeTab
+  };
+
   return (
     <View style={styles.wrapper} pointerEvents="box-none">
       <View style={styles.container}>
@@ -52,7 +65,7 @@ const MainBottomNav: React.FC<MainBottomNavProps> = ({
             <Pressable
               key={tab.key}
               style={[styles.tab, isActive && styles.tabActive]}
-              onPress={() => onTabPress && onTabPress(tab.key)}
+              onPress={() => handlePress(tab.key)}
               android_ripple={{ color: "#ffe0dd", borderless: true }}
             >
               <IconComponent width={20} height={20} />
@@ -67,12 +80,11 @@ const MainBottomNav: React.FC<MainBottomNavProps> = ({
 export default MainBottomNav;
 
 const styles = StyleSheet.create({
-  // nav dạng overlay, chỉ còn đúng khối hồng, phần còn lại trong suốt
   wrapper: {
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 24,        // cao hơn thanh gesture một chút
+    bottom: 24,
     alignItems: "center",
   },
   container: {

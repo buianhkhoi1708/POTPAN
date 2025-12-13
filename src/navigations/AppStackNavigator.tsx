@@ -1,4 +1,4 @@
-// src/navigation/StartingStackNav.tsx  (thêm FamousChefs)
+// src/navigation/StartingStackNav.tsx (thêm FamousChefsScreen)
 
 import { createStackNavigator } from "@react-navigation/stack";
 import StartingScreen from "../screens/StartingScreen";

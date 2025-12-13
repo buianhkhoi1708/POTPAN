@@ -8,6 +8,7 @@ import {
   Image,
   StyleSheet,
   Dimensions,
+  ImageSourcePropType,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
@@ -17,47 +18,83 @@ import { AppLightColor } from "../styles/color";
 import MainBottomNav, { MainTabKey } from "../components/MainBottomNav";
 import SearchRecipeModal from "../components/SearchRecipeModal";
 
-import {
-  popularChefs,
-  type HomeChef,
-} from "../config/homeData";
-
 import BackArrow from "../assets/images/backarrow.svg";
-import SearchIcon from "../assets/images/search-active.svg";
+import SearchIcon from "../assets/images/search.svg";
 import NotificationIcon from "../assets/images/notification.svg";
 import StarIcon from "../assets/images/star.svg";
 import ShareChefIcon from "../assets/images/share-chef.svg";
 
-type ChefCard = HomeChef & {
+// ảnh đầu bếp 1–6
+import Chef1Img from "../assets/images/chef1.png";
+import Chef2Img from "../assets/images/chef2.png";
+import Chef3Img from "../assets/images/chef3.png";
+import Chef4Img from "../assets/images/chef4.png";
+import Chef5Img from "../assets/images/chef5.png";
+import Chef6Img from "../assets/images/chef6.png";
+
+type ChefCard = {
+  id: string;
+  name: string;
+  avatar: ImageSourcePropType;
   handle: string;
   followers: number;
 };
 
-const FOLLOWERS = [6687, 5687, 6687, 5687, 4321, 3890];
-const HANDLES = [
-  "@gordon_chef",
-  "@leslie_gill",
-  "@ballack36",
-  "@theblindcook",
-  "@chef_new1",
-  "@chef_new2",
+const CHEFS: ChefCard[] = [
+  {
+    id: "chef1",
+    name: "Gordan Ramsay",
+    avatar: Chef1Img,
+    handle: "@Gordon_chef",
+    followers: 6687,
+  },
+  {
+    id: "chef2",
+    name: "Leslie Gilliams",
+    avatar: Chef2Img,
+    handle: "@Leslie Gilliams",
+    followers: 5687,
+  },
+  {
+    id: "chef3",
+    name: "Micheal Ballack",
+    avatar: Chef3Img,
+    handle: "@ballack36",
+    followers: 6687,
+  },
+  {
+    id: "chef4",
+    name: "Christine Hà",
+    avatar: Chef4Img,
+    handle: "@theblindcook",
+    followers: 5687,
+  },
+  {
+    id: "chef5",
+    name: "Nguyễn Thị Linh",
+    avatar: Chef5Img,
+    handle: "@linhcute",
+    followers: 6687,
+  },
+  {
+    id: "chef6",
+    name: "Trần Trung Hiếu",
+    avatar: Chef6Img,
+    handle: "@hieutran",
+    followers: 5687,
+  },
 ];
 
-const chefCards: ChefCard[] = popularChefs.map((c, index) => ({
-  ...c,
-  followers: FOLLOWERS[index] ?? 0,
-  handle: HANDLES[index] ?? `@chef_${index + 1}`,
-}));
-
-const topChefs = chefCards.slice(0, 2);
-const favoriteChefs = chefCards.slice(2, 4);
-const newChefs = chefCards.slice(4);
+const topChefs = CHEFS.slice(0, 2);
+const favoriteChefs = CHEFS.slice(2, 4);
+const newChefs = CHEFS.slice(4);
 
 const { width: SCREEN_W } = Dimensions.get("window");
+// cùng công thức cho tất cả card
 const CARD_WIDTH = (SCREEN_W - 20 * 2 - 12) / 2;
 
 const FamousChefsScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [activeTab, setActiveTab] = useState<MainTabKey>("world");
   const [searchVisible, setSearchVisible] = useState(false);
   const [followMap, setFollowMap] = useState<Record<string, boolean>>({});
@@ -71,7 +108,9 @@ const FamousChefsScreen: React.FC = () => {
 
     return (
       <View key={chef.id} style={styles.card}>
-        <Image source={chef.avatar} style={styles.cardImage} />
+        <View style={styles.cardImageWrap}>
+          <Image source={chef.avatar} style={styles.cardImage} />
+        </View>
 
         <View style={styles.cardInfo}>
           <AppText variant="bold" style={styles.chefName}>
@@ -104,7 +143,7 @@ const FamousChefsScreen: React.FC = () => {
             </Pressable>
 
             <Pressable style={styles.shareBtn}>
-              <ShareChefIcon width={16} height={16} />
+              <ShareChefIcon width={14} height={14} />
             </Pressable>
           </View>
         </View>
@@ -137,7 +176,7 @@ const FamousChefsScreen: React.FC = () => {
             </Pressable>
             <Pressable
               style={styles.headerIconCircle}
-              onPress={() => navigation.navigate("Notification" as never)}
+              onPress={() => navigation.navigate("Notification")}
             >
               <NotificationIcon width={18} height={18} />
             </Pressable>
@@ -150,35 +189,46 @@ const FamousChefsScreen: React.FC = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Đầu bếp nổi tiếng (khối hồng trên) */}
+          {/* ĐẦU BẾP NỔI BẬT – KHỐI HỒNG, CHỈ CÓ LIST NGANG */}
           <View style={styles.sectionBlockTop}>
-            <AppText variant="medium" style={styles.sectionTitleTop}>
-              Đầu bếp nổi tiếng
-            </AppText>
-            <View style={styles.cardsGridTop}>
-              {topChefs.map(renderChefCard)}
+            <View style={styles.sectionTopInner}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+              >
+                {topChefs.map(renderChefCard)}
+              </ScrollView>
             </View>
           </View>
 
-          {/* Đầu bếp được yêu thích nhất */}
+          {/* ĐẦU BẾP ĐƯỢC YÊU THÍCH NHẤT */}
           <View style={styles.sectionBlock}>
-            <AppText variant="medium" style={styles.sectionTitle}>
+            <AppText variant="title" style={styles.sectionTitle}>
               Đầu Bếp Được Yêu Thích Nhất
             </AppText>
-            <View style={styles.cardsGrid}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+            >
               {favoriteChefs.map(renderChefCard)}
-            </View>
+            </ScrollView>
           </View>
 
-          {/* Đầu bếp mới */}
+          {/* ĐẦU BẾP MỚI */}
           {newChefs.length > 0 && (
             <View style={styles.sectionBlock}>
-              <AppText variant="medium" style={styles.sectionTitle}>
+              <AppText variant="title" style={styles.sectionTitle}>
                 Đầu bếp mới
               </AppText>
-              <View style={styles.cardsGrid}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+              >
                 {newChefs.map(renderChefCard)}
-              </View>
+              </ScrollView>
             </View>
           )}
         </ScrollView>
@@ -195,7 +245,7 @@ const FamousChefsScreen: React.FC = () => {
           onTabPress={(tab) => {
             setActiveTab(tab);
             if (tab === "home") {
-              navigation.navigate("Home" as never);
+              navigation.navigate("Home");
             }
           }}
         />
@@ -215,6 +265,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 
+  // HEADER
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -245,13 +296,12 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#ffffff",
+    backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#ffe3e2",
   },
 
+  // SCROLL
   scroll: {
     flex: 1,
   },
@@ -260,59 +310,62 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 
+  // KHỐI ĐẦU BẾP NỔI BẬT
   sectionBlockTop: {
+    marginHorizontal: -20,
+    marginBottom: 16,
     backgroundColor: AppLightColor.primary_color,
-    borderRadius: 16,
-    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  sectionTopInner: {
+    paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 14,
-    marginBottom: 16,
-  },
-  sectionTitleTop: {
-    color: "#ffffff",
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  cardsGridTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    rowGap: 12,
-    flexWrap: "wrap",
   },
 
+  // CÁC SECTION DƯỚI
   sectionBlock: {
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 14,
-    color: AppLightColor.primary_text,
+    fontSize: 16,
+    color: AppLightColor.primary_color,
+    fontWeight: "700",
     marginBottom: 8,
   },
-  cardsGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    rowGap: 12,
-    flexWrap: "wrap",
+
+  horizontalList: {
+    paddingRight: 20,
   },
 
+  // CARD
   card: {
     width: CARD_WIDTH,
-    borderRadius: 16,
-    backgroundColor: "#ffffff",
+    marginRight: 12,
+  },
+  cardImageWrap: {
+    borderRadius: 18,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    backgroundColor: "#eee",
   },
   cardImage: {
     width: "100%",
     height: 150,
   },
   cardInfo: {
-    paddingHorizontal: 8,
+    backgroundColor: "#ffffff",
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: AppLightColor.primary_color,
+    paddingHorizontal: 10,
     paddingVertical: 8,
+    marginTop: -12,
+    marginHorizontal: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 2,
   },
   chefName: {
     fontSize: 13,
@@ -320,22 +373,24 @@ const styles = StyleSheet.create({
   },
   chefHandle: {
     fontSize: 12,
-    color: "#999",
+    color: AppLightColor.primary_color,
+    fontWeight: "700",
     marginBottom: 6,
   },
   cardBottomRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    columnGap: 8,
   },
   followersRow: {
     flexDirection: "row",
     alignItems: "center",
-    columnGap: 4,
+    columnGap: 3,
   },
   followersText: {
     fontSize: 12,
     color: AppLightColor.primary_color,
+    fontWeight: "700",
   },
 
   followBtn: {
@@ -357,12 +412,14 @@ const styles = StyleSheet.create({
   followTextActive: {
     fontSize: 11,
     color: AppLightColor.primary_color,
+    fontWeight: "700",
   },
 
   shareBtn: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
   },
