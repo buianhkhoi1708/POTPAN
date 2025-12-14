@@ -6,6 +6,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
+import BottomNavSpacer from "../components/BottomNavSpacer";
 import { AppLightColor } from "../styles/color";
 import MainBottomNav, { MainTabKey } from "../components/MainBottomNav";
 import {
@@ -267,6 +268,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               renderSmallRecipeCard(item, styles.smallCardRecent)
             )}
           </ScrollView>
+          <BottomNavSpacer height={60} />
         </ScrollView>
 
         {/* MODAL TÌM KIẾM */}

@@ -17,6 +17,7 @@ import AppText from "../components/AppText";
 import { AppLightColor } from "../styles/color";
 import MainBottomNav, { MainTabKey } from "../components/MainBottomNav";
 import SearchRecipeModal from "../components/SearchRecipeModal";
+import BottomNavSpacer from "../components/BottomNavSpacer";
 
 import BackArrow from "../assets/images/backarrow.svg";
 import SearchIcon from "../assets/images/search.svg";
@@ -231,6 +232,7 @@ const FamousChefsScreen: React.FC = () => {
               </ScrollView>
             </View>
           )}
+          <BottomNavSpacer height={60} />
         </ScrollView>
 
         {/* MODAL TÌM KIẾM */}

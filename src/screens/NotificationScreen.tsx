@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import MainBottomNav, { MainTabKey } from "../components/MainBottomNav";
+import BottomNavSpacer from "../components/BottomNavSpacer";
 import { notificationStyles as styles } from "../styles/NotificationScreenStyles";
 
 import BackArrow from "../assets/images/backarrow.svg";
@@ -230,6 +231,7 @@ const NotificationScreen: React.FC = () => {
               {group.items.map(renderItem)}
             </View>
           ))}
+          <BottomNavSpacer height={60} />
         </ScrollView>
 
         <MainBottomNav
