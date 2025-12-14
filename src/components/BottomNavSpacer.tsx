@@ -1,12 +1,8 @@
-// src/components/BottomNavSpacer.tsx
 import React from "react";
 import { View } from "react-native";
 
-type BottomNavSpacerProps = {
-  /** Chiều cao khoảng trắng. Mặc định >= chiều cao nav overlay. */
-  height?: number;
+const BottomNavSpacer = ({ height = 60 }: { height?: number }) => {
+  return <View style={{ height }} />;
 };
 
-export default function BottomNavSpacer({ height = 96 }: BottomNavSpacerProps) {
-  return <View style={{ height }} />;
-}
+export default BottomNavSpacer;

@@ -1,5 +1,3 @@
-// src/screens/EditProfileScreen.tsx
-
 import React, { useState } from "react";
 import {
   Image,
@@ -16,33 +14,30 @@ import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import BottomNavSpacer from "../components/BottomNavSpacer";
 import MainBottomNav, { type MainTabKey } from "../components/MainBottomNav";
+import SearchRecipeModal from "../components/SearchRecipeModal";
 import { AppLightColor } from "../styles/color";
 
 const EditProfileScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
+  const [searchVisible, setSearchVisible] = useState(false);
 
   const [fullName, setFullName] = useState("Bùi Anh Khôi");
   const [nickname, setNickname] = useState("KhoiABui");
   const [bio, setBio] = useState("Nấu ăn là niềm đam mê to lớn của tôi");
   const [link, setLink] = useState("");
 
-  const onSave = () => {
-    navigation.goBack();
-  };
-
   return (
     <AppSafeView style={styles.safeArea}>
       <View style={styles.container}>
         <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
           {/* HEADER */}
           <View style={styles.header}>
             <Pressable
-              style={styles.iconCirclePrimary}
+              style={styles.iconCircle}
               onPress={() => navigation.goBack()}
             >
               <Ionicons name="arrow-back" size={18} color="#fff" />
@@ -55,11 +50,21 @@ const EditProfileScreen: React.FC = () => {
             </View>
 
             <View style={styles.headerRight}>
-              <Pressable style={styles.iconCirclePrimary}>
+              <Pressable
+                style={styles.iconCircle}
+                onPress={() => setSearchVisible(true)}
+              >
                 <Ionicons name="search-outline" size={18} color="#fff" />
               </Pressable>
-              <Pressable style={styles.iconCirclePrimary}>
-                <Ionicons name="notifications-outline" size={18} color="#fff" />
+              <Pressable
+                style={styles.iconCircle}
+                onPress={() => navigation.navigate("Notification")}
+              >
+                <Ionicons
+                  name="notifications-outline"
+                  size={18}
+                  color="#fff"
+                />
               </Pressable>
             </View>
           </View>
@@ -81,20 +86,18 @@ const EditProfileScreen: React.FC = () => {
               value={fullName}
               onChangeText={setFullName}
               style={styles.inputPill}
-              placeholderTextColor="#b06c6b"
             />
 
-            <AppText variant="medium" style={[styles.label, styles.labelGap]}>
+            <AppText variant="medium" style={styles.label}>
               Biệt Danh
             </AppText>
             <TextInput
               value={nickname}
               onChangeText={setNickname}
               style={styles.inputPill}
-              placeholderTextColor="#b06c6b"
             />
 
-            <AppText variant="medium" style={[styles.label, styles.labelGap]}>
+            <AppText variant="medium" style={styles.label}>
               Giới Thiệu Bản Thân
             </AppText>
             <TextInput
@@ -102,21 +105,21 @@ const EditProfileScreen: React.FC = () => {
               onChangeText={setBio}
               style={styles.inputBio}
               multiline
-              textAlignVertical="top"
-              placeholderTextColor="#b06c6b"
             />
 
-            <AppText variant="medium" style={[styles.label, styles.labelGap]}>
+            <AppText variant="medium" style={styles.label}>
               Thêm Liên Kết
             </AppText>
             <TextInput
               value={link}
               onChangeText={setLink}
               style={styles.inputPill}
-              placeholderTextColor="#b06c6b"
             />
 
-            <Pressable style={styles.saveBtn} onPress={onSave}>
+            <Pressable
+              style={styles.saveBtn}
+              onPress={() => navigation.goBack()}
+            >
               <AppText variant="medium" style={styles.saveText}>
                 Lưu
               </AppText>
@@ -125,6 +128,11 @@ const EditProfileScreen: React.FC = () => {
 
           <BottomNavSpacer height={90} />
         </ScrollView>
+
+        <SearchRecipeModal
+          visible={searchVisible}
+          onClose={() => setSearchVisible(false)}
+        />
 
         <MainBottomNav activeTab={activeTab} onTabPress={setActiveTab} />
       </View>
@@ -137,9 +145,7 @@ export default EditProfileScreen;
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: "#fff" },
   container: { flex: 1, backgroundColor: "#fff" },
-
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 26, paddingTop: 8, paddingBottom: 10 },
+  scrollContent: { paddingHorizontal: 26, paddingTop: 8 },
 
   header: {
     height: 44,
@@ -147,24 +153,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-
-  // title overlay absolute để canh giữa theo màn hình
   headerTitleWrap: {
     position: "absolute",
     left: 0,
     right: 0,
     alignItems: "center",
-    justifyContent: "center",
   },
   headerTitle: {
     fontSize: 18,
-    color: AppLightColor.primary_color,
     fontWeight: "800",
+    color: AppLightColor.primary_color,
   },
+  headerRight: { flexDirection: "row", columnGap: 10 },
 
-  headerRight: { flexDirection: "row", alignItems: "center", columnGap: 10 },
-
-  iconCirclePrimary: {
+  iconCircle: {
     width: 34,
     height: 34,
     borderRadius: 17,
@@ -173,19 +175,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  avatarWrap: { alignItems: "center", marginTop: 10, marginBottom: 8 },
+  avatarWrap: { alignItems: "center", marginTop: 10 },
   avatar: { width: 96, height: 96, borderRadius: 48 },
 
-  form: { marginTop: 6 },
-
-  label: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#111",
-    marginLeft: 2,
-  },
-  labelGap: { marginTop: 14 },
-
+  form: { marginTop: 12 },
+  label: { fontSize: 14, fontWeight: "700", marginTop: 14 },
   inputPill: {
     marginTop: 8,
     backgroundColor: "#ffe3e2",
@@ -193,28 +187,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 14,
-    color: "#222",
   },
-
   inputBio: {
     marginTop: 8,
     backgroundColor: "#ffe3e2",
     borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 14,
+    padding: 14,
     minHeight: 96,
     fontSize: 14,
-    color: "#222",
   },
 
   saveBtn: {
-    marginTop: 18,
+    marginTop: 20,
     alignSelf: "center",
     backgroundColor: AppLightColor.primary_color,
     borderRadius: 999,
     paddingHorizontal: 64,
     paddingVertical: 10,
   },
-  saveText: { color: "#fff", fontWeight: "800", fontSize: 16 },
+  saveText: { color: "#fff", fontSize: 16, fontWeight: "800" },
 });

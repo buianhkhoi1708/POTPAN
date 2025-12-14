@@ -18,7 +18,7 @@ import {
   type HomeRecipe,
   type HomeChef,
   type HomeCategoryKey,
-} from "../config/homeData";
+} from "../data/homeData";
 
 import SearchIcon from "../assets/images/search.svg";
 import NotificationIcon from "../assets/images/notification.svg";
