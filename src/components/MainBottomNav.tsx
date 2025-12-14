@@ -7,13 +7,11 @@ import type { SvgProps } from "react-native-svg";
 
 import { AppLightColor } from "../styles/color";
 
-// SVG mặc định
 import HomeIcon from "../assets/images/home.svg";
 import WorldIcon from "../assets/images/world.svg";
 import CategoryIcon from "../assets/images/category.svg";
 import ProfileIcon from "../assets/images/profile.svg";
 
-// SVG khi active
 import ActiveHomeIcon from "../assets/images/active-home.svg";
 import ActiveWorldIcon from "../assets/images/active-world.svg";
 import ActiveCategoryIcon from "../assets/images/active-category.svg";
@@ -39,19 +37,23 @@ const TABS: TabConfig[] = [
   { key: "profile", Icon: ProfileIcon, ActiveIcon: ActiveProfileIcon },
 ];
 
-const MainBottomNav: React.FC<MainBottomNavProps> = ({
-  activeTab,
-  onTabPress,
-}) => {
+const MainBottomNav: React.FC<MainBottomNavProps> = ({ activeTab, onTabPress }) => {
   const navigation = useNavigation<any>();
 
+  const ROUTE_BY_TAB: Record<MainTabKey, string> = {
+    home: "Home",
+    world: "FamousChefs",
+    category: "Category",
+    profile: "Profile", // quan trọng
+  };
+
   const handlePress = (tab: MainTabKey) => {
+    if (tab === activeTab) return;
+
     onTabPress?.(tab);
 
-    if (tab === "home") {
-      navigation.navigate("Home");
-    }
-    // các tab khác tạm thời chỉ đổi trạng thái activeTab
+    const routeName = ROUTE_BY_TAB[tab];
+    if (routeName) navigation.navigate(routeName);
   };
 
   return (
