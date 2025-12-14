@@ -1,6 +1,6 @@
 // src/screens/ProfileScreen.tsx
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -8,7 +8,6 @@ import {
   ScrollView,
   StyleSheet,
   View,
-  type ImageSourcePropType,
 } from "react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 
@@ -23,22 +22,14 @@ import MenuIcon from "../assets/images/setting.svg";
 import StarIcon from "../assets/images/star.svg";
 import ClockIcon from "../assets/images/clock.svg";
 
+import {
+  profileRecipes,
+  profileCollections,
+  type ProfileRecipe,
+  type CollectionCard,
+} from "../data/profileData";
+
 type ProfileTab = "recipes" | "favorites";
-
-type ProfileRecipe = {
-  id: string;
-  title: string;
-  description: string;
-  rating: number;
-  time: string;
-  thumbnail: ImageSourcePropType;
-};
-
-type CollectionCard = {
-  id: string;
-  title: string;
-  image: ImageSourcePropType;
-};
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const H_PADDING = 20;
@@ -59,102 +50,51 @@ const ProfileScreen: React.FC = () => {
     }
   }, [isFocused]);
 
-  const recipes = useMemo<ProfileRecipe[]>(
-    () => [
-      {
-        id: "p-1",
-        title: "Gà kho gừng",
-        description: "Món ngon mỗi ngày",
-        rating: 5,
-        time: "55 phút",
-        thumbnail: require("../assets/images/man1.png"),
-      },
-      {
-        id: "p-2",
-        title: "Bánh mì",
-        description: "Nổi tiếng mọi nơi",
-        rating: 5,
-        time: "10 phút",
-        thumbnail: require("../assets/images/man2.png"),
-      },
-      {
-        id: "p-3",
-        title: "Bánh vòm",
-        description: "Đặc sản",
-        rating: 5,
-        time: "14 phút",
-        thumbnail: require("../assets/images/man3.png"),
-      },
-      {
-        id: "p-4",
-        title: "Canh chua cá lóc",
-        description: "Đậm đà hương vị",
-        rating: 5,
-        time: "55 phút",
-        thumbnail: require("../assets/images/man4.png"),
-      },
-    ],
-    []
-  );
+  const renderRecipeCard = (item: ProfileRecipe) => (
+    <Pressable key={item.id} style={styles.recipeCard}>
+      <View style={styles.recipeImageWrap}>
+        <Image source={item.thumbnail} style={styles.recipeImage} />
+      </View>
 
-  const collections = useMemo<CollectionCard[]>(
-    () => [
-      { id: "c-1", title: "Món mặn", image: require("../assets/images/hoso-man.png") },
-      { id: "c-2", title: "Đồ chay", image: require("../assets/images/hoso-chay.png") },
-    ],
-    []
-  );
+      <View style={styles.recipeBody}>
+        <AppText variant="bold" style={styles.recipeTitle}>
+          {item.title}
+        </AppText>
+        <AppText variant="light" style={styles.recipeDesc}>
+          {item.description}
+        </AppText>
 
-  const renderRecipeCard = (item: ProfileRecipe) => {
-    return (
-      <Pressable key={item.id} style={styles.recipeCard}>
-        <View style={styles.recipeImageWrap}>
-          <Image source={item.thumbnail} style={styles.recipeImage} />
-        </View>
-
-        <View style={styles.recipeBody}>
-          <AppText variant="medium" style={styles.recipeTitle}>
-            {item.title}
-          </AppText>
-          <AppText variant="light" style={styles.recipeDesc}>
-            {item.description}
-          </AppText>
-
-          <View style={styles.recipeMetaRow}>
-            <View style={styles.metaItem}>
-              <StarIcon width={12} height={12} />
-              <AppText variant="light" style={styles.metaText}>
-                {item.rating}
-              </AppText>
-            </View>
-
-            <View style={styles.metaItem}>
-              <ClockIcon width={12} height={12} />
-              <AppText variant="light" style={styles.metaText}>
-                {item.time}
-              </AppText>
-            </View>
+        <View style={styles.recipeMetaRow}>
+          <View style={styles.metaItem}>
+            <StarIcon width={12} height={12} />
+            <AppText variant="light" style={styles.metaText}>
+              {item.rating}
+            </AppText>
           </View>
-        </View>
-      </Pressable>
-    );
-  };
 
-  const renderCollectionCard = (item: CollectionCard) => {
-    return (
-      <Pressable key={item.id} style={styles.collectionCard}>
-        <Image source={item.image} style={styles.collectionImage} />
-
-        <View style={styles.collectionLabelWrap}>
-          <View style={styles.collectionLabelPill}>
-            <AppText variant="medium" style={styles.collectionLabelText}>
-              {item.title}
+          <View style={styles.metaItem}>
+            <ClockIcon width={12} height={12} />
+            <AppText variant="light" style={styles.metaText}>
+              {item.time}
             </AppText>
           </View>
         </View>
-      </Pressable>
-    );
-  };
+      </View>
+    </Pressable>
+  );
+
+  const renderCollectionCard = (item: CollectionCard) => (
+    <Pressable key={item.id} style={styles.collectionCard}>
+      <Image source={item.image} style={styles.collectionImage} />
+      <View style={styles.collectionLabelWrap}>
+        <View style={styles.collectionLabelPill}>
+          <AppText variant="medium" style={styles.collectionLabelText}>
+            {item.title}
+          </AppText>
+        </View>
+      </View>
+    </Pressable>
+  );
 
   return (
     <AppSafeView style={styles.safeArea}>
@@ -164,7 +104,6 @@ const ProfileScreen: React.FC = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* TOP INFO */}
           <View style={styles.topRow}>
             <Image
               source={require("../assets/images/avt-profile.png")}
@@ -184,7 +123,6 @@ const ProfileScreen: React.FC = () => {
             </View>
 
             <View style={styles.topActions}>
-              {/* đổi nền nút + và menu theo ảnh: nền hồng nhạt, icon đỏ */}
               <Pressable style={styles.actionCircleSoft}>
                 <PlusIcon width={16} height={16} />
               </Pressable>
@@ -194,7 +132,6 @@ const ProfileScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* ACTION BUTTONS */}
           <View style={styles.actionRow}>
             <Pressable
               style={styles.primaryPill}
@@ -212,7 +149,6 @@ const ProfileScreen: React.FC = () => {
             </Pressable>
           </View>
 
-          {/* STATS */}
           <View style={styles.statsCard}>
             <View style={styles.statItem}>
               <AppText variant="medium" style={styles.statValue}>
@@ -246,7 +182,6 @@ const ProfileScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* TABS */}
           <View style={styles.tabRow}>
             <Pressable style={styles.tabItem} onPress={() => setSection("recipes")}>
               <AppText
@@ -255,27 +190,32 @@ const ProfileScreen: React.FC = () => {
               >
                 Công thức
               </AppText>
-              {section === "recipes" ? <View style={styles.tabUnderline} /> : null}
+              {section === "recipes" && <View style={styles.tabUnderline} />}
             </Pressable>
 
-            <Pressable style={styles.tabItem} onPress={() => setSection("favorites")}>
+            <Pressable
+              style={styles.tabItem}
+              onPress={() => setSection("favorites")}
+            >
               <AppText
                 variant="medium"
-                style={section === "favorites" ? styles.tabTextActive : styles.tabText}
+                style={
+                  section === "favorites" ? styles.tabTextActive : styles.tabText
+                }
               >
                 Yêu thích
               </AppText>
-              {section === "favorites" ? <View style={styles.tabUnderline} /> : null}
+              {section === "favorites" && <View style={styles.tabUnderline} />}
             </Pressable>
           </View>
 
-          {/* CONTENT */}
           {section === "recipes" ? (
-            <View style={styles.recipeGrid}>{recipes.map(renderRecipeCard)}</View>
+            <View style={styles.recipeGrid}>
+              {profileRecipes.map(renderRecipeCard)}
+            </View>
           ) : (
             <View style={styles.collectionList}>
-              {collections.map(renderCollectionCard)}
-
+              {profileCollections.map(renderCollectionCard)}
               <Pressable style={styles.createCollectionBtn}>
                 <AppText variant="medium" style={styles.createCollectionText}>
                   + Tạo bộ sưu tập
@@ -287,7 +227,6 @@ const ProfileScreen: React.FC = () => {
           <BottomNavSpacer height={90} />
         </ScrollView>
 
-        {/* NAV BOTTOM */}
         <MainBottomNav activeTab={activeTab} onTabPress={setActiveTab} />
       </View>
     </AppSafeView>
@@ -328,8 +267,6 @@ const styles = StyleSheet.create({
   actionRow: {
     marginTop: 14,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     columnGap: 12,
   },
   primaryPill: {
@@ -338,7 +275,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingVertical: 10,
     alignItems: "center",
-    justifyContent: "center",
   },
   primaryPillText: { fontSize: 13, color: "#fff", fontWeight: "700" },
 
@@ -348,21 +284,15 @@ const styles = StyleSheet.create({
     borderColor: "#ffb6b5",
     borderRadius: 14,
     flexDirection: "row",
-    alignItems: "center",
     paddingVertical: 10,
   },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 8,
-  },
+  statItem: { flex: 1, alignItems: "center" },
   statValue: { fontSize: 16, fontWeight: "800", color: "#111" },
-  statLabel: { marginTop: 4, fontSize: 11, color: "#333", textAlign: "center" },
+  statLabel: { marginTop: 4, fontSize: 11, color: "#333" },
   statDivider: { width: 1, height: 34, backgroundColor: "#ffd1d0" },
 
-  tabRow: { marginTop: 14, flexDirection: "row", alignItems: "center" },
-  tabItem: { flex: 1, alignItems: "center", justifyContent: "center", paddingBottom: 10 },
+  tabRow: { marginTop: 14, flexDirection: "row" },
+  tabItem: { flex: 1, alignItems: "center", paddingBottom: 10 },
   tabText: { fontSize: 16, fontWeight: "800", color: "#111" },
   tabTextActive: { fontSize: 16, fontWeight: "800", color: "#111" },
   tabUnderline: {
@@ -385,23 +315,30 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "#ffb6b5",
-    backgroundColor: "#fff",
     marginBottom: 12,
     overflow: "hidden",
   },
-  recipeImageWrap: { borderTopLeftRadius: 14, borderTopRightRadius: 14, overflow: "hidden" },
+  recipeImageWrap: { overflow: "hidden" },
   recipeImage: { width: "100%", height: 110 },
-  recipeBody: { paddingHorizontal: 10, paddingTop: 8, paddingBottom: 10 },
-  recipeTitle: { fontSize: 13, fontWeight: "800", color: "#111" },
+  recipeBody: { paddingHorizontal: 10, paddingVertical: 10 },
+  recipeTitle: {
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: "800",
+    color: "#111",
+  },
   recipeDesc: { marginTop: 2, fontSize: 11, color: "#333" },
   recipeMetaRow: {
     marginTop: 8,
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
   },
   metaItem: { flexDirection: "row", alignItems: "center", columnGap: 6 },
-  metaText: { color: AppLightColor.primary_color, fontWeight: "700", fontSize: 11 },
+  metaText: {
+    color: AppLightColor.primary_color,
+    fontWeight: "700",
+    fontSize: 11,
+  },
 
   collectionList: { marginTop: 10 },
   collectionCard: {
@@ -409,7 +346,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#ffb6b5",
-    backgroundColor: "#fff",
     marginBottom: 12,
   },
   collectionImage: { width: "100%", height: 140 },
