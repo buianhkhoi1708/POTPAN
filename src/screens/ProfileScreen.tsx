@@ -56,7 +56,7 @@ const ProfileScreen: React.FC = () => {
         <Image source={item.thumbnail} style={styles.recipeImage} />
       </View>
 
-      <View style={styles.recipeBody}>
+      <View style={styles.recipeInfo}>
         <AppText variant="bold" style={styles.recipeTitle}>
           {item.title}
         </AppText>
@@ -83,15 +83,14 @@ const ProfileScreen: React.FC = () => {
     </Pressable>
   );
 
+  // Favorites: card = ảnh + (label nằm dưới), không overlay, khung mở rộng full width
   const renderCollectionCard = (item: CollectionCard) => (
     <Pressable key={item.id} style={styles.collectionCard}>
       <Image source={item.image} style={styles.collectionImage} />
-      <View style={styles.collectionLabelWrap}>
-        <View style={styles.collectionLabelPill}>
-          <AppText variant="medium" style={styles.collectionLabelText}>
-            {item.title}
-          </AppText>
-        </View>
+      <View style={styles.collectionFooter}>
+        <AppText variant="medium" style={styles.collectionTitle}>
+          {item.title}
+        </AppText>
       </View>
     </Pressable>
   );
@@ -104,6 +103,7 @@ const ProfileScreen: React.FC = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Header (hình 4) */}
           <View style={styles.topRow}>
             <Image
               source={require("../assets/images/avt-profile.png")}
@@ -118,7 +118,7 @@ const ProfileScreen: React.FC = () => {
                 @KhoiABui
               </AppText>
               <AppText variant="light" style={styles.bio}>
-                Nấu ăn là niềm đam mê to lớn của tôi
+                Nấu ăn là niềm đam mê to lớn{"\n"}của tôi
               </AppText>
             </View>
 
@@ -182,8 +182,12 @@ const ProfileScreen: React.FC = () => {
             </View>
           </View>
 
+          {/* Tabs (nội dung nằm dưới, không bọc trong khung ngoài) */}
           <View style={styles.tabRow}>
-            <Pressable style={styles.tabItem} onPress={() => setSection("recipes")}>
+            <Pressable
+              style={styles.tabItem}
+              onPress={() => setSection("recipes")}
+            >
               <AppText
                 variant="medium"
                 style={section === "recipes" ? styles.tabTextActive : styles.tabText}
@@ -210,9 +214,7 @@ const ProfileScreen: React.FC = () => {
           </View>
 
           {section === "recipes" ? (
-            <View style={styles.recipeGrid}>
-              {profileRecipes.map(renderRecipeCard)}
-            </View>
+            <View style={styles.recipeGrid}>{profileRecipes.map(renderRecipeCard)}</View>
           ) : (
             <View style={styles.collectionList}>
               {profileCollections.map(renderCollectionCard)}
@@ -224,6 +226,7 @@ const ProfileScreen: React.FC = () => {
             </View>
           )}
 
+          {/* bắt buộc có khoảng trắng chuẩn bị sẵn */}
           <BottomNavSpacer height={90} />
         </ScrollView>
 
@@ -243,17 +246,23 @@ const styles = StyleSheet.create({
 
   topRow: { flexDirection: "row", alignItems: "flex-start" },
   avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     borderWidth: 1,
     borderColor: "#f1f1f1",
   },
   userInfo: { flex: 1, paddingLeft: 12, paddingRight: 10 },
-  name: { fontSize: 18, color: AppLightColor.primary_color, fontWeight: "800" },
-  handle: { marginTop: 2, color: AppLightColor.primary_color, fontWeight: "700" },
-  bio: { marginTop: 6, color: "#111" },
-  topActions: { flexDirection: "row", alignItems: "center", columnGap: 8 },
+  name: { fontSize: 20, color: AppLightColor.primary_color, fontWeight: "800" },
+  handle: {
+    marginTop: 2,
+    color: AppLightColor.primary_color,
+    fontWeight: "700",
+    opacity: 0.65,
+    fontSize: 13,
+  },
+  bio: { marginTop: 6, color: "#111", fontSize: 12, lineHeight: 16 },
+  topActions: { flexDirection: "row", alignItems: "center", columnGap: 8, marginTop: 8 },
 
   actionCircleSoft: {
     width: 34,
@@ -264,11 +273,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffe3e2",
   },
 
-  actionRow: {
-    marginTop: 14,
-    flexDirection: "row",
-    columnGap: 12,
-  },
+  actionRow: { marginTop: 14, flexDirection: "row", columnGap: 12 },
   primaryPill: {
     flex: 1,
     backgroundColor: AppLightColor.primary_color,
@@ -298,7 +303,7 @@ const styles = StyleSheet.create({
   tabUnderline: {
     position: "absolute",
     bottom: 2,
-    width: 120,
+    width: 140,
     height: 3,
     borderRadius: 999,
     backgroundColor: AppLightColor.primary_color,
@@ -312,67 +317,62 @@ const styles = StyleSheet.create({
   },
   recipeCard: {
     width: CARD_W,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#ffb6b5",
-    marginBottom: 12,
-    overflow: "hidden",
-  },
-  recipeImageWrap: { overflow: "hidden" },
-  recipeImage: { width: "100%", height: 110 },
-  recipeBody: { paddingHorizontal: 10, paddingVertical: 10 },
-  recipeTitle: {
-    fontSize: 16,
-    lineHeight: 20,
-    fontWeight: "800",
-    color: "#111",
-  },
-  recipeDesc: { marginTop: 2, fontSize: 11, color: "#333" },
-  recipeMetaRow: {
-    marginTop: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  metaItem: { flexDirection: "row", alignItems: "center", columnGap: 6 },
-  metaText: {
-    color: AppLightColor.primary_color,
-    fontWeight: "700",
-    fontSize: 11,
-  },
-
-  collectionList: { marginTop: 10 },
-  collectionCard: {
-    borderRadius: 18,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#ffb6b5",
-    marginBottom: 12,
-  },
-  collectionImage: { width: "100%", height: 140 },
-  collectionLabelWrap: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 10,
+    marginBottom: 14,
+    overflow: "visible",
     alignItems: "center",
   },
-  collectionLabelPill: {
-    paddingHorizontal: 18,
-    paddingVertical: 6,
-    borderRadius: 999,
+  recipeImageWrap: {
+    width: "92%",
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#eee",
+  },
+  recipeImage: { width: "100%", height: 120 },
+  recipeInfo: {
+    width: "100%",
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#ffb6b5",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: -12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  recipeTitle: { fontSize: 18, lineHeight: 22, fontWeight: "800", color: "#111" },
+  recipeDesc: { marginTop: 2, fontSize: 12, color: "#333" },
+  recipeMetaRow: { marginTop: 8, flexDirection: "row", justifyContent: "space-between" },
+  metaItem: { flexDirection: "row", alignItems: "center", columnGap: 6 },
+  metaText: { color: AppLightColor.primary_color, fontWeight: "700", fontSize: 12 },
+
+  // Favorites list (hình 2)
+  collectionList: { marginTop: 10, rowGap: 14 },
+  collectionCard: {
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "#ffb6b5",
+    overflow: "hidden",
     backgroundColor: "#fff",
   },
-  collectionLabelText: { fontSize: 12, fontWeight: "800", color: "#111" },
+  collectionImage: { width: "100%", height: 150 },
+  collectionFooter: {
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  collectionTitle: { fontSize: 16, fontWeight: "800", color: "#111" },
 
   createCollectionBtn: {
-    marginTop: 6,
+    marginTop: 4,
     alignSelf: "center",
-    paddingHorizontal: 22,
-    paddingVertical: 10,
+    paddingHorizontal: 26,
+    paddingVertical: 12,
     borderRadius: 999,
     backgroundColor: "#ffe3e2",
   },
-  createCollectionText: { fontSize: 12, fontWeight: "800", color: "#111" },
+  createCollectionText: { fontSize: 13, fontWeight: "800", color: "#111" },
 });

@@ -1,3 +1,5 @@
+// src/screens/EditProfileScreen.tsx
+
 import React, { useState } from "react";
 import {
   Image,
@@ -7,7 +9,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 
 import AppSafeView from "../components/AppSafeView";
@@ -16,6 +17,10 @@ import BottomNavSpacer from "../components/BottomNavSpacer";
 import MainBottomNav, { type MainTabKey } from "../components/MainBottomNav";
 import SearchRecipeModal from "../components/SearchRecipeModal";
 import { AppLightColor } from "../styles/color";
+
+import BackArrow from "../assets/images/backarrow.svg";
+import SearchIcon from "../assets/images/search.svg";
+import NotificationIcon from "../assets/images/notification.svg";
 
 const EditProfileScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -34,13 +39,12 @@ const EditProfileScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* HEADER */}
           <View style={styles.header}>
             <Pressable
-              style={styles.iconCircle}
+              style={styles.headerIconCircle}
               onPress={() => navigation.goBack()}
             >
-              <Ionicons name="arrow-back" size={18} color="#fff" />
+              <BackArrow width={18} height={18} />
             </Pressable>
 
             <View style={styles.headerTitleWrap} pointerEvents="none">
@@ -51,25 +55,21 @@ const EditProfileScreen: React.FC = () => {
 
             <View style={styles.headerRight}>
               <Pressable
-                style={styles.iconCircle}
+                style={styles.headerIconCircle}
                 onPress={() => setSearchVisible(true)}
               >
-                <Ionicons name="search-outline" size={18} color="#fff" />
+                <SearchIcon width={18} height={18} />
               </Pressable>
+
               <Pressable
-                style={styles.iconCircle}
+                style={styles.headerIconCircle}
                 onPress={() => navigation.navigate("Notification")}
               >
-                <Ionicons
-                  name="notifications-outline"
-                  size={18}
-                  color="#fff"
-                />
+                <NotificationIcon width={18} height={18} />
               </Pressable>
             </View>
           </View>
 
-          {/* AVATAR */}
           <View style={styles.avatarWrap}>
             <Image
               source={require("../assets/images/avt-profile.png")}
@@ -77,7 +77,6 @@ const EditProfileScreen: React.FC = () => {
             />
           </View>
 
-          {/* FORM */}
           <View style={styles.form}>
             <AppText variant="medium" style={styles.label}>
               Họ Tên
@@ -116,10 +115,7 @@ const EditProfileScreen: React.FC = () => {
               style={styles.inputPill}
             />
 
-            <Pressable
-              style={styles.saveBtn}
-              onPress={() => navigation.goBack()}
-            >
+            <Pressable style={styles.saveBtn} onPress={() => navigation.goBack()}>
               <AppText variant="medium" style={styles.saveText}>
                 Lưu
               </AppText>
@@ -166,17 +162,17 @@ const styles = StyleSheet.create({
   },
   headerRight: { flexDirection: "row", columnGap: 10 },
 
-  iconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+  headerIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
   },
 
-  avatarWrap: { alignItems: "center", marginTop: 10 },
-  avatar: { width: 96, height: 96, borderRadius: 48 },
+  avatarWrap: { alignItems: "center", marginTop: 14 },
+  avatar: { width: 120, height: 120, borderRadius: 60 },
 
   form: { marginTop: 12 },
   label: { fontSize: 14, fontWeight: "700", marginTop: 14 },
