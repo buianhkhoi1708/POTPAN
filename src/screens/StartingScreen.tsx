@@ -1,29 +1,15 @@
-// src/screens/StartingScreen.tsx
-import React, { useEffect } from "react";
-import { StyleSheet, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
-import AppLogo from "../components/AppLogo";
 import { AppLightColor } from "../styles/color";
-import { RootStackParamList } from "../navigations/AppStackNavigator";
-
-// navigation type cho StartingScreen
-type StartingNavProp = StackNavigationProp<RootStackParamList, "StartingScreen">;
+import AppLogo from "../components/AppLogo";
+import { useNavigation } from "@react-navigation/native";
 
 const StartingScreen = () => {
-  const navigator = useNavigation<StartingNavProp>();
+  const navigator = useNavigation();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigator.navigate("Page2"); // tên route phải trùng Stack.Screen name="Page2"
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [navigator]);
-
+  const timer = setTimeout(() => {navigator.navigate('Page2')}, 1000)
   return (
     <AppSafeView style={styles.container}>
       <View style={styles.container1}>
@@ -43,17 +29,15 @@ const styles = StyleSheet.create({
     backgroundColor: AppLightColor.primary_color,
     justifyContent: "center",
     alignItems: "center",
-    flex: 1,
   },
   container1: {
     marginBottom: 20,
-    width: "100%",
-    alignItems: "center",
+    width: '100%'
   },
   text: {
     color: "white",
     fontSize: 50,
-    fontWeight: "800",
+    fontWeight: 800,
     marginTop: 10,
   },
 });

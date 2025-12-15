@@ -1,26 +1,9 @@
-// src/screens/Introduce1.tsx
-import { ImageBackground, StyleSheet, View } from "react-native";
-import React, { useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-
+import { ImageBackground, StyleSheet, Text, View } from "react-native";
+import React from "react";
 import AppText from "../components/AppText";
 import AppSafeView from "../components/AppSafeView";
-import { RootStackParamList } from "../navigations/AppStackNavigator";
-
-type IntroduceNavProp = StackNavigationProp<RootStackParamList, "Introduce1">;
 
 const Introduce1 = () => {
-  const navigation = useNavigation<IntroduceNavProp>();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.navigate("Page2_2"); // dùng TÊN ROUTE, không dùng "Page2.2.tsx"
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [navigation]);
-
   return (
     <ImageBackground
       source={require("../assets/images/22bg.png")}

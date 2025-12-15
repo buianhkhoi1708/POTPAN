@@ -1,20 +1,13 @@
-// src/screens/Page2.tsx
-import { ImageBackground, StyleSheet, View } from "react-native";
+import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-
 import AppText from "../components/AppText";
 import AppLogo from "../components/AppLogo";
 import { AppLightColor } from "../styles/color";
 import AppButton from "../components/AppButton";
-import { RootStackParamList } from "../navigations/AppStackNavigator";
-
-type Page2NavProp = StackNavigationProp<RootStackParamList, "Page2">;
 
 const Page2 = () => {
-  const navigator = useNavigation<Page2NavProp>();
-
+  const navigator = useNavigation();
   return (
     <ImageBackground
       source={require("../assets/images/Page21.png")}
@@ -29,23 +22,17 @@ const Page2 = () => {
           Món gì khó, có POTPAN
         </AppText>
       </View>
-
       <AppButton
         butName="Đăng nhập"
         style={[styles.button, styles.button1]}
         style1={styles.buttext1}
-        onPress={() => {
-          navigator.navigate("StartingScreen");
-        }}
+        onPress={()=> {navigator.navigate('')}}
       />
-
       <AppButton
         butName="Bắt đầu"
         style={[styles.button, styles.button2]}
         style1={styles.buttext2}
-        onPress={() => {
-          navigator.navigate("Introduce1");
-        }}
+        onPress={()=> {navigator.navigate('Introduce1')}}
       />
     </ImageBackground>
   );
@@ -59,22 +46,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 900,
   },
+
   container1: {
     backgroundColor: "white",
     alignItems: "center",
     width: 300,
     height: 300,
     marginBottom: 40,
-    borderRadius: 150,
+    borderRadius: "50%",
     position: "absolute",
   },
+
   text: {
     color: AppLightColor.primary_color,
     fontSize: 50,
     marginTop: -25,
   },
   text1: {
-    fontWeight: "500",
+    fontWeight: 500,
     fontSize: 16,
   },
   button: {
@@ -93,12 +82,13 @@ const styles = StyleSheet.create({
     backgroundColor: AppLightColor.primary_color,
   },
   buttext1: {
-    fontWeight: "600",
+    fontWeight: 600,
     fontSize: 18,
   },
+
   buttext2: {
     color: "white",
-    fontWeight: "600",
+    fontWeight: 600,
     fontSize: 18,
   },
 });
