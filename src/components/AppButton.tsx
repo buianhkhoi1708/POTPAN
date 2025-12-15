@@ -1,6 +1,7 @@
-import { Button, Pressable, StyleSheet, Text, View } from "react-native";
+import {Pressable, StyleSheet} from "react-native";
 import React from "react";
 import AppText from "./AppText";
+import { AppFonts } from "../styles/fonts";
 
 interface AppButton {
   butName: string;

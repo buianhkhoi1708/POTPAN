@@ -1,24 +1,21 @@
-// src/screens/StartingScreen.tsx
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppLogo from "../components/AppLogo";
 import { AppLightColor } from "../styles/color";
-import { RootStackParamList } from "../navigations/AppStackNavigator";
+import { RootStackParamList } from "../type/types";
 
-// navigation type cho StartingScreen
-type StartingNavProp = StackNavigationProp<RootStackParamList, "StartingScreen">;
+type NavigationProp = StackNavigationProp<RootStackParamList, "IntroduceScreen">;
 
 const StartingScreen = () => {
-  const navigator = useNavigation<StartingNavProp>();
+  const navigator = useNavigation<NavigationProp>();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigator.navigate("Page2"); // tên route phải trùng Stack.Screen name="Page2"
+      navigator.navigate("IntroduceScreen");
     }, 1000);
 
     return () => clearTimeout(timer);

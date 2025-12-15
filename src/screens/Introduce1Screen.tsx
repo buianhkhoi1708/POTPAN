@@ -6,16 +6,18 @@ import { StackNavigationProp } from "@react-navigation/stack";
 
 import AppText from "../components/AppText";
 import AppSafeView from "../components/AppSafeView";
-import { RootStackParamList } from "../navigations/AppStackNavigator";
+import { RootStackParamList } from "../type/types";
+import { AppLightColor } from "../styles/color";
 
-type IntroduceNavProp = StackNavigationProp<RootStackParamList, "Introduce1">;
 
-const Introduce1 = () => {
-  const navigation = useNavigation<IntroduceNavProp>();
+type NavigationProp = StackNavigationProp<RootStackParamList, "Introduce2Screen">;
+
+const Introduce1Screen = () => {
+  const navigation = useNavigation<NavigationProp>();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.navigate("Page2_2"); // dùng TÊN ROUTE, không dùng "Page2.2.tsx"
+      navigation.navigate("Introduce2Screen"); // dùng TÊN ROUTE, không dùng "Page2.2.tsx"
     }, 5000);
 
     return () => clearTimeout(timer);
@@ -28,19 +30,28 @@ const Introduce1 = () => {
     >
       <AppSafeView>
         <View>
-          <AppText>Món ăn Việt Nam</AppText>
-          <AppText>Món ăn chuẩn Việt, đậm đà bản sắc dân tộc</AppText>
+          <AppText variant="bold" style = {styles.text}>Món ăn Việt Nam</AppText>
+          <AppText variant = "light" style = {styles.text1}>Món ăn chuẩn Việt, đậm đà bản sắc dân tộc</AppText>
         </View>
       </AppSafeView>
     </ImageBackground>
   );
 };
 
-export default Introduce1;
+export default Introduce1Screen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
+  },
+  text: {
+    fontSize: 30,
+    fontFamily: 'RobotoSlab',
+    color: AppLightColor.primary_color
+  },
+  text1: {
+    fontSize: 16,
+    fontStyle: 'italic',
   },
 });

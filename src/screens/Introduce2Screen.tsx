@@ -15,7 +15,7 @@ import styles from "../styles/Page2.2";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
-export default function Screen() {
+export default function Introduce2Screen() {
   const navigation = useNavigation();
   const route = useRoute();
 
