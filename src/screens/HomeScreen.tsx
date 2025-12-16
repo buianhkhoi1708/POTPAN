@@ -1,7 +1,14 @@
-// src/screens/HomeScreen.tsx  (cập nhật điều hướng tới FamousChefs + nav home, gộp styles vào cùng file)
+// src/screens/HomeScreen.tsx  (fix shadow/“hiệu ứng ở dưới” cho card trong "Công thức của tôi")
 
 import React, { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, View, StyleSheet, Dimensions } from "react-native";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  View,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useIsFocused } from "@react-navigation/native";
 
@@ -36,7 +43,8 @@ const { width: SCREEN_W } = Dimensions.get("window");
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const isFocused = useIsFocused();
 
-  const [selectedCategory, setSelectedCategory] = useState<HomeCategoryKey>("family");
+  const [selectedCategory, setSelectedCategory] =
+    useState<HomeCategoryKey>("family");
   const [activeTab, setActiveTab] = useState<MainTabKey>("home");
   const [searchVisible, setSearchVisible] = useState(false);
 
@@ -77,7 +85,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <AppText variant="light" style={styles.featuredMetaText}>
               {item.rating}
             </AppText>
-            <Ionicons name="star" size={12} color={AppLightColor.primary_color} />
+            <Ionicons
+              name="star"
+              size={12}
+              color={AppLightColor.primary_color}
+            />
           </View>
         </View>
       </View>
@@ -114,7 +126,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <AppText variant="light" style={styles.smallMetaText}>
               {item.rating}
             </AppText>
-            <Ionicons name="star" size={12} color={AppLightColor.primary_color} />
+            <Ionicons
+              name="star"
+              size={12}
+              color={AppLightColor.primary_color}
+            />
           </View>
         </View>
       </View>
@@ -130,7 +146,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   return (
     <AppSafeView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* HEADER */}
         <View style={styles.header}>
           <View>
             <AppText variant="bold" style={styles.hello}>
@@ -155,13 +170,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </View>
         </View>
 
-        {/* BODY */}
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* DANH MỤC NGANG */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -190,7 +203,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             })}
           </ScrollView>
 
-          {/* CÔNG THỨC NỔI BẬT */}
           <View style={styles.sectionHeader}>
             <AppText
               variant="title"
@@ -209,7 +221,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             {featuredRecipes.map(renderFeaturedCard)}
           </ScrollView>
 
-          {/* CÔNG THỨC CỦA TÔI */}
           <View style={styles.mySectionWrapper}>
             <View style={styles.mySectionHeader}>
               <View style={styles.sectionPillWrap}>
@@ -231,9 +242,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </ScrollView>
           </View>
 
-          {/* CÁC ĐẦU BẾP NỔI TIẾNG */}
           <View style={styles.sectionHeader}>
-            <Pressable onPress={() => navigation.navigate("FamousChefs" as never)}>
+            <Pressable
+              onPress={() => navigation.navigate("FamousChefs" as never)}
+            >
               <AppText
                 variant="title"
                 style={[styles.sectionTitle, styles.sectionTitlePrimary]}
@@ -250,7 +262,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             {popularChefs.map(renderChefCard)}
           </ScrollView>
 
-          {/* CÔNG THỨC THÊM GẦN ĐÂY */}
           <View style={styles.sectionHeader}>
             <AppText
               variant="title"
@@ -272,13 +283,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           <BottomNavSpacer height={60} />
         </ScrollView>
 
-        {/* MODAL TÌM KIẾM */}
         <SearchRecipeModal
           visible={searchVisible}
           onClose={() => setSearchVisible(false)}
         />
 
-        {/* NAV BOTTOM */}
         <MainBottomNav
           activeTab={activeTab}
           onTabPress={(tab) => {
@@ -309,15 +318,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  hello: {
-    fontSize: 26,
-    color: AppLightColor.primary_text,
-  },
-  headerIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-    columnGap: 10,
-  },
+  hello: { fontSize: 26, color: AppLightColor.primary_text },
+  headerIcons: { flexDirection: "row", alignItems: "center", columnGap: 10 },
   headerIconCircle: {
     width: 32,
     height: 32,
@@ -330,18 +332,15 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 16 },
 
-  // CATEGORY
   categoryRow: { paddingHorizontal: 16, paddingBottom: 8 },
   categoryItem: { marginRight: 16, paddingVertical: 4 },
   categoryText: { color: AppLightColor.primary_color },
   categoryTextActive: { color: AppLightColor.primary_color },
 
-  // SECTION HEADER
   sectionHeader: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4 },
   sectionTitle: { color: AppLightColor.primary_text },
   sectionTitlePrimary: { color: AppLightColor.primary_color },
 
-  // FEATURED
   featuredRow: { paddingHorizontal: 20, paddingBottom: 12 },
   featuredCard: { width: SCREEN_W - 40, marginRight: 16 },
   featuredImageWrap: {
@@ -388,16 +387,21 @@ const styles = StyleSheet.create({
   featuredMetaRight: { flexDirection: "row", alignItems: "center", columnGap: 4 },
   featuredMetaText: { fontSize: 12, color: AppLightColor.primary_color },
 
-  // "Công thức của tôi"
   mySectionWrapper: {
     marginTop: 8,
     marginHorizontal: -16,
     backgroundColor: AppLightColor.primary_color,
     borderRadius: 8,
-    paddingBottom: 14,
+    paddingBottom: 18,
   },
   mySectionHeader: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 4 },
-  mySectionList: { paddingHorizontal: 32, paddingTop: 4 },
+
+  // FIX: thêm paddingBottom để shadow của card không bị “cắt” ở dưới
+  mySectionList: {
+    paddingHorizontal: 32,
+    paddingTop: 4,
+    paddingBottom: 12,
+  },
 
   sectionPillWrap: { alignItems: "center", justifyContent: "center" },
   sectionPillBg: {
@@ -416,12 +420,11 @@ const styles = StyleSheet.create({
   },
   sectionPillText: { color: AppLightColor.primary_color },
 
-  // LISTS
   horizontalList: { paddingHorizontal: 16, paddingBottom: 8 },
   horizontalListBottom: { paddingHorizontal: 16, paddingBottom: 24 },
 
-  // SMALL CARD
-  smallCard: { width: 190, marginRight: 16 },
+  // FIX: overflow visible + thêm paddingBottom để bóng/đổ (shadow) không bị clip
+  smallCard: { width: 190, marginRight: 16, overflow: "visible", paddingBottom: 10 },
   smallCardRecent: { borderRadius: 10, padding: 4, overflow: "visible" },
 
   smallImageWrap: {
@@ -443,20 +446,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
+  // FIX: bỏ border đen + tăng shadow/elevation, bỏ marginHorizontal âm để tránh clip
   smallInfo: {
-    borderWidth: 1,
-    borderColor: "black",
     backgroundColor: "#ffffff",
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: AppLightColor.primary_color,
     paddingHorizontal: 10,
     paddingVertical: 8,
     marginTop: -10,
-    marginHorizontal: -6,
+    marginHorizontal: 0,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.14,
+    shadowRadius: 3,
+    elevation: 3,
   },
   smallTitle: { fontSize: 18, color: "#000" },
   smallMetaRow: {
@@ -469,7 +473,6 @@ const styles = StyleSheet.create({
   smallMetaRight: { flexDirection: "row", alignItems: "center", columnGap: 4 },
   smallMetaText: { fontSize: 12, color: AppLightColor.primary_color },
 
-  // CHEF CARD
   chefCard: {
     width: 90,
     height: 90,
