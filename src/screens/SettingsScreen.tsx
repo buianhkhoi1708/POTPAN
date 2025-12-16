@@ -121,7 +121,13 @@ const SettingsScreen: React.FC = () => {
         showNext: true, 
         onPress: () => navigation.navigate("SupportCenter") },
       { key: "privacy", title: "Chính sách bảo mật", Icon: Setting3Icon, showNext: true },
-      { key: "language", title: "Ngôn ngữ", Icon: Setting4Icon, showNext: true },
+      {
+        key: "language",
+        title: "Ngôn ngữ",
+        Icon: Setting4Icon,
+        showNext: true,
+        onPress: () => navigation.navigate("Language"),
+      },
       { key: "dark", title: "Chuyển màu tối", Icon: Setting5Icon, showNext: false },
       {
         key: "logout",

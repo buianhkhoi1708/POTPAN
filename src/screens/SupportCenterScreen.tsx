@@ -1,4 +1,4 @@
-// src/screens/SupportCenterScreen.tsx  (full file, giữ active effect 2 nút trên; đổi màu chữ tất cả pill về ĐEN)
+// src/screens/SupportCenterScreen.tsx  (full file, giữ hiệu ứng active cho 2 nút trên; đổi màu chữ để trên/dưới đồng bộ)
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
@@ -27,7 +27,11 @@ const SupportCenterScreen: React.FC = () => {
   const isFocused = useIsFocused();
 
   const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
+
+  // 2 nút trên có active effect
   const [topTab, setTopTab] = useState<TopTab>("faq");
+
+  // 3 nút dưới không cần active style (chỉ đổi nội dung)
   const [section, setSection] = useState<SupportSection>("general");
 
   useEffect(() => {
@@ -100,7 +104,7 @@ const SupportCenterScreen: React.FC = () => {
     return (
       <Image
         source={require("../assets/images/helpcenter4.png")}
-          style={styles.contactPngIcon}
+        style={styles.contactPngIcon}
       />
     );
   };
@@ -114,16 +118,19 @@ const SupportCenterScreen: React.FC = () => {
     active: boolean;
     onPress: () => void;
   }) => (
-    <Pressable style={active ? styles.topPillActive : styles.pillBase} onPress={onPress}>
-      <AppText variant="bold" style={active ? styles.topPillTextActive : styles.pillTextBlack}>
+    <Pressable style={active ? styles.topPillActive : styles.topPill} onPress={onPress}>
+      <AppText
+        variant="bold"
+        style={active ? styles.topPillTextActive : styles.topPillText}
+      >
         {label}
       </AppText>
     </Pressable>
   );
 
   const SubPill = ({ label, onPress }: { label: string; onPress: () => void }) => (
-    <Pressable style={styles.pillBase} onPress={onPress}>
-      <AppText variant="bold" style={styles.pillTextBlack}>
+    <Pressable style={styles.subPill} onPress={onPress}>
+      <AppText variant="bold" style={styles.subPillText}>
         {label}
       </AppText>
     </Pressable>
@@ -183,6 +190,7 @@ const SupportCenterScreen: React.FC = () => {
                       {it.title}
                     </AppText>
                   </View>
+
                   <View style={styles.faqRight}>
                     <SettingNextIcon width={16} height={16} />
                   </View>
@@ -199,6 +207,7 @@ const SupportCenterScreen: React.FC = () => {
                       {c.title}
                     </AppText>
                   </View>
+
                   <View style={styles.contactRight}>
                     <SettingNextIcon width={16} height={16} />
                   </View>
@@ -258,11 +267,11 @@ const styles = StyleSheet.create({
   headerRightStub: { width: 32, height: 32 },
 
   topBlock: { marginTop: 4, alignItems: "center" },
-  topRow: { width: "100%", flexDirection: "row", columnGap: 12, marginTop: 6 },
-  subRow: { width: "100%", flexDirection: "row", columnGap: 10, marginTop: 10 },
 
-  // nền pill giống nhau, chữ đen
-  pillBase: {
+  topRow: { width: "100%", flexDirection: "row", columnGap: 12, marginTop: 6 },
+
+  // TOP: giữ active effect, nhưng màu chữ (inactive) đồng bộ với hàng dưới
+  topPill: {
     flex: 1,
     paddingVertical: 10,
     borderRadius: 999,
@@ -270,14 +279,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  pillTextBlack: {
-    fontSize: 13,
-    fontWeight: "900",
-    color: "#111",
-    fontFamily: ROBOTO_SLAB_BOLD,
-  },
-
-  // active chỉ đổi nền, chữ vẫn đen (đúng yêu cầu màu chữ chung là đen)
   topPillActive: {
     flex: 1,
     paddingVertical: 10,
@@ -286,10 +287,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  topPillText: {
+    fontSize: 13,
+    fontWeight: "900",
+    color: AppLightColor.primary_color, // đổi từ đen -> đỏ để giống hàng dưới
+    fontFamily: ROBOTO_SLAB_BOLD,
+  },
   topPillTextActive: {
     fontSize: 13,
     fontWeight: "900",
-    color: "#ffffffff",
+    color: "#fff",
+    fontFamily: ROBOTO_SLAB_BOLD,
+  },
+
+  subRow: { width: "100%", flexDirection: "row", columnGap: 10, marginTop: 10 },
+  subPill: {
+    flex: 1,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: "#ffe3e2",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  subPillText: {
+    fontSize: 12,
+    fontWeight: "900",
+    color: AppLightColor.primary_color, // đổi từ đen -> đỏ để đồng bộ với hàng trên
     fontFamily: ROBOTO_SLAB_BOLD,
   },
 
@@ -301,7 +324,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 18,
   },
-  searchPlaceholder: { fontSize: 13, color: "#000000ff", opacity: 0.7 },
+  searchPlaceholder: { fontSize: 13, color: "#111", opacity: 0.7 },
 
   listWrap: { marginTop: 14 },
   faqRow: {
