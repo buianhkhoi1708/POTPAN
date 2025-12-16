@@ -30,7 +30,6 @@ const styles = StyleSheet.create({
   },
   light: {
     fontSize: 16,
-    fontFamily: AppFonts.RobotoLight,
     color: "#000",
   },
 });

@@ -1,77 +1,61 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
-import {
-  Dimensions,
-  ImageBackground,
-  Pressable,
-  StatusBar,
-  Text,
-  View,
-  type ImageSourcePropType,
-} from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import styles from "../styles/Page2.2";
+// src/screens/Introduce1.tsx
+import { ImageBackground, StyleSheet, View, Image } from "react-native";
+import React, { useEffect } from "react";
+import AppText from "../components/AppText";
+import AppSafeView from "../components/AppSafeView";
+import { AppLightColor } from "../styles/color";
+import { AppFonts } from "../styles/fonts";
+import AppIntroduceNavBar from "../components/AppIntroduceNavBar";
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
+const Introduce2Screen = () => {
 
-export default function Introduce2Screen() {
-  const navigation = useNavigation();
-  const route = useRoute();
-
-  const ima = (route.params as any)?.ima as string | undefined;
-  const urlFromParam =
-    typeof ima === "string" && ima.length > 0 ? decodeURIComponent(ima) : undefined;
-
-  const bgSource: ImageSourcePropType = urlFromParam
-    ? { uri: urlFromParam }
-    : require("../assets/images/page2_2.png"); // <-- dùng PNG
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <ImageBackground
-        source={bgSource}
-        resizeMode="cover"
-        style={styles.background}
-        imageStyle={styles.bgImage}
-      >
-        <LinearGradient
-          colors={["rgba(255,255,255,1)", "rgba(255,255,255,0)"]}
-          locations={[0.25, 0.95]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.topFade}
-        />
-
-        <Text style={styles.title}>Món Ăn Châu Âu</Text>
-        <Text style={styles.subtitle}>Tinh hoa văn hoá phương tây, sang trọng quý phái </Text>
-        <LinearGradient
-          colors={["rgba(255, 105, 56, 0)", "rgba(255,255,255,1)"]}
-          locations={[0, 1]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.bottomFade}
-        />
-
-        <View style={styles.dots}>
-          <View style={styles.dot} />
-          <View style={[styles.dot, styles.dotActive]} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
+    <ImageBackground
+      source={require("../assets/images/bgIntro2.png")}
+      style={styles.container}
+    >
+      <AppSafeView>
+        <View style = {styles.textContainer}>
+          <View style = {styles.text1Container}>
+          <AppText variant="bold" style = {styles.text}>Món ăn Châu Âu</AppText>
+          </View>
+          <AppText variant = "light" style = {styles.text1}>Tinh hoa văn hoá phương tây</AppText>
         </View>
-
-        <Pressable
-          style={[styles.muiten, { left: 24 }]}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={28} color="#fff" />
-        </Pressable>
-
-        <Pressable style={[styles.muiten, { right: 24 }]}>
-          <Ionicons name="arrow-forward" size={28} color="#fff" />
-        </Pressable>
-      </ImageBackground>
-    </View>
+        <AppIntroduceNavBar NavScreen="Introdu" style = {styles.navBar} activeIndex={1}/>
+      </AppSafeView>
+    </ImageBackground>
   );
-}
+};
+
+export default Introduce2Screen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+  },
+  textContainer: {
+    marginTop: 12,
+    marginLeft: 35,
+  },
+  text1Container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  text: {
+    fontSize: 24,
+    fontFamily: AppFonts.RobotoSlabBold,
+    color: AppLightColor.primary_color
+  },
+  text1: {
+    fontFamily: AppFonts.RobotoLightItalic,
+    fontSize: 16,
+  },
+  navBar: {
+    top: 680
+  },
+ 
+});

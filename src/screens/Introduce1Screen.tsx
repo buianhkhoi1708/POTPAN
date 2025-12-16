@@ -1,27 +1,16 @@
 // src/screens/Introduce1.tsx
-import { ImageBackground, StyleSheet, View } from "react-native";
+import { ImageBackground, StyleSheet, View, Image } from "react-native";
 import React, { useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-
 import AppText from "../components/AppText";
 import AppSafeView from "../components/AppSafeView";
 import { RootStackParamList } from "../type/types";
 import { AppLightColor } from "../styles/color";
-
-
-type NavigationProp = StackNavigationProp<RootStackParamList, "Introduce2Screen">;
+import { AppFonts } from "../styles/fonts";
+import AppIntroduceNavBar from "../components/AppIntroduceNavBar";
+import Flag from "../assets/icons/flag.svg"
 
 const Introduce1Screen = () => {
-  const navigation = useNavigation<NavigationProp>();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.navigate("Introduce2Screen"); // dùng TÊN ROUTE, không dùng "Page2.2.tsx"
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [navigation]);
 
   return (
     <ImageBackground
@@ -29,10 +18,14 @@ const Introduce1Screen = () => {
       style={styles.container}
     >
       <AppSafeView>
-        <View>
+        <View style = {styles.textContainer}>
+          <View style = {styles.text1Container}>
           <AppText variant="bold" style = {styles.text}>Món ăn Việt Nam</AppText>
+          <Flag/>
+          </View>
           <AppText variant = "light" style = {styles.text1}>Món ăn chuẩn Việt, đậm đà bản sắc dân tộc</AppText>
         </View>
+        <AppIntroduceNavBar NavScreen="Introduce2Screen" style = {styles.navBar} activeIndex={0}/>
       </AppSafeView>
     </ImageBackground>
   );
@@ -45,13 +38,26 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
+  textContainer: {
+    marginTop: 12,
+    marginLeft: 35,
+  },
+  text1Container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
   text: {
-    fontSize: 30,
-    fontFamily: 'RobotoSlab',
+    fontSize: 24,
+    fontFamily: AppFonts.RobotoSlabBold,
     color: AppLightColor.primary_color
   },
   text1: {
+    fontFamily: AppFonts.RobotoLightItalic,
     fontSize: 16,
-    fontStyle: 'italic',
+  },
+  navBar: {
+    top: 680
   },
 });

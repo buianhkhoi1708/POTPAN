@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: '100%',
-    marginBottom: 30,
+    marginBottom: 50,
     alignItems: 'center'
   },
   button: {
@@ -106,4 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: AppFonts.RobotoSlabBold
   },
+  
+  
+
 });

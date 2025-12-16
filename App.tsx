@@ -8,7 +8,9 @@ import {
   RobotoSlab_500Medium, 
   RobotoSlab_700Bold 
 } from '@expo-google-fonts/roboto-slab';
-
+import { 
+  Roboto_300Light_Italic 
+} from '@expo-google-fonts/roboto';
 import { AppFonts } from './src/styles/fonts'; 
 
 export default function App() {
@@ -16,6 +18,7 @@ export default function App() {
     [AppFonts.RobotoSlabRegular]: RobotoSlab_400Regular,
     [AppFonts.RobotoSlabMedium]: RobotoSlab_500Medium,
     [AppFonts.RobotoSlabBold]: RobotoSlab_700Bold,
+    [AppFonts.RobotoLightItalic]: Roboto_300Light_Italic, 
   });
 
   if (!fontsLoaded) {

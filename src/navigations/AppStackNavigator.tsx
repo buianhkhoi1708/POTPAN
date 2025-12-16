@@ -6,12 +6,16 @@ import IntroduceScreen from "../screens/IntroduceScreen";
 import Introduce1Screen from "../screens/Introduce1Screen";
 import Introduce2Screen from "../screens/Introduce2Screen";
 
-
 const Stack = createStackNavigator<RootStackParamList>();
 
 export function AppStackNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      screenOptions={{ 
+        headerShown: false,
+        animation: "none",
+      }}
+    >
       <Stack.Screen name="StartingScreen" component={StartingScreen} />
       <Stack.Screen name="IntroduceScreen" component={IntroduceScreen} />
       <Stack.Screen name="Introduce1Screen" component={Introduce1Screen} />
