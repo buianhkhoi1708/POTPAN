@@ -1,54 +1,44 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
 import React from "react";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  TextInputProps,
+  StyleProp,
+  TextStyle,
+} from "react-native";
+import { AppLightColor } from "../styles/color";
 
-interface AppTextInput {
-    text: string;
-    icon: string;
-    style?: AppTextStyle | AppTextStyle[];
-    value: string;
-    type?: string;
-    password?: boolean;
-    onText: (text: string) => void;
+interface AppTextInputProps extends TextInputProps {
+  style?: StyleProp<TextStyle>;
 }
 
-export const AppTextInput = ({text, icon, style, value, type, password, onText} : AppTextInput) => {
+const AppTextInput = ({ style, ...rest }: AppTextInputProps) => {
   return (
-    <View style = {[styles.container, style]}>
-      <View style={styles.container1}>
-        <Ionicons name= {icon} size={25} />
-        <TextInput
-        value={value}
-        onChangeText={onText}
-        placeholder= {text}
-        style = {styles.textinput}
-        keyboardType = {type}
-        secureTextEntry = {password}
-        />
-      </View>
+    <View style={styles.inputWrap}>
+      <TextInput
+        allowFontScaling={false}
+        placeholderTextColor={AppLightColor.placeholder_text}
+        {...rest}
+        style={[styles.input, style]}
+      />
     </View>
   );
 };
 
-export default AppTextInput;
-
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    marginBottom: 20,
+  inputWrap: { position: "relative" },
+  input: {
+    height: 52,
+    borderRadius: 999,
+    paddingHorizontal: 22,
+    backgroundColor: AppLightColor.secondary_color,
+    color: AppLightColor.primary_text,
+    fontWeight: "600",
+    fontSize: 20,
+    letterSpacing: 0.5,
+    textAlignVertical: "center",
   },
-  container1: {
-    flexDirection: 'row',
-    borderColor: '#b0b0b0ff',
-    borderWidth: 1.5,
-    borderRadius: 10,
-    width: '80%',
-    height: 55,
-    alignItems: 'center',
-    gap: 10,
-    padding: 12,
-  },
-  textinput: {
-    width: '100%',
-  }
 });
+
+export default AppTextInput;

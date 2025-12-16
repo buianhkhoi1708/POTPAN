@@ -9,7 +9,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../type/types";
 import { AppFonts } from "../styles/fonts";
 
-type NavigationProp = StackNavigationProp<RootStackParamList, 'Introduce1Screen'>
+type NavigationProp = StackNavigationProp<RootStackParamList>
 
 const IntroduceScreen = () => {
   const navigator = useNavigation<NavigationProp>();
@@ -32,7 +32,7 @@ const IntroduceScreen = () => {
         butName="Đăng nhập"
         style={[styles.button, styles.button1]}
         style1={styles.buttext1}
-        onPress={()=> {navigator.navigate('')}}
+        onPress={()=> {navigator.navigate('LoginScreen')}}
       />
       <AppButton
         butName="Bắt đầu"
@@ -96,14 +96,14 @@ const styles = StyleSheet.create({
   },
   buttext1: {
     fontWeight: 600,
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: AppFonts.RobotoSlabBold
   },
 
   buttext2: {
     color: "white",
     fontWeight: 600,
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: AppFonts.RobotoSlabBold
   },
   

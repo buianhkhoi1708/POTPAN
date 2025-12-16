@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, StyleProp} from "react-native";
 import { AppFonts } from "../styles/fonts";
 
 type AppTextVariant = "bold" | "medium" | "light";

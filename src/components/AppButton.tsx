@@ -1,28 +1,46 @@
-import {Pressable, StyleSheet} from "react-native";
+import { Pressable, PressableProps, StyleSheet, StyleProp, ViewStyle, TextStyle } from "react-native";
 import React from "react";
 import AppText from "./AppText";
 import { AppFonts } from "../styles/fonts";
 
-interface AppButton {
+
+type AppBut = StyleProp<ViewStyle>;
+type AppBut1 = StyleProp<TextStyle>;
+
+interface AppButtonProps extends PressableProps {
   butName: string;
-  style?: AppBut | AppBut[];
-  style1?: AppBut1 | AppBut1[];
+  style?: AppBut;  
+  style1?: AppBut1;
   onPress?: () => void;
+  activeOpacity?: number; 
 }
 
-const AppButton = ({ butName, style, style1, onPress}: AppButton) => {
+const AppButton = ({ 
+  butName, 
+  style, 
+  style1, 
+  onPress, 
+  activeOpacity = 0.7,
+  ...rest
+}: AppButtonProps) => {
   return (
-    <Pressable style = {style} onPress={onPress}>
-      <AppText variant="bold" style = {style1}> {butName}</AppText>
+    <Pressable 
+      style={({ pressed }) => [
+        style as ViewStyle, 
+        pressed && { opacity: activeOpacity }
+      ]} 
+      onPress={onPress} 
+      {...rest}
+    >
+      <AppText variant="bold" style={[style1, styles.buttext]}> {butName}</AppText>
     </Pressable>
   );
 };
 
-export default AppButton;
-
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 40,
-  },
+  buttext: {
+    fontFamily: AppFonts.RobotoSlabBold
+  }
+})
 
-});
+export default AppButton;

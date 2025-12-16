@@ -9,39 +9,55 @@ import { AppFonts } from "../styles/fonts";
 import AppIntroduceNavBar from "../components/AppIntroduceNavBar";
 import Flag from "../assets/icons/flag.svg";
 
-const Introduce1Screen = () => {
+const Introduce3Screen = () => {
   return (
     <AppSafeView style = {styles.safe}>
       <ImageBackground
-        source={require("../assets/images/22bg.png")}
+        source={require("../assets/images/intro3Bg.png")}
         style={styles.container}
       >
         <View style={styles.textContainer}>
           <View style={styles.text1Container}>
             <AppText variant="bold" style={styles.text}>
-              Món ăn Việt Nam
+              Các tính năng chính
             </AppText>
-            <Flag />
           </View>
           <AppText variant="light" style={styles.text1}>
-            Món ăn chuẩn Việt, đậm đà bản sắc dân tộc
+            Cung cấp cho người dùng trải nghiệm tuyệt vời
           </AppText>
+          <View style={styles.text2Container}>
+            <View style={styles.textDisCon}>
+              <AppText variant="bold" style={styles.textDis}>
+                Tìm kiếm công thức
+              </AppText>
+            </View>
+            <View style={styles.textDisCon}>
+              <AppText variant="bold" style={styles.textDis}>
+                Gợi ý món ăn
+              </AppText>
+            </View>
+            <View style={styles.textDisCon}>
+              <AppText variant="bold" style={styles.textDis}>
+                Mạng xã hội
+              </AppText>
+            </View>
+          </View>
         </View>
         <AppIntroduceNavBar
-          NavScreen="Introduce2Screen"
+          NavScreen="Introduce4Screen"
           style={styles.navBar}
-          activeIndex={0}
+          activeIndex={2}
         />
       </ImageBackground>
     </AppSafeView>
   );
 };
 
-export default Introduce1Screen;
+export default Introduce3Screen;
 
 const styles = StyleSheet.create({
   safe: {
-    backgroundColor: 'white'
+    backgroundColor: AppLightColor.background,
   },
   container: {
     flex: 1,
@@ -49,7 +65,23 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     marginTop: 12,
-    marginRight: 28,
+    marginLeft: 20,
+  },
+  text2Container: {
+    top: 150,
+    gap: 50,
+    width: "100%",
+    right: 10,
+  },
+  textDisCon: {
+    width: 350,
+    borderColor: AppLightColor.background,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+    backgroundColor: AppLightColor.introDis,
+    height: 80,
   },
   text1Container: {
     flexDirection: "row",
@@ -69,5 +101,9 @@ const styles = StyleSheet.create({
   navBar: {
     top: 760,
     position: "absolute",
+  },
+  textDis: {
+    color: AppLightColor.primary_text_constrast,
+    fontSize: 32,
   },
 });

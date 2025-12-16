@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   text: {
-    color: "white",
+    color: AppLightColor.primary_text_constrast,
     fontSize: 50,
     fontWeight: "800",
     marginTop: 10,

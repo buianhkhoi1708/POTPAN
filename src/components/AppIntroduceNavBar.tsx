@@ -6,7 +6,7 @@ import { AppLightColor } from "../styles/color";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../type/types";
 
-interface AppIntroduceNavBar {
+interface AppIntroduceNavBarProp {
     NavScreen: keyof RootStackParamList;
     style?: NavStyle | NavStyle[];
     activeIndex?: number;
@@ -14,7 +14,7 @@ interface AppIntroduceNavBar {
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
-const AppIntroduceNavBar = ({NavScreen, style, activeIndex} : AppIntroduceNavBar) => {
+const AppIntroduceNavBar = ({NavScreen, style, activeIndex} : AppIntroduceNavBarProp) => {
   const navigation = useNavigation<NavigationProp>();
   return (
     <View style = {[styles.container, style]}>
