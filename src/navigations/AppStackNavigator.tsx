@@ -1,4 +1,4 @@
-// Vị trí: src/navigations/AppStackNavigator.tsx
+// src/navigations/AppStackNavigator.tsx
 
 import { createStackNavigator } from "@react-navigation/stack";
 
@@ -10,12 +10,16 @@ import NotificationScreen from "../screens/NotificationScreen";
 import FamousChefsScreen from "../screens/FamousChefsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
+import SettingsScreen from "../screens/SettingsScreen";
 
 const Stack = createStackNavigator();
 
 export function StartingStackNav() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Home">
+    <Stack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName="Home"
+    >
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Starting" component={StartingScreen} />
       <Stack.Screen name="Page2" component={Page2} />
@@ -24,6 +28,7 @@ export function StartingStackNav() {
       <Stack.Screen name="FamousChefs" component={FamousChefsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 }

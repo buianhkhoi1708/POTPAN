@@ -1,7 +1,14 @@
 // src/screens/ProfileScreen.tsx
 
 import React, { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 
 import AppSafeView from "../components/AppSafeView";
@@ -22,9 +29,14 @@ import {
 } from "../data/profileData";
 
 import { PROFILE_USER } from "../data/profileScreenData";
-import { styles } from "../styles/profileStyles";
+import { AppLightColor } from "../styles/color";
 
 type ProfileTab = "recipes" | "favorites";
+
+const { width: SCREEN_W } = Dimensions.get("window");
+const H_PADDING = 20;
+const GRID_GAP = 12;
+const CARD_W = (SCREEN_W - H_PADDING * 2 - GRID_GAP) / 2;
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -111,7 +123,11 @@ const ProfileScreen: React.FC = () => {
               <Pressable style={styles.actionCircleSoft}>
                 <PlusIcon width={16} height={16} />
               </Pressable>
-              <Pressable style={styles.actionCircleSoft}>
+
+              <Pressable
+                style={styles.actionCircleSoft}
+                onPress={() => navigation.navigate("Settings")}
+              >
                 <MenuIcon width={16} height={16} />
               </Pressable>
             </View>
@@ -226,3 +242,159 @@ const ProfileScreen: React.FC = () => {
 };
 
 export default ProfileScreen;
+
+const styles = StyleSheet.create({
+  safeArea: { backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff" },
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: H_PADDING, paddingTop: 10 },
+
+  topRow: { flexDirection: "row", alignItems: "flex-start" },
+  avatar: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    borderWidth: 1,
+    borderColor: "#f1f1f1",
+  },
+  userInfo: { flex: 1, paddingLeft: 12, paddingRight: 10 },
+  name: { fontSize: 20, color: AppLightColor.primary_color, fontWeight: "800" },
+  handle: {
+    marginTop: 2,
+    color: AppLightColor.primary_color,
+    fontWeight: "700",
+    opacity: 0.65,
+    fontSize: 13,
+  },
+  bio: { marginTop: 6, color: "#111", fontSize: 12, lineHeight: 16 },
+  topActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 8,
+    marginTop: 8,
+  },
+
+  actionCircleSoft: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ffe3e2",
+  },
+
+  actionRow: { marginTop: 14, flexDirection: "row", columnGap: 12 },
+  primaryPill: {
+    flex: 1,
+    backgroundColor: AppLightColor.primary_color,
+    borderRadius: 999,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  primaryPillText: { fontSize: 13, color: "#fff", fontWeight: "700" },
+
+  statsCard: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "#ffb6b5",
+    borderRadius: 14,
+    flexDirection: "row",
+    paddingVertical: 10,
+  },
+  statItem: { flex: 1, alignItems: "center" },
+  statValue: { fontSize: 16, fontWeight: "800", color: "#111" },
+  statLabel: { marginTop: 4, fontSize: 11, color: "#333" },
+  statDivider: { width: 1, height: 34, backgroundColor: "#ffd1d0" },
+
+  tabRow: { marginTop: 14, flexDirection: "row" },
+  tabItem: { flex: 1, alignItems: "center", paddingBottom: 10 },
+  tabText: { fontSize: 16, fontWeight: "800", color: "#111" },
+  tabTextActive: { fontSize: 16, fontWeight: "800", color: "#111" },
+  tabUnderline: {
+    position: "absolute",
+    bottom: 2,
+    width: 140,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: AppLightColor.primary_color,
+  },
+
+  recipeGrid: {
+    marginTop: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  recipeCard: {
+    width: CARD_W,
+    marginBottom: 14,
+    overflow: "visible",
+    alignItems: "center",
+  },
+  recipeImageWrap: {
+    width: "92%",
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#eee",
+  },
+  recipeImage: { width: "100%", height: 120 },
+  recipeInfo: {
+    width: "100%",
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ffb6b5",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: -12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  recipeTitle: {
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: "800",
+    color: "#111",
+  },
+  recipeDesc: { marginTop: 2, fontSize: 12, color: "#333" },
+  recipeMetaRow: {
+    marginTop: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  metaItem: { flexDirection: "row", alignItems: "center", columnGap: 6 },
+  metaText: {
+    color: AppLightColor.primary_color,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+
+  collectionList: { marginTop: 10, rowGap: 14 },
+  collectionCard: {
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "#ffb6b5",
+    overflow: "hidden",
+    backgroundColor: "#fff",
+  },
+  collectionImage: { width: "100%", height: 150 },
+  collectionFooter: {
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  collectionTitle: { fontSize: 16, fontWeight: "800", color: "#111" },
+
+  createCollectionBtn: {
+    marginTop: 4,
+    alignSelf: "center",
+    paddingHorizontal: 26,
+    paddingVertical: 12,
+    borderRadius: 999,
+    backgroundColor: "#ffe3e2",
+  },
+  createCollectionText: { fontSize: 13, fontWeight: "800", color: "#111" },
+});
