@@ -12,6 +12,7 @@ import FamousChefsScreen from "../screens/FamousChefsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import SupportCenterScreen from "../screens/SupportCenterScreen";
 
 const Stack = createStackNavigator();
 
@@ -34,6 +35,7 @@ export function StartingStackNav() {
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="SupportCenter" component={SupportCenterScreen} />
     </Stack.Navigator>
   );
 }
