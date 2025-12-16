@@ -21,6 +21,8 @@ import Setting6Icon from "../assets/images/setting-6.svg";
 import NextIcon from "../assets/images/setting-next.svg";
 
 const ROBOTO_SLAB_BOLD = "RobotoSlab-Bold";
+const SETTINGS_ITEM_FONT_SIZE = 20; // chữ nội dung
+const DELETE_BTN_FONT_SIZE = 20; // đồng bộ với chữ nội dung
 
 type SettingRow = {
   key: string;
@@ -49,36 +51,11 @@ const SettingsScreen: React.FC = () => {
         showNext: true,
         onPress: () => navigation.navigate("Notification"),
       },
-      {
-        key: "support",
-        title: "Trung tâm hỗ trợ",
-        Icon: Setting2Icon,
-        showNext: true,
-      },
-      {
-        key: "privacy",
-        title: "Chính sách bảo mật",
-        Icon: Setting3Icon,
-        showNext: true,
-      },
-      {
-        key: "language",
-        title: "Ngôn ngữ",
-        Icon: Setting4Icon,
-        showNext: true,
-      },
-      {
-        key: "dark",
-        title: "Chuyển màu tối",
-        Icon: Setting5Icon,
-        showNext: false,
-      },
-      {
-        key: "logout",
-        title: "Đăng xuất",
-        Icon: Setting6Icon,
-        showNext: false,
-      },
+      { key: "support", title: "Trung tâm hỗ trợ", Icon: Setting2Icon, showNext: true },
+      { key: "privacy", title: "Chính sách bảo mật", Icon: Setting3Icon, showNext: true },
+      { key: "language", title: "Ngôn ngữ", Icon: Setting4Icon, showNext: true },
+      { key: "dark", title: "Chuyển màu tối", Icon: Setting5Icon, showNext: false },
+      { key: "logout", title: "Đăng xuất", Icon: Setting6Icon, showNext: false },
     ],
     [navigation]
   );
@@ -108,11 +85,7 @@ const SettingsScreen: React.FC = () => {
               const RowIcon = r.Icon;
 
               return (
-                <Pressable
-                  key={r.key}
-                  style={styles.itemRow}
-                  onPress={r.onPress}
-                >
+                <Pressable key={r.key} style={styles.itemRow} onPress={r.onPress}>
                   <View style={styles.leftGroup}>
                     <View style={styles.iconCircle}>
                       <RowIcon width={18} height={18} />
@@ -208,7 +181,7 @@ const styles = StyleSheet.create({
   },
 
   itemText: {
-    fontSize: 18,
+    fontSize: SETTINGS_ITEM_FONT_SIZE,
     fontWeight: "900",
     color: AppLightColor.primary_color,
     fontFamily: ROBOTO_SLAB_BOLD,
@@ -216,16 +189,20 @@ const styles = StyleSheet.create({
 
   nextWrap: { width: 24, alignItems: "flex-end" },
 
+  // Button giống hình 2: nhỏ hơn, pill gọn, chữ to & đậm như nội dung
   deleteBtn: {
-    marginTop: 28,
+    marginTop: 26,
     alignSelf: "center",
     backgroundColor: AppLightColor.primary_color,
-    paddingHorizontal: 34,
-    paddingVertical: 12,
     borderRadius: 999,
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   deleteBtnText: {
-    fontSize: 16,
+    fontSize: DELETE_BTN_FONT_SIZE,
+    lineHeight: 24,
     fontWeight: "900",
     color: "#fff",
     fontFamily: ROBOTO_SLAB_BOLD,
