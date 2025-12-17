@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Pressable,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -35,7 +36,7 @@ const LoginScreen = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("Đăng nhập thành công:", userCredential.user.uid);
-      navigation.navigate("Page3-1b", { name: userCredential.user.email });
+      navigation.navigate("HomeScreen", { name: userCredential.user.email });
     } catch (error: any) {
       console.log(error.code);
       let msg = "Có lỗi xảy ra: " + error.message;
@@ -58,9 +59,8 @@ const LoginScreen = () => {
           <AppText variant="bold" style={styles.title}>ĐĂNG NHẬP</AppText>
 
           <View style={styles.form}>
-            <AppText variant="medium" style={styles.label}>Tên đăng nhập</AppText>
+            <AppText variant="medium" style={styles.label}>Email</AppText>
             
-            {/* Sử dụng Component Input đã tách */}
             <AppTextInput
               style={styles.textHolder}
               placeholder="example@gmail.com"
@@ -73,7 +73,8 @@ const LoginScreen = () => {
             <AppText style={[styles.label, { marginTop: 22 }]}>Mật khẩu</AppText>
            
             <AppPasswordInput
-              placeholder="Nhập mật khẩu"
+              style={styles.textHolder}
+              placeholder="Vd: 12345"
               value={password}
               onChangeText={setPassword}
             />
@@ -84,30 +85,30 @@ const LoginScreen = () => {
           <View style={styles.bottomBlock}>
             <Text style={styles.bottomLink}>Quên mật khẩu?</Text>
 
-            <Text style={styles.bottomText}>
+            <AppText variant="light" style={styles.bottomText}>
               Chưa có tài khoản?
               <Text
                 style={styles.link}
-                onPress={() => navigation.navigate("Register")}
+                onPress={() => navigation.navigate("SigninScreen")}
                 suppressHighlighting
               >
                 {" "}Đăng ký
               </Text>
-            </Text>
+            </AppText>
 
             {/* --- Phần Social Block giữ nguyên tại đây --- */}
-            <Text style={styles.bottomTextSmall}>Hoặc đăng ký với</Text>
+            <AppText variant="light" style={styles.bottomTextSmall}>Hoặc đăng ký với</AppText>
 
             <View style={styles.socialRow}>
-              <TouchableOpacity style={styles.socialBtn}>
+              <Pressable style={styles.socialBtn}>
                 <Ionicons name="logo-facebook" size={20} color="#111827" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialBtn}>
+              </Pressable>
+              <Pressable style={styles.socialBtn}>
                 <Ionicons name="logo-instagram" size={20} color="#111827" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialBtn}>
+              </Pressable>
+              <Pressable style={styles.socialBtn}>
                 <Ionicons name="paper-plane-outline" size={20} color="#111827"/>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </View>
@@ -151,7 +152,8 @@ const styles = StyleSheet.create({
   },
   textHolder: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: '400',
+    letterSpacing: 2,
   },
   primaryBtn: {
     marginTop: 8,
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
     color: "#0040C0",
     fontWeight: "800",
   },
-  // --- Style cho Social Block ---
+
   bottomTextSmall: {
     marginTop: 18,
     fontSize: 14,
@@ -205,6 +207,6 @@ const styles = StyleSheet.create({
     borderColor: "#E5E7EB",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: AppLightColor.background,
   },
 });

@@ -8,4 +8,12 @@ export type RootStackParamList = {
   LoginScreen: undefined;
   SigninScreen: undefined;
   AuthStackNavigator: undefined;
+  HomeScreen: undefined;
+  NotificationScreen: undefined;
+  ProfileScreen: undefined;
+  EditProfileScreen: undefined;
+  SettingsScreen: undefined;
+  NotificationSettingsScreen: undefined;
+  SupportCenterScreen: undefined;
+  LanguageScreen: undefined;
 };

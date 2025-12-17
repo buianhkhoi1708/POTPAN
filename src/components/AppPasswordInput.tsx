@@ -7,6 +7,7 @@ import {
   TextInputProps,
   StyleProp,
   TextStyle,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AppLightColor } from "../styles/color";
@@ -27,7 +28,7 @@ const AppPasswordInput = ({ style, ...rest }: PasswordInputProps) => {
         {...rest}
         style={[styles.input, styles.eyeInput, style]}
       />
-      <TouchableOpacity
+      <Pressable
         style={styles.eyeBtn}
         onPress={() => setVisible(!visible)}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -37,7 +38,7 @@ const AppPasswordInput = ({ style, ...rest }: PasswordInputProps) => {
           size={20}
           color={AppLightColor.primary_color}
         />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };
@@ -58,7 +59,6 @@ const styles = StyleSheet.create({
     paddingRight: 52,
     paddingVertical: 0,
     textAlignVertical: "center",
-    fontSize: 16
   },
   eyeBtn: {
     position: "absolute",
