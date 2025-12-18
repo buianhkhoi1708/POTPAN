@@ -454,7 +454,7 @@ export default function RecipeDetailScreen() {
             <View style={s.ratingContainer}>
               <Ionicons name="star" size={14} color="#fff" />
               <Text style={s.ratingText}> {currentRecipe.rating}</Text>
-              <Text style={s.viewsText}>  👁 {currentRecipe.views}</Text>
+              <Text style={s.viewsText}> 👁 {currentRecipe.views}</Text>
             </View>
           </View>
         </View>
