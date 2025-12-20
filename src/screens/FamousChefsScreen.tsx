@@ -13,9 +13,9 @@ import { useNavigation } from "@react-navigation/native";
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
-import MainBottomNav, { type MainTabKey } from "../components/MainBottomNav";
-import SearchRecipeModal from "../components/SearchRecipeModal";
-import BottomNavSpacer from "../components/BottomNavSpacer";
+import MainBottomNav, { type MainTabKey } from "../components/AppMainNavBar";
+import SearchRecipeModal from "../components/AppSearchModal";
+import BottomNavSpacer from "../components/AppBottomSpace";
 
 import BackArrow from "../assets/images/backarrow.svg";
 import SearchIcon from "../assets/images/search.svg";
@@ -28,7 +28,7 @@ import {
   topChefs,
   favoriteChefs,
   newChefs,
-} from "../data/famousChefsData";
+} from "../data/famousChefData";
 
 import { AppLightColor } from "../styles/color";
 

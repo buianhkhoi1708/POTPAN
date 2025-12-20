@@ -1,3 +1,5 @@
+// src/components/AppMainNavBar.tsx
+
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -41,8 +43,8 @@ const AppMainNavBar = ({ activeTab, onTabPress }: MainBottomNavProps) => {
 
   const ROUTE_BY_TAB: Record<MainTabKey, keyof RootStackParamList> = {
     home: "HomeScreen",
-    world: "FamousChefs",
-    category: "Category",
+    world: "CommunityScreen",
+    category: "HomeScreen",
     profile: "ProfileScreen",
   };
 
@@ -52,7 +54,7 @@ const AppMainNavBar = ({ activeTab, onTabPress }: MainBottomNavProps) => {
     onTabPress?.(tab);
 
     const routeName = ROUTE_BY_TAB[tab];
-    navigation.navigate(routeName);
+    if (routeName) navigation.navigate(routeName);
   };
 
   return (
