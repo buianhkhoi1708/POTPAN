@@ -22,10 +22,11 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export function AppStackNavigator() {
   return (
-    <Stack.Navigator 
-      screenOptions={{ 
+    <Stack.Navigator
+      initialRouteName="HomeScreen"
+      screenOptions={{
         headerShown: false,
-        animation: 'fade',
+        animation: "fade",
       }}
     >
       <Stack.Screen name="StartingScreen" component={StartingScreen} />
@@ -41,19 +42,12 @@ export function AppStackNavigator() {
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
       <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
-      <Stack.Screen name="NotificationSettingsScreen" component={NotificationSettingsScreen} />
+      <Stack.Screen
+        name="NotificationSettingsScreen"
+        component={NotificationSettingsScreen}
+      />
       <Stack.Screen name="SupportCenterScreen" component={SupportCenterScreen} />
       <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
-
-
-
-      
-
-
-
-
-
-      
     </Stack.Navigator>
   );
 }
