@@ -1,22 +1,23 @@
 // src/components/AppText.tsx
 import React, { ReactNode } from "react";
-import { StyleSheet, Text, TextStyle } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  type TextProps,
+  type TextStyle,
+  type StyleProp,
+} from "react-native";
 import { AppFonts } from "../styles/fonts";
 
 type AppTextVariant = "bold" | "medium" | "light" | "title" | "subtitle";
 
-interface AppTextProps {
+interface AppTextProps extends TextProps {
   children: ReactNode;
-  style?: TextStyle | TextStyle[];
+  style?: StyleProp<TextStyle>;
   variant?: AppTextVariant;
 }
 
-const AppText = ({
-  children,
-  style,
-  variant = "medium",
-  ...rest
-}: AppTextProps) => {
+const AppText = ({ children, style, variant = "medium", ...rest }: AppTextProps) => {
   return (
     <Text {...rest} style={[styles[variant], style]}>
       {children}

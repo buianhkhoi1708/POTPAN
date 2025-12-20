@@ -35,9 +35,19 @@ import {
 } from "../data/communityData";
 
 const { width: SCREEN_W } = Dimensions.get("window");
-const CARD_IMAGE_W = 112;
-const CARD_W = SCREEN_W - 20 * 2;
-const CARD_H = 122;
+
+const H_PADDING = 20;
+
+const IMAGE_W = 162;
+const IMAGE_H = 162;
+
+const OVERLAP = 64;
+
+const CARD_W = SCREEN_W - H_PADDING * 2;
+const CONTENT_W = CARD_W - IMAGE_W + OVERLAP;
+
+const TAB_H = 46;
+const TAB_PX = 28;
 
 const CommunityScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -62,6 +72,7 @@ const CommunityScreen: React.FC = () => {
       <Pressable
         onPress={() => setActiveTab(key)}
         style={isActive ? styles.tabBtnActive : styles.tabBtn}
+        hitSlop={10}
       >
         <AppText
           variant="medium"
@@ -75,25 +86,25 @@ const CommunityScreen: React.FC = () => {
 
   const renderCard = (item: CommunityPost) => {
     return (
-      <View key={item.id} style={styles.card}>
-        <View style={styles.cardImageWrap}>
-          <Image source={item.image} style={styles.cardImage} />
+      <View key={item.id} style={styles.row}>
+        <View style={styles.imageWrap}>
+          <Image source={item.image} style={styles.image} />
         </View>
 
-        <View style={styles.cardRight}>
-          <AppText variant="bold" style={styles.cardTitle}>
+        <View style={styles.contentCard}>
+          <AppText variant="bold" style={styles.title}>
             {item.title}
           </AppText>
 
-          <AppText variant="light" style={styles.cardDesc}>
+          <AppText variant="light" style={styles.desc}>
             {item.desc}
           </AppText>
 
-          <AppText variant="light" style={styles.cardAuthor}>
+          <AppText variant="light" style={styles.author}>
             {item.authorLine}
           </AppText>
 
-          <View style={styles.cardMetaRow}>
+          <View style={styles.metaRow}>
             <View style={styles.metaItem}>
               <ClockIcon width={12} height={12} />
               <AppText variant="medium" style={styles.metaText}>
@@ -164,7 +175,7 @@ const CommunityScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
         >
           {posts.map(renderCard)}
-          <BottomNavSpacer height={90} />
+          <BottomNavSpacer height={120} />
         </ScrollView>
 
         <AppSearchModal
@@ -213,16 +224,16 @@ const styles = StyleSheet.create({
     color: AppLightColor.primary_color,
   },
   headerRight: {
-    width: 80,
+    width: 86,
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    columnGap: 8,
+    columnGap: 10,
   },
   headerIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
@@ -234,31 +245,31 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 6,
-    paddingBottom: 10,
+    paddingBottom: 8,
   },
   tabBtn: {
-    height: 34,
-    paddingHorizontal: 18,
+    height: TAB_H,
+    paddingHorizontal: TAB_PX,
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "transparent",
   },
   tabBtnActive: {
-    height: 34,
-    paddingHorizontal: 18,
+    height: TAB_H,
+    paddingHorizontal: TAB_PX,
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: AppLightColor.primary_color,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 16,
     color: AppLightColor.primary_color,
     fontWeight: "700",
   },
   tabTextActive: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#fff",
     fontWeight: "700",
   },
@@ -268,71 +279,77 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 18,
+    paddingTop: 4,
+    paddingBottom: 20,
   },
 
-  card: {
+  row: {
     width: CARD_W,
-    height: CARD_H,
+    height: IMAGE_H,
+    marginBottom: 18,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 14,
   },
-  cardImageWrap: {
-    width: CARD_IMAGE_W,
-    height: CARD_H,
-    borderRadius: 18,
+
+  imageWrap: {
+    width: IMAGE_W,
+    height: IMAGE_H,
+    borderRadius: 30,
     overflow: "hidden",
     backgroundColor: "#eee",
+    zIndex: 3,
   },
-  cardImage: {
+  image: {
     width: "100%",
     height: "100%",
   },
 
-  cardRight: {
-    flex: 1,
-    height: CARD_H - 10,
-    marginLeft: 10,
-    borderWidth: 1,
+  contentCard: {
+    width: CONTENT_W,
+    minHeight: 128,
+    marginLeft: -OVERLAP,
+    borderWidth: 1.5,
     borderColor: AppLightColor.primary_color,
-    borderRadius: 18,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    justifyContent: "space-between",
+    borderRadius: 26,
+    paddingTop: 14,
+    paddingBottom: 12,
+    paddingRight: 16,
+    paddingLeft: 16 + OVERLAP,
     backgroundColor: "#fff",
+    zIndex: 2,
   },
 
-  cardTitle: {
-    fontSize: 14,
+  title: {
+    fontSize: 16,
     color: AppLightColor.primary_text,
   },
-  cardDesc: {
-    fontSize: 11,
+  desc: {
+    fontSize: 12,
     color: AppLightColor.primary_text,
     opacity: 0.9,
-    marginTop: 2,
+    marginTop: 6,
+    lineHeight: 16,
   },
-  cardAuthor: {
-    fontSize: 10,
+  author: {
+    fontSize: 11,
     color: AppLightColor.primary_text,
     opacity: 0.7,
-    marginTop: 2,
+    marginTop: 8,
   },
 
-  cardMetaRow: {
+  metaRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 6,
+    marginTop: 12,
   },
   metaItem: {
     flexDirection: "row",
     alignItems: "center",
-    columnGap: 4,
+    columnGap: 6,
   },
   metaText: {
-    fontSize: 11,
+    fontSize: 12,
     color: AppLightColor.primary_color,
     fontWeight: "700",
   },
