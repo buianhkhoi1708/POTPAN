@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import type { StackNavigationProp } from "@react-navigation/stack";
 import type { SvgProps } from "react-native-svg";
 import { AppLightColor } from "../styles/color";
 import HomeIcon from "../assets/images/home.svg";
@@ -33,10 +34,12 @@ const TABS: TabConfig[] = [
   { key: "profile", Icon: ProfileIcon, ActiveIcon: ActiveProfileIcon },
 ];
 
-const AppMainNavBar = ({ activeTab, onTabPress } : MainBottomNavProps) => {
-  const navigation = useNavigation<RootStackParamList>();
+type RootNav = StackNavigationProp<RootStackParamList>;
 
-  const ROUTE_BY_TAB: Record<MainTabKey, string> = {
+const AppMainNavBar = ({ activeTab, onTabPress }: MainBottomNavProps) => {
+  const navigation = useNavigation<RootNav>();
+
+  const ROUTE_BY_TAB: Record<MainTabKey, keyof RootStackParamList> = {
     home: "HomeScreen",
     world: "FamousChefs",
     category: "Category",
@@ -49,7 +52,7 @@ const AppMainNavBar = ({ activeTab, onTabPress } : MainBottomNavProps) => {
     onTabPress?.(tab);
 
     const routeName = ROUTE_BY_TAB[tab];
-    if (routeName) navigation.navigate(routeName);
+    navigation.navigate(routeName);
   };
 
   return (

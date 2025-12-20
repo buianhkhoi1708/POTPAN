@@ -16,4 +16,7 @@ export type RootStackParamList = {
   NotificationSettingsScreen: undefined;
   SupportCenterScreen: undefined;
   LanguageScreen: undefined;
+
+  FamousChefs: undefined;
+  Category: undefined;
 };
