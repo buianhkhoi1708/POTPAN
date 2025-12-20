@@ -62,7 +62,7 @@ const categories: CategoryItem[] = [
   { id: "4", title: "Món nước ngoài", image: require("../assets/images/mon-nuoc-ngoai.png") },
   { id: "5", title: "Chữa lành", image: require("../assets/images/chua-lanh.png") },
   { id: "6", title: "Đồ ăn chay", image: require("../assets/images/do-an-chay.png") },
-  { id: "7", title: "Mới hấp dẫn", image: require("../assets/images/moi-hap-dan.png") },
+  { id: "7", title: "Mồi hấp dẫn", image: require("../assets/images/moi-hap-dan.png") },
   { id: "8", title: "Mẹ bầu và con", image: require("../assets/images/me-bau-va-con.png") },
 ];
 
@@ -73,17 +73,17 @@ function CategoriesHeader({ title, onBack }: { title: string; onBack: () => void
   return (
     <View style={h.header}>
       <Pressable onPress={onBack} style={h.circleBtn} hitSlop={10}>
-        <Ionicons name="arrow-back" size={24} color="#fff" />
+        <Ionicons name="arrow-back" size={30} color="#fff" />
       </Pressable>
 
       <Text style={h.title}>{title}</Text>
 
       <View style={h.rightGroup}>
         <Pressable style={h.circleBtn}>
-          <Ionicons name="search" size={20} color="#fff" />
+          <Ionicons name="search" size={30} color="#fff" />
         </Pressable>
         <Pressable style={h.circleBtn}>
-          <Ionicons name="notifications" size={20} color="#fff" />
+          <Ionicons name="notifications" size={30} color="#fff" />
         </Pressable>
       </View>
     </View>
@@ -92,7 +92,7 @@ function CategoriesHeader({ title, onBack }: { title: string; onBack: () => void
 
 const h = StyleSheet.create({
   header: {
-    marginTop: 30,
+    marginTop: 40,
     height: 60,
     flexDirection: "row",
     alignItems: "center",
@@ -101,7 +101,7 @@ const h = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
-    fontSize: 22,
+    fontSize: 30,
     fontWeight: "bold",
     color: COLORS.CORAL,
   },
@@ -156,8 +156,8 @@ const c = StyleSheet.create({
   },
   img: { width: "100%", height: "100%" },
   pill: {
-    marginTop: 10,
-    height: 32,
+    marginTop: -20,
+    height: 50,
     paddingHorizontal: 16,
     borderRadius: 999,
     backgroundColor: "#fff",
@@ -201,7 +201,7 @@ function CategoriesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: paddingX,
-          paddingTop: 8,
+          paddingTop: 30,
           paddingBottom: 120, // Padding để tránh TabBar che mất
         }}
         columnWrapperStyle={{ gap }}
@@ -222,11 +222,9 @@ function CategoriesStackNavigator() {
   return (
     <CategoriesStack.Navigator screenOptions={{ headerShown: false }}>
       {/* Màn 1: Danh sách phân loại */}
-      <CategoriesStack.Screen name="Categories" component={CategoriesScreen} />
-      
+      <CategoriesStack.Screen name="Categories" component={CategoriesScreen} />      
       {/* Màn 2: Chi tiết từng loại (List món ăn) */}
-      <CategoriesStack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
-      
+      <CategoriesStack.Screen name="CategoryDetail" component={CategoryDetailScreen} />      
       {/* Màn 3: Chi tiết công thức nấu ăn (Fix: Đã thêm vào đây) */}
       <CategoriesStack.Screen 
         name="RecipeDetail" 
@@ -267,25 +265,32 @@ function TabIcon({ focused, name }: { focused: boolean; name: any }) {
 const t = StyleSheet.create({
   tabBar: {
     position: 'absolute',
-    bottom: 25,
-    // Căn chỉnh ngắn gọn ở giữa
-    left: '20%',  
-    right: '20%', 
-    height: 64,
+    bottom: 40,
+
+    left: 20,
+    right: 20,
+
+    marginHorizontal: '15%', 
+    
+
+    
+    height: 50,
     borderRadius: 32,
     backgroundColor: COLORS.CORAL,
-    borderTopWidth: 0,
+    paddingHorizontal: 0, 
     shadowColor: "#FF6B6B",
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 10,
-    paddingBottom: 0,
+    shadowRadius: 5,
+    elevation: 5,
+    borderTopWidth: 0,
   },
+
   tabItem: {
     height: 64,
     padding: 0,
   },
+
   activeBubble: {
     width: 48,
     height: 48,

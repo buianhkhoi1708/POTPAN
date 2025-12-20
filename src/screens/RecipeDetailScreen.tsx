@@ -330,7 +330,7 @@ const h = StyleSheet.create({
     zIndex: 10,
     marginBottom: 10,
   },
-  title: { fontSize: 20, fontWeight: '800', color: COLORS.CORAL, flex: 1, textAlign: 'center', marginHorizontal: 10 },
+  title: { fontSize: 30, fontWeight: '800', color: COLORS.CORAL, flex: 1, textAlign: 'center', marginHorizontal: 10 },
   rightGroup: { flexDirection: 'row', gap: 12 },
   circleBtn: {
     width: 40, height: 40, borderRadius: 20,

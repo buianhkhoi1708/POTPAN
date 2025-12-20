@@ -120,6 +120,7 @@ export default function SearchScreen() {
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.BG },
   header: {
+    marginTop: 40,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

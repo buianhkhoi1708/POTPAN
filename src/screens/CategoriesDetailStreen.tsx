@@ -124,18 +124,22 @@ const FOOD_DATABASE: Record<string, FoodItem[]> = {
 
 // Header chung
 function DetailHeader({ title, onBack }: { title: string; onBack: () => void }) {
+  const navigation = useNavigation<any>();
   return (
     <View style={h.header}>
       <Pressable onPress={onBack} style={h.circleBtn} hitSlop={10}>
-        <Ionicons name="arrow-back" size={24} color="#fff" />
+        <Ionicons name="arrow-back" size={30} color="#fff" />
       </Pressable>
       <Text style={h.title}>{title}</Text>
       <View style={h.rightGroup}>
-        <Pressable style={h.circleBtn}>
-          <Ionicons name="search" size={20} color="#fff" />
+        <Pressable 
+          style={h.circleBtn}
+        >
+          <Ionicons name="search" size={30} color="#fff" />
         </Pressable>
-        <Pressable style={h.circleBtn}>
-          <Ionicons name="notifications" size={20} color="#fff" />
+        <Pressable style={h.circleBtn}
+          onPress={() => navigation.navigate("SearchScreen")}>
+          <Ionicons name="notifications" size={30} color="#fff" />
         </Pressable>
       </View>
     </View>
@@ -144,7 +148,7 @@ function DetailHeader({ title, onBack }: { title: string; onBack: () => void }) 
 
 const h = StyleSheet.create({
   header: {
-    marginTop: 30,
+    marginTop: 40,
     height: 60,
     flexDirection: "row",
     alignItems: "center",
@@ -152,7 +156,7 @@ const h = StyleSheet.create({
     paddingHorizontal: 18,
     marginBottom: 10,
   },
-  title: { fontSize: 22, fontWeight: "bold", color: COLORS.CORAL },
+  title: { fontSize: 30, fontWeight: "bold", color: COLORS.CORAL },
   rightGroup: { flexDirection: "row", gap: 10 },
   circleBtn: {
     width: 40,
@@ -210,9 +214,9 @@ const c = StyleSheet.create({
   },
   image: { width: "100%", height: "100%" },
   pill: {
-    marginTop: 10,
+    marginTop: -20,
     backgroundColor: "#fff",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
@@ -259,12 +263,13 @@ export default function CategoryDetailScreen() {
         columnWrapperStyle={{ justifyContent: "space-between" }}
         contentContainerStyle={{
           paddingHorizontal: paddingHorizontal,
-          paddingTop: 10,
+          paddingTop: 30,
           paddingBottom: 100, // Padding đáy để tránh TabBar (nếu có)
         }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => <FoodCard item={item} width={itemWidth} />}
-        
+
+        ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
         // Hiển thị khi danh sách trống
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 50 }}>
