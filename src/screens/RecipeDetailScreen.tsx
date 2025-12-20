@@ -185,9 +185,11 @@ const DETAILED_RECIPES: Record<string, Partial<Recipe>> = {
   // === 2. Đặc sản Việt ===
   "201": {
     time: "3 giờ",
-    description: "Phở bò tái chín, quốc hồn quốc túy.",
-    ingredients: ["Xương bò hầm", "Bánh phở", "Thịt bò tái/chín", "Quế, hồi, thảo quả"],
-    steps: [{ title: "Bước 1: Sơ chế nguyên liệu", content: "Ninh xương bò lấy nước dùng." }, { title: "Bước 2", content: "Trụng phở, xếp thịt, chan nước." }]
+    description: "Đây là cái nhìn tổng quan cho món nem rán. Các nguyên liệu và hướng dẫn chế biến đầy đủ có trong công thức dưới đây.",
+    ingredients: ["Thịt bò: 500g bắp bò/thịt gầu , 300g thịt thăn bò.", "Xương bò: 1 - 1.5kg xương ống bò hoặc xương sườn bò", "Rau củ:gừng,hành tây,hành lá,ớt,chanh", "Gia vị: Quế, hồi, thảo quả,hạt ngò,đinh hương"],
+    steps: [{ title: "Bước 1: Sơ chế nguyên liệu", content: "Xương bò rửa sạch, chần sơ qua nước sôi có gừng đập dập khoảng 5-10 phút để loại bỏ tạp chất và mùi hôi. Vớt xương ra, rửa lại thật sạch dưới vòi nước. Cắt thịt miếng lớn, thịt bò tái(thăn) thái mỏng, để riêng. Nướng/áp chảo cho vỏ ngoài hành tây(lớn), gừng hơi cháy xém và dậy mùi thơm. Cạo bỏ phần cháy, đập dập gừng, bổ đôi củ hành. Cho hồi, quế, thảo quả, hạt ngò... vào chảo rang thơm, sau đó cho vào túi vải hoặc bọc vào miếng vải mỏng." },
+       { title: "Bước 2: Hầm Nước Dùng (Nước Lèo)", content: "Cho xương bò đã làm sạch, thịt bò nấu nước dùng, hành tây, gừng nướng, và gói gia vị phở vào nồi. Đổ khoảng 4-5 lít nước lạnh vào. Đun sôi rồi hạ lửa nhỏ nhất, hầm liên tục trong 3 - 6 giờ (hoặc lâu hơn) để xương tiết ra chất ngọt. Trong quá trình hầm, thường xuyên vớt bọt để nước dùng được trong. Sau khoảng 2-3 giờ hầm, cho thêm muối và đường phèn (hoặc đường) vào nồi. Khi thịt bò nấu nước dùng chín mềm, vớt ra ngâm ngay vào tô nước lạnh để thịt không bị thâm, sau đó thái lát mỏng. Trước khi dùng, nêm nếm lại bằng nước mắm và điều chỉnh cho vừa khẩu vị mặn ngọt. Nước dùng chuẩn phải ngọt xương, thơm mùi hồi quế, và trong. Vớt bỏ xương, gừng, hành và gói gia vị phở ra khỏi nồi." },
+      {title:"Bước 3: Trình bày và hoàn thành", content:"Trụng bánh phở tươi qua nước sôi cho mềm rồi cho vào tô. Xếp thịt bò đã thái (thịt chín và thịt tái) lên trên lớp phở. Lưu ý: Với thịt bò tái, bạn nên trải mỏng ra để thịt nhanh chín khi chan nước dùng. Rắc hành lá, ngò gai thái nhỏ, và một vài lát hành tây thái mỏng lên trên. Đun nước dùng thật sôi. Múc nước dùng chan ngập thịt và phở. Nước dùng nóng sẽ làm chín tái thịt bò ngay lập tức. Dọn phở ra kèm với đĩa rau thơm, giá đỗ, tương ớt, tương đen, ớt tươi và chanh." , }]
   },
   "202": {
     time: "2 giờ",
@@ -296,13 +298,16 @@ const DETAILED_RECIPES: Record<string, Partial<Recipe>> = {
 // --- COMPONENTS ---
 
 // 1. Header
-const RecipeHeader = ({ title, onBack }: { title: string, onBack: () => void }) => (
+const RecipeHeader = ({ title, onBack, onSearch }: { title: string, onBack: () => void, onSearch: () => void }) => (
   <View style={h.header}>
     <Pressable onPress={onBack} style={h.circleBtn}>
       <Ionicons name="arrow-back" size={24} color="#fff" />
     </Pressable>
     <Text style={h.title} numberOfLines={1}>{title}</Text>
     <View style={h.rightGroup}>
+      <Pressable style={h.circleBtn} onPress={onSearch}>
+        <Ionicons name="search" size={20} color="#fff" />
+      </Pressable>
       <Pressable style={h.circleBtn}>
         <Ionicons name="heart-outline" size={22} color="#fff" />
       </Pressable>
@@ -394,7 +399,7 @@ const st = StyleSheet.create({
 
 // --- MAIN SCREEN ---
 export default function RecipeDetailScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { foodId } = route.params || {};
 
@@ -437,13 +442,13 @@ export default function RecipeDetailScreen() {
     <SafeAreaView style={s.root}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.BG} />
       
-      <RecipeHeader title={currentRecipe.categoryName} onBack={() => navigation.goBack()} />
+      <RecipeHeader title={currentRecipe.categoryName} onBack={() => navigation.goBack()} onSearch={() => navigation.navigate("SearchScreen")} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scrollContent}>
         
         {/* --- Hero Image --- */}
         <View style={s.heroContainer}>
-          <Image source={currentRecipe.image} style={s.heroImage} resizeMode="cover" />
+          <Image source={currentRecipe.image} style={s.heroImage} resizeMode="cover" resizeMethod="resize" fadeDuration={0} />
           <View style={s.playBtnOverlay}>
             <View style={s.playBtnCircle}>
                <Ionicons name="play" size={30} color={COLORS.CORAL} style={{marginLeft: 4}} />
@@ -454,7 +459,13 @@ export default function RecipeDetailScreen() {
             <View style={s.ratingContainer}>
               <Ionicons name="star" size={14} color="#fff" />
               <Text style={s.ratingText}> {currentRecipe.rating}</Text>
-              <Text style={s.viewsText}> 👁 {currentRecipe.views}</Text>
+              <View style={{ width: 10 }} />
+              <Image
+        source={require("../assets/images/Vector.png")}
+        style={s.smallIconStyle}
+        resizeMode="contain"
+    />
+              <Text style={s.viewsText}>{currentRecipe.views}</Text>
             </View>
           </View>
         </View>
@@ -515,9 +526,13 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.BG },
   scrollContent: { paddingBottom: 50 },
   heroContainer: { width: '100%', height: 250, position: 'relative', marginBottom: 15 },
-  heroImage: { width: width - 32, height: '100%', borderRadius: 10, marginHorizontal: 16 },
+  heroImage: { width: width -32, height: '100%', borderRadius: 10, marginHorizontal: 16 },
   playBtnOverlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', marginHorizontal: 16 },
   playBtnCircle: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', elevation: 5 },
+  smallIconStyle: {
+    width: 14,  
+    height: 14,
+  },
   infoBar: {
     position: 'absolute', bottom: 0, left: 16, right: 16, height: 50,
     backgroundColor: COLORS.CORAL, borderTopLeftRadius: 15, borderTopRightRadius: 15,
@@ -526,7 +541,7 @@ const s = StyleSheet.create({
   },
   dishName: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   ratingContainer: { flexDirection: 'row', alignItems: 'center' },
-  ratingText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  ratingText: { color: '#fff', fontWeight: 'bold', fontSize: 14,marginLeft: 4 },
   viewsText: { color: '#fff', fontSize: 14, marginLeft: 5 },
   authorSection: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginTop: 10 },
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#eee' },

@@ -210,7 +210,7 @@ const c = StyleSheet.create({
   },
   image: { width: "100%", height: "100%" },
   pill: {
-    marginTop: -16,
+    marginTop: 10,
     backgroundColor: "#fff",
     paddingHorizontal: 16,
     paddingVertical: 6,
@@ -223,7 +223,7 @@ const c = StyleSheet.create({
     shadowOpacity: 0.1,
     elevation: 3,
   },
-  pillText: { fontSize: 13, fontWeight: "700", color: "#000", textAlign: "center" },
+  pillText: { fontSize: 18, fontWeight: "700", color: "#000", textAlign: "center" },
 });
 
 // --- 3. MAIN REUSABLE SCREEN ---
@@ -238,7 +238,7 @@ export default function CategoryDetailScreen() {
   const foodList = FOOD_DATABASE[categoryId] || [];
 
   const paddingHorizontal = 18;
-  const gap = 20;
+  const gap = 30;
   const itemWidth = (width - paddingHorizontal * 2 - gap) / 2;
 
   return (

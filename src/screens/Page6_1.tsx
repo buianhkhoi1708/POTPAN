@@ -16,6 +16,7 @@ import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import SearchScreen from "./SearchScreen";
 
 // ✅ IMPORT CÁC MÀN HÌNH CON (Đảm bảo đường dẫn đúng)
 import CategoryDetailScreen from "./CategoriesDetailStreen"; 
@@ -34,6 +35,7 @@ type TabParamList = {
   Explore: undefined;
   Categories: undefined;
   Profile: undefined;
+  SearchScreen: undefined;
 };
 
 // Định nghĩa Stack bao gồm: Danh sách loại -> Chi tiết loại -> Chi tiết công thức
@@ -165,7 +167,7 @@ const c = StyleSheet.create({
     justifyContent: "center",
     maxWidth: "94%",
   },
-  pillText: { fontSize: 13, fontWeight: "700", color: COLORS.TEXT },
+  pillText: { fontSize: 18, fontWeight: "700", color: COLORS.TEXT },
 });
 
 // --- SCREENS ---
@@ -215,8 +217,7 @@ function CategoriesScreen() {
 // --- NAVIGATORS ---
 
 // 1. Stack Navigator (Quản lý chuyển màn hình)
-const CategoriesStack = createNativeStackNavigator<CategoriesStackParamList>();
-
+const CategoriesStack = createNativeStackNavigator<any>();
 function CategoriesStackNavigator() {
   return (
     <CategoriesStack.Navigator screenOptions={{ headerShown: false }}>
@@ -231,6 +232,11 @@ function CategoriesStackNavigator() {
         name="RecipeDetail" 
         component={RecipeDetailScreen} 
         options={{ animation: 'slide_from_bottom' }}
+      />
+      <CategoriesStack.Screen 
+        name="SearchScreen"
+        component={SearchScreen} 
+        options={{ animation: 'fade_from_bottom' }} 
       />
     </CategoriesStack.Navigator>
   );
