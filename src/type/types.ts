@@ -1,8 +1,15 @@
 // src/type/types.ts
-
 export type RootStackParamList = {
+  StartingScreen: undefined;
+  IntroduceScreen: undefined;
+  Introduce1Screen: undefined;
+  Introduce2Screen: undefined;
+  Introduce3Screen: undefined;
+  Introduce4Screen: undefined;
+  LoginScreen: undefined;
+  SigninScreen: undefined;
+  AuthStackNavigator: undefined;
   HomeScreen: undefined;
-  CommunityScreen: undefined;
   NotificationScreen: undefined;
   ProfileScreen: undefined;
   EditProfileScreen: undefined;
@@ -10,4 +17,8 @@ export type RootStackParamList = {
   NotificationSettingsScreen: undefined;
   SupportCenterScreen: undefined;
   LanguageScreen: undefined;
+
+  FamousChefs: undefined;
+  CommunityScreen: undefined;
+  FeaturedRecipesScreen: undefined;
 };

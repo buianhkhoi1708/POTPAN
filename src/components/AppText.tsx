@@ -3,9 +3,9 @@ import React, { ReactNode } from "react";
 import {
   StyleSheet,
   Text,
-  type TextProps,
-  type TextStyle,
-  type StyleProp,
+  TextStyle,
+  TextProps,
+  StyleProp,
 } from "react-native";
 import { AppFonts } from "../styles/fonts";
 
@@ -17,7 +17,12 @@ interface AppTextProps extends TextProps {
   variant?: AppTextVariant;
 }
 
-const AppText = ({ children, style, variant = "medium", ...rest }: AppTextProps) => {
+const AppText = ({
+  children,
+  style,
+  variant = "medium",
+  ...rest
+}: AppTextProps) => {
   return (
     <Text {...rest} style={[styles[variant], style]}>
       {children}

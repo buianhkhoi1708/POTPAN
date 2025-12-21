@@ -1,3 +1,5 @@
+// src/screens/HomeScreen.tsx
+
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -9,11 +11,13 @@ import {
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useIsFocused } from "@react-navigation/native";
+
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppBottomSpace from "../components/AppBottomSpace";
 import { AppLightColor } from "../styles/color";
 import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
+
 import {
   featuredRecipes,
   homeCategories,
@@ -24,11 +28,11 @@ import {
   type HomeChef,
   type HomeCategoryKey,
 } from "../data/homeData";
+
 import SearchIcon from "../assets/images/search.svg";
 import NotificationIcon from "../assets/images/notification.svg";
 import SaveIcon from "../assets/images/save.svg";
 import AppSearchModal from "../components/AppSearchModal";
-import App from "../../App";
 
 type HomeScreenProps = {
   navigation: any;
@@ -200,13 +204,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </ScrollView>
 
           <View style={styles.sectionHeader}>
-            <AppText
-              variant="bold"
-              style={[styles.sectionTitle, styles.sectionTitlePrimary]}
+            <Pressable
+              onPress={() =>
+                navigation.navigate("FeaturedRecipesScreen" as never)
+              }
             >
-              Công thức nấu ăn nổi bật
-            </AppText>
+              <AppText
+                variant="bold"
+                style={[styles.sectionTitle, styles.sectionTitlePrimary]}
+              >
+                Công thức nấu ăn nổi bật
+              </AppText>
+            </Pressable>
           </View>
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -250,6 +261,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               </AppText>
             </Pressable>
           </View>
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -266,6 +278,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               Công thức thêm gần đây
             </AppText>
           </View>
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -289,7 +302,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           onTabPress={(tab) => {
             setActiveTab(tab);
             if (tab === "home") navigation.navigate("HomeScreen" as never);
-            if (tab === "world") navigation.navigate("FamousChefs" as never);
+            if (tab === "world") navigation.navigate("CommunityScreen" as never);
             if (tab === "profile") navigation.navigate("ProfileScreen" as never);
             if (tab === "category") navigation.navigate("Page2" as never);
           }}
@@ -399,7 +412,6 @@ const styles = StyleSheet.create({
   },
   mySectionHeader: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 4 },
 
-  // FIX: thêm paddingBottom để shadow của card không bị “cắt” ở dưới
   mySectionList: {
     paddingHorizontal: 32,
     paddingTop: 4,
@@ -426,7 +438,6 @@ const styles = StyleSheet.create({
   horizontalList: { paddingHorizontal: 16, paddingBottom: 8 },
   horizontalListBottom: { paddingHorizontal: 16, paddingBottom: 24 },
 
-  // FIX: overflow visible + thêm paddingBottom để bóng/đổ (shadow) không bị clip
   smallCard: {
     width: 190,
     marginRight: 16,
@@ -454,7 +465,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // FIX: bỏ border đen + tăng shadow/elevation, bỏ marginHorizontal âm để tránh clip
   smallInfo: {
     backgroundColor: "#ffffff",
     borderRadius: 10,
