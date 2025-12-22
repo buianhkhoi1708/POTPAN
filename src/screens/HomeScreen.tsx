@@ -232,11 +232,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <View style={styles.mySectionHeader}>
               <View style={styles.sectionPillWrap}>
                 <View style={styles.sectionPillBg} />
-                <View style={styles.sectionPill}>
+
+                {/* FIX: bấm "Công thức của tôi" -> MyRecipesScreen */}
+                <Pressable
+                  style={styles.sectionPill}
+                  onPress={() => navigation.navigate("MyRecipesScreen" as never)}
+                >
                   <AppText variant="bold" style={styles.sectionPillText}>
                     Công thức của tôi
                   </AppText>
-                </View>
+                </Pressable>
               </View>
             </View>
 

@@ -7,6 +7,8 @@ import { RootStackParamList } from "../type/types";
 import HomeScreen from "../screens/HomeScreen";
 import CommunityScreen from "../screens/CommunityScreen";
 import FeaturedRecipesScreen from "../screens/FeaturedRecipesScreen";
+import MyRecipesScreen from "../screens/MyRecipesScreen";
+
 import NotificationScreen from "../screens/NotificationScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
@@ -32,6 +34,8 @@ export function AppStackNavigator() {
         name="FeaturedRecipesScreen"
         component={FeaturedRecipesScreen}
       />
+      <Stack.Screen name="MyRecipesScreen" component={MyRecipesScreen} />
+
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
