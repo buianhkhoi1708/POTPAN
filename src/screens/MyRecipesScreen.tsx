@@ -1,4 +1,5 @@
 // src/screens/MyRecipesScreen.tsx
+// CHỈ SỬA STYLE hotInfoBar (đè ít hơn + xích xuống)
 
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -37,9 +38,17 @@ import { AppLightColor } from "../styles/color";
 const { width: SCREEN_W } = Dimensions.get("window");
 
 const H_PADDING = 20;
+
 const GRID_GAP = 14;
 const GRID_W = SCREEN_W - H_PADDING * 2;
 const GRID_CARD_W = (GRID_W - GRID_GAP) / 2;
+
+const GRID_OVERLAP = 18;
+
+const HOT_CARD_W = 178;
+const HOT_IMAGE_H = 104;
+
+const HOT_OVERLAP = 12; // <= giảm đè (trước là 24)
 
 const MyRecipesScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -60,13 +69,12 @@ const MyRecipesScreen: React.FC = () => {
       <View key={item.id} style={styles.hotCard}>
         <View style={styles.hotImageWrap}>
           <Image source={item.image} style={styles.hotImage} />
-          <Pressable style={styles.saveBtn}>
-            <HotSaveIcon width={16} height={16} stroke="#fff" fill="none" />
+          <Pressable style={styles.hotSaveBtn}>
+            <HotSaveIcon width={18} height={18} stroke="#fff" fill="none" />
           </Pressable>
         </View>
 
-        <View style={styles.hotInfo}>
-          {/* FIX: title đậm */}
+        <View style={styles.hotInfoBar}>
           <AppText variant="subtitle" style={styles.hotTitle}>
             {item.title}
           </AppText>
@@ -96,7 +104,7 @@ const MyRecipesScreen: React.FC = () => {
       <View key={item.id} style={styles.gridCard}>
         <View style={styles.gridImageWrap}>
           <Image source={item.image} style={styles.gridImage} />
-          <Pressable style={styles.saveBtn}>
+          <Pressable style={styles.gridSaveBtn}>
             <HotSaveIcon width={16} height={16} stroke="#fff" fill="none" />
           </Pressable>
         </View>
@@ -167,7 +175,6 @@ const MyRecipesScreen: React.FC = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* FIX: ô đỏ full 2 bên màn hình */}
           <View style={styles.hotBlockFullBleed}>
             <View style={styles.hotBlock}>
               <AppText variant="bold" style={styles.hotBlockTitle}>
@@ -247,13 +254,11 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
 
-  // full-bleed wrapper (đẩy ra ngoài padding của scrollContent)
   hotBlockFullBleed: {
     marginTop: 10,
     marginHorizontal: -H_PADDING,
   },
 
-  // FIX: ô đỏ chạm 2 bên màn hình
   hotBlock: {
     width: SCREEN_W,
     alignSelf: "center",
@@ -264,10 +269,10 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
   },
 
-  // FIX: chữ to + đậm
   hotBlockTitle: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 22,
+    fontWeight: "700",
   },
 
   hotRow: {
@@ -276,8 +281,10 @@ const styles = StyleSheet.create({
   },
 
   hotCard: {
-    width: 178,
+    width: HOT_CARD_W,
     marginRight: 12,
+    overflow: "visible",
+    paddingBottom: 6,
   },
   hotImageWrap: {
     borderRadius: 18,
@@ -286,28 +293,35 @@ const styles = StyleSheet.create({
   },
   hotImage: {
     width: "100%",
-    height: 104,
+    height: HOT_IMAGE_H,
+  },
+  hotSaveBtn: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: AppLightColor.primary_color,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  hotInfo: {
+  // FIX: đè ít hơn + xích xuống
+  hotInfoBar: {
     backgroundColor: "#fff",
     borderRadius: 18,
-    borderWidth: 1.2,
-    borderColor: AppLightColor.primary_color,
     paddingHorizontal: 12,
-    paddingVertical: 12,
-    marginTop: -14,
-    marginHorizontal: 8,
+    paddingTop: 12,
+    paddingBottom: 12,
+    marginTop: -HOT_OVERLAP, // trước -24
   },
-
-  // FIX: title to + đậm (subtitle)
   hotTitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: AppLightColor.primary_text,
   },
-
   hotMetaRow: {
-    marginTop: 10,
+    marginTop: 8,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -322,15 +336,32 @@ const styles = StyleSheet.create({
   },
   gridCard: {
     width: GRID_CARD_W,
+    overflow: "visible",
+    paddingBottom: 12,
   },
   gridImageWrap: {
     borderRadius: 18,
     overflow: "hidden",
     backgroundColor: "#eee",
+    position: "relative",
+    zIndex: 3,
+    elevation: 3,
+    marginBottom: -GRID_OVERLAP,
   },
   gridImage: {
     width: "100%",
     height: 132,
+  },
+  gridSaveBtn: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    backgroundColor: AppLightColor.primary_color,
+    alignItems: "center",
+    justifyContent: "center",
   },
   gridInfo: {
     backgroundColor: "#fff",
@@ -338,15 +369,16 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     borderColor: AppLightColor.primary_color,
     paddingHorizontal: 12,
-    paddingTop: 12,
+    paddingTop: 12 + GRID_OVERLAP,
     paddingBottom: 12,
-    marginTop: -14,
+    marginTop: 0,
     marginHorizontal: 8,
+    position: "relative",
+    zIndex: 1,
+    elevation: 1,
   },
-
-  // FIX: chữ to hơn
   gridTitle: {
-    fontSize: 15,
+    fontSize: 16,
     color: AppLightColor.primary_text,
   },
   gridSubtitle: {
@@ -364,32 +396,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  saveBtn: {
-    position: "absolute",
-    right: 10,
-    top: 10,
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    backgroundColor: AppLightColor.primary_color,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
   metaItem: {
     flexDirection: "row",
     alignItems: "center",
     columnGap: 6,
   },
 
-  // FIX: meta to hơn
   metaTextHot: {
-    fontSize: 12,
+    fontSize: 14,
     color: AppLightColor.primary_color,
     fontWeight: "700",
   },
   metaTextGrid: {
-    fontSize: 12,
+    fontSize: 14,
     color: AppLightColor.primary_color,
     fontWeight: "700",
   },
