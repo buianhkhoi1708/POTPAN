@@ -11,6 +11,8 @@ import MyRecipesScreen from "../screens/MyRecipesScreen";
 
 import NotificationScreen from "../screens/NotificationScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import ProfileSavoryScreen from "../screens/ProfileSavoryScreen";
+import ProfileVegetarianScreen from "../screens/ProfileVegetarianScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import NotificationSettingsScreen from "../screens/NotificationSettingsScreen";
@@ -38,7 +40,13 @@ export function AppStackNavigator() {
 
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+      <Stack.Screen name="ProfileSavoryScreen" component={ProfileSavoryScreen} />
+      <Stack.Screen
+        name="ProfileVegetarianScreen"
+        component={ProfileVegetarianScreen}
+      />
       <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
+
       <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
       <Stack.Screen
         name="NotificationSettingsScreen"

@@ -1,3 +1,5 @@
+// src/screens/ProfileScreen.tsx
+
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
@@ -84,7 +86,14 @@ const ProfileScreen: React.FC = () => {
   );
 
   const renderCollectionCard = (item: CollectionCard) => (
-    <Pressable key={item.id} style={styles.collectionCard}>
+    <Pressable
+      key={item.id}
+      style={styles.collectionCard}
+      onPress={() => {
+        if (item.id === "c-1") navigation.navigate("ProfileSavoryScreen");
+        if (item.id === "c-2") navigation.navigate("ProfileVegetarianScreen");
+      }}
+    >
       <Image source={item.image} style={styles.collectionImage} />
       <View style={styles.collectionFooter}>
         <AppText variant="medium" style={styles.collectionTitle}>

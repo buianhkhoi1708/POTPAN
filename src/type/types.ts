@@ -9,6 +9,8 @@ export type RootStackParamList = {
   NotificationScreen: undefined;
 
   ProfileScreen: undefined;
+  ProfileSavoryScreen: undefined;
+  ProfileVegetarianScreen: undefined;
   EditProfileScreen: undefined;
 
   SettingsScreen: undefined;
