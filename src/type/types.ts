@@ -11,6 +11,8 @@ export type RootStackParamList = {
   ProfileScreen: undefined;
   ProfileSavoryScreen: undefined;
   ProfileVegetarianScreen: undefined;
+  ProfileShareQrScreen: undefined;
+
   EditProfileScreen: undefined;
 
   SettingsScreen: undefined;

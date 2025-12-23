@@ -13,6 +13,7 @@ import NotificationScreen from "../screens/NotificationScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import ProfileSavoryScreen from "../screens/ProfileSavoryScreen";
 import ProfileVegetarianScreen from "../screens/ProfileVegetarianScreen";
+import ProfileShareQrScreen from "../screens/ProfileShareQrScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import NotificationSettingsScreen from "../screens/NotificationSettingsScreen";
@@ -44,6 +45,10 @@ export function AppStackNavigator() {
       <Stack.Screen
         name="ProfileVegetarianScreen"
         component={ProfileVegetarianScreen}
+      />
+      <Stack.Screen
+        name="ProfileShareQrScreen"
+        component={ProfileShareQrScreen}
       />
       <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
 

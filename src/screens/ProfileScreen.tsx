@@ -150,7 +150,10 @@ const ProfileScreen: React.FC = () => {
               </AppText>
             </Pressable>
 
-            <Pressable style={styles.primaryPill}>
+            <Pressable
+              style={styles.primaryPill}
+              onPress={() => navigation.navigate("ProfileShareQrScreen")}
+            >
               <AppText variant="medium" style={styles.primaryPillText}>
                 Chia Sẻ Hồ Sơ
               </AppText>
