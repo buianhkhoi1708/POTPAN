@@ -18,6 +18,7 @@ import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
 import { AppLightColor } from "../styles/color";
 
 import BackArrowIcon from "../assets/images/backarrow.svg";
+import HotSaveIcon from "../assets/images/hot-save.svg";
 import StarIcon from "../assets/images/star.svg";
 import ClockIcon from "../assets/images/clock.svg";
 
@@ -27,10 +28,14 @@ import {
 } from "../data/profileFavoritesData";
 
 const { width: SCREEN_W } = Dimensions.get("window");
+
 const H_PADDING = 20;
+
 const GRID_GAP = 14;
 const GRID_W = SCREEN_W - H_PADDING * 2;
-const CARD_W = (GRID_W - GRID_GAP) / 2;
+const GRID_CARD_W = (GRID_W - GRID_GAP) / 2;
+
+const GRID_OVERLAP = 18;
 
 const ProfileVegetarianScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -42,38 +47,44 @@ const ProfileVegetarianScreen: React.FC = () => {
     if (isFocused) setActiveTab("profile");
   }, [isFocused]);
 
-  const renderCard = (item: ProfileFavoriteItem) => (
-    <View key={item.id} style={styles.card}>
-      <View style={styles.imageWrap}>
-        <Image source={item.image} style={styles.image} />
-      </View>
+  const renderGridCard = (item: ProfileFavoriteItem) => {
+    return (
+      <View key={item.id} style={styles.gridCard}>
+        <View style={styles.gridImageWrap}>
+          <Image source={item.image} style={styles.gridImage} />
+          <Pressable style={styles.gridSaveBtn}>
+            <HotSaveIcon width={16} height={16} stroke="#fff" fill="none" />
+          </Pressable>
+        </View>
 
-      <View style={styles.info}>
-        <AppText variant="bold" style={styles.title}>
-          {item.title}
-        </AppText>
-        <AppText variant="light" style={styles.subtitle}>
-          {item.subtitle}
-        </AppText>
+        <View style={styles.gridInfo}>
+          <AppText variant="subtitle" style={styles.gridTitle}>
+            {item.title}
+          </AppText>
 
-        <View style={styles.metaRow}>
-          <View style={styles.metaItem}>
-            <StarIcon width={12} height={12} />
-            <AppText variant="medium" style={styles.metaText}>
-              {item.rating}
-            </AppText>
-          </View>
+          <AppText variant="medium" style={styles.gridSubtitle}>
+            {item.subtitle}
+          </AppText>
 
-          <View style={styles.metaItem}>
-            <ClockIcon width={12} height={12} />
-            <AppText variant="medium" style={styles.metaText}>
-              {item.timeMin} phút
-            </AppText>
+          <View style={styles.gridMetaRow}>
+            <View style={styles.metaItem}>
+              <AppText variant="medium" style={styles.metaTextGrid}>
+                {item.rating}
+              </AppText>
+              <StarIcon width={12} height={12} />
+            </View>
+
+            <View style={styles.metaItem}>
+              <ClockIcon width={12} height={12} />
+              <AppText variant="medium" style={styles.metaTextGrid}>
+                {item.timeMin} phút
+              </AppText>
+            </View>
           </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <AppSafeView style={styles.safeArea}>
@@ -101,8 +112,9 @@ const ProfileVegetarianScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.gridWrap}>
-            {profileVegetarianFavorites.map(renderCard)}
+            {profileVegetarianFavorites.map(renderGridCard)}
           </View>
+
           <AppBottomSpace height={90} />
         </ScrollView>
 
@@ -151,45 +163,89 @@ const styles = StyleSheet.create({
   headerRightStub: { width: 32, height: 32 },
 
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: H_PADDING, paddingTop: 10 },
+  scrollContent: {
+    paddingHorizontal: H_PADDING,
+    paddingTop: 10,
+    paddingBottom: 16,
+  },
 
   gridWrap: {
+    marginTop: 8,
     flexDirection: "row",
     flexWrap: "wrap",
     columnGap: GRID_GAP,
     rowGap: GRID_GAP,
   },
 
-  card: { width: CARD_W },
-
-  imageWrap: {
-    width: "100%",
-    height: 150,
+  gridCard: {
+    width: GRID_CARD_W,
+    overflow: "visible",
+    paddingBottom: 12,
+  },
+  gridImageWrap: {
     borderRadius: 18,
     overflow: "hidden",
+    backgroundColor: "#eee",
+    position: "relative",
+    zIndex: 3,
+    elevation: 3,
+    marginBottom: -GRID_OVERLAP,
   },
-  image: { width: "100%", height: "100%" },
-
-  info: {
-    marginTop: 8,
+  gridImage: {
+    width: "100%",
+    height: 132,
+  },
+  gridSaveBtn: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    backgroundColor: AppLightColor.primary_color,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  gridInfo: {
     backgroundColor: "#fff",
     borderRadius: 18,
     borderWidth: 1.2,
     borderColor: AppLightColor.primary_color,
     paddingHorizontal: 12,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: 12 + GRID_OVERLAP,
+    paddingBottom: 12,
+    marginHorizontal: 8,
+    position: "relative",
+    zIndex: 1,
+    elevation: 1,
   },
-
-  title: { fontSize: 15, color: "#111", lineHeight: 20 },
-  subtitle: { fontSize: 11, color: "#6a6a6a", marginTop: 2 },
-
-  metaRow: {
-    marginTop: 10,
+  gridTitle: {
+    fontSize: 16,
+    color: AppLightColor.primary_text,
+  },
+  gridSubtitle: {
+    marginTop: 6,
+    fontSize: 12,
+    color: AppLightColor.primary_text,
+    opacity: 0.75,
+    maxHeight: 18,
+    overflow: "hidden",
+  },
+  gridMetaRow: {
+    marginTop: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 6 },
-  metaText: { fontSize: 12, color: AppLightColor.primary_color },
+
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 6,
+  },
+  metaTextGrid: {
+    fontSize: 14,
+    color: AppLightColor.primary_color,
+    fontWeight: "700",
+  },
 });
