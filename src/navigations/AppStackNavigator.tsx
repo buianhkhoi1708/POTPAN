@@ -14,6 +14,9 @@ import ProfileScreen from "../screens/ProfileScreen";
 import ProfileSavoryScreen from "../screens/ProfileSavoryScreen";
 import ProfileVegetarianScreen from "../screens/ProfileVegetarianScreen";
 import ProfileShareQrScreen from "../screens/ProfileShareQrScreen";
+import ProfileFollowingScreen from "../screens/ProfileFollowingScreen";
+import ProfileFollowersScreen from "../screens/ProfileFollowersScreen";
+
 import EditProfileScreen from "../screens/EditProfileScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import NotificationSettingsScreen from "../screens/NotificationSettingsScreen";
@@ -33,30 +36,22 @@ export function AppStackNavigator() {
     >
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="CommunityScreen" component={CommunityScreen} />
-      <Stack.Screen
-        name="FeaturedRecipesScreen"
-        component={FeaturedRecipesScreen}
-      />
+      <Stack.Screen name="FeaturedRecipesScreen" component={FeaturedRecipesScreen} />
       <Stack.Screen name="MyRecipesScreen" component={MyRecipesScreen} />
 
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
+
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="ProfileSavoryScreen" component={ProfileSavoryScreen} />
-      <Stack.Screen
-        name="ProfileVegetarianScreen"
-        component={ProfileVegetarianScreen}
-      />
-      <Stack.Screen
-        name="ProfileShareQrScreen"
-        component={ProfileShareQrScreen}
-      />
+      <Stack.Screen name="ProfileVegetarianScreen" component={ProfileVegetarianScreen} />
+      <Stack.Screen name="ProfileShareQrScreen" component={ProfileShareQrScreen} />
+      <Stack.Screen name="ProfileFollowingScreen" component={ProfileFollowingScreen} />
+      <Stack.Screen name="ProfileFollowersScreen" component={ProfileFollowersScreen} />
+
       <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
 
       <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
-      <Stack.Screen
-        name="NotificationSettingsScreen"
-        component={NotificationSettingsScreen}
-      />
+      <Stack.Screen name="NotificationSettingsScreen" component={NotificationSettingsScreen} />
       <Stack.Screen name="SupportCenterScreen" component={SupportCenterScreen} />
       <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
     </Stack.Navigator>

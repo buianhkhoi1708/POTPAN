@@ -161,36 +161,45 @@ const ProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.statsCard}>
-            <View style={styles.statItem}>
+            <Pressable
+              style={styles.statItem}
+              onPress={() => navigation.navigate("MyRecipesScreen")}
+            >
               <AppText variant="medium" style={styles.statValue}>
                 {PROFILE_USER.stats.savedRecipes}
               </AppText>
               <AppText variant="light" style={styles.statLabel}>
                 Công thức đã lưu
               </AppText>
-            </View>
+            </Pressable>
 
             <View style={styles.statDivider} />
 
-            <View style={styles.statItem}>
+            <Pressable
+              style={styles.statItem}
+              onPress={() => navigation.navigate("ProfileFollowingScreen")}
+            >
               <AppText variant="medium" style={styles.statValue}>
                 {PROFILE_USER.stats.following}
               </AppText>
               <AppText variant="light" style={styles.statLabel}>
                 Lượt theo dõi
               </AppText>
-            </View>
+            </Pressable>
 
             <View style={styles.statDivider} />
 
-            <View style={styles.statItem}>
+            <Pressable
+              style={styles.statItem}
+              onPress={() => navigation.navigate("ProfileFollowersScreen")}
+            >
               <AppText variant="medium" style={styles.statValue}>
                 {PROFILE_USER.stats.followers}
               </AppText>
               <AppText variant="light" style={styles.statLabel}>
                 Người theo dõi
               </AppText>
-            </View>
+            </Pressable>
           </View>
 
           <View style={styles.tabRow}>
