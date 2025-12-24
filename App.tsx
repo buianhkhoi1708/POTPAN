@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { AppStackNavigator } from './src/navigations/AppStackNavigator';
+import { AppNavigator } from './src/navigations/AppStackNavigator';
 import { 
   useFonts, 
   RobotoSlab_400Regular, 
@@ -30,8 +30,7 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <AppStackNavigator/>
-    </NavigationContainer>
+
+      <AppNavigator/>
   );
 }

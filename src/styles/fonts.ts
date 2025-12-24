@@ -1,6 +1,9 @@
+import { Roboto_400Regular } from "@expo-google-fonts/roboto";
+
 export const AppFonts = {
     RobotoBold: "Roboto-Bold",
     RobotoMedium: "Roboto-Medium",
+    RobotoRegular: "Roboto-Regular",
     RobotoLight: "Roboto-Light",
     RobotoLightItalic: 'Roboto-LightItalic',
 

@@ -1,239 +1,255 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  Dimensions,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
   View,
+  Image,
+  StyleSheet,
+  FlatList,
+  Pressable,
+  Dimensions,
+  ScrollView,
 } from "react-native";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { Ionicons, Feather } from "@expo/vector-icons";
 
+// --- COMPONENTS & STORE ---
+import { useAuthStore } from "../store/useAuthStore";
+import { supabase } from "../config/supabaseClient";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
-import AppBottomSpace from "../components/AppBottomSpace";
-import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
-
-import PlusIcon from "../assets/images/plus.svg";
-import MenuIcon from "../assets/images/setting.svg";
-import StarIcon from "../assets/images/star.svg";
-import ClockIcon from "../assets/images/clock.svg";
-
-import {
-  profileRecipes,
-  profileCollections,
-  type ProfileRecipe,
-  type CollectionCard,
-} from "../data/profileData";
-
-import { PROFILE_USER } from "../data/profileScreenData";
+import AppMainNavBar, { MainTabKey } from "../components/AppMainNavBar";
 import { AppLightColor } from "../styles/color";
 
-type ProfileTab = "recipes" | "favorites";
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = (width - 48) / 2; // Tính toán chiều rộng thẻ để chia 2 cột
+const PRIMARY_COLOR = "#F06560"; // Màu chủ đạo (Hồng cam)
 
-const { width: SCREEN_W } = Dimensions.get("window");
-const H_PADDING = 20;
-const GRID_GAP = 12;
-const CARD_W = (SCREEN_W - H_PADDING * 2 - GRID_GAP) / 2;
-
-const ProfileScreen: React.FC = () => {
+const ProfileScreen = () => {
   const navigation = useNavigation<any>();
-  const isFocused = useIsFocused();
 
-  const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
-  const [section, setSection] = useState<ProfileTab>("recipes");
+  // Lấy dữ liệu profile từ Store
+  const { user, profile, fetchUserProfile } = useAuthStore();
 
-  useEffect(() => {
-    if (isFocused) {
-      setActiveTab("profile");
-      setSection("recipes");
+  const [activeTab, setActiveTab] = useState<"recipes" | "favorites">(
+    "recipes"
+  );
+  const [myRecipes, setMyRecipes] = useState<any[]>([]);
+  const [activeNavTab, setActiveNavTab] = useState<MainTabKey>("profile");
+
+  // --- 1. LẤY DANH SÁCH MÓN ĂN ---
+  const fetchMyRecipes = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from("recipes")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      setMyRecipes(data || []);
+    } catch (error) {
+      console.log(error);
     }
-  }, [isFocused]);
+  };
 
-  const renderRecipeCard = (item: ProfileRecipe) => (
-    <Pressable key={item.id} style={styles.recipeCard}>
-      <View style={styles.recipeImageWrap}>
-        <Image source={item.thumbnail} style={styles.recipeImage} />
+  // --- 2. TỰ ĐỘNG CẬP NHẬT KHI VÀO MÀN HÌNH ---
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserProfile(); // Lấy lại Profile mới nhất (Tên, Bio, Avatar...)
+      fetchMyRecipes(); // Lấy lại danh sách món
+      setActiveNavTab("profile");
+    }, [user])
+  );
+
+  // --- 3. PHẦN HEADER PROFILE ---
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
+      {/* A. INFO ROW */}
+      <View style={styles.profileRow}>
+        {/* Avatar */}
+        <View style={styles.avatarWrapper}>
+          <Image
+            source={{ uri: profile?.avatar_url || "https://i.pravatar.cc/300" }}
+            style={styles.avatar}
+          />
+        </View>
+
+        {/* Info Text (ĐÃ SỬA: LẤY DỮ LIỆU THẬT) */}
+        <View style={styles.infoCol}>
+          <AppText variant="bold" style={styles.nameText}>
+            {profile?.full_name || "Chưa đặt tên"}
+          </AppText>
+
+          <AppText variant="medium" style={styles.handleText}>
+            {/* Ưu tiên hiện Username, nếu không có thì lấy email */}
+            {profile?.username
+              ? `@${profile.username}`
+              : `@${profile?.email?.split("@")[0] || "user"}`}
+          </AppText>
+
+          <AppText style={styles.bioText} numberOfLines={2}>
+            {profile?.bio || "Chưa có giới thiệu bản thân."}
+          </AppText>
+        </View>
+
+        {/* Top Icons */}
+        <View style={styles.topIcons}>
+          <Pressable style={styles.iconCircle}>
+            <Ionicons name="add" size={20} color={PRIMARY_COLOR} />
+          </Pressable>
+          <Pressable
+            style={[styles.iconCircle, { marginLeft: 8 }]}
+            onPress={() => navigation.navigate("SettingsScreen")}
+          >
+            <Ionicons name="settings-outline" size={20} color={PRIMARY_COLOR} />
+          </Pressable>
+        </View>
       </View>
 
-      <View style={styles.recipeInfo}>
-        <AppText variant="bold" style={styles.recipeTitle}>
+      {/* B. BUTTONS ROW */}
+      <View style={styles.buttonRow}>
+        <Pressable
+          style={styles.actionBtn}
+          onPress={() => navigation.navigate("EditProfileScreen")}
+        >
+          <AppText variant="bold" style={styles.actionBtnText}>
+            Chỉnh Sửa Hồ Sơ
+          </AppText>
+        </Pressable>
+        <Pressable style={styles.actionBtn}>
+          <AppText variant="bold" style={styles.actionBtnText}>
+            Chia Sẻ Hồ Sơ
+          </AppText>
+        </Pressable>
+      </View>
+
+      {/* C. STATS ROW */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statItem}>
+          <AppText variant="bold" style={styles.statNumber}>
+            {myRecipes.length}
+          </AppText>
+          <AppText style={styles.statLabel}>Công thức đã lưu</AppText>
+        </View>
+        <View style={styles.verticalDivider} />
+        <View style={styles.statItem}>
+          <AppText variant="bold" style={styles.statNumber}>
+            120
+          </AppText>
+          <AppText style={styles.statLabel}>Lượt theo dõi</AppText>
+        </View>
+        <View style={styles.verticalDivider} />
+        <View style={styles.statItem}>
+          <AppText variant="bold" style={styles.statNumber}>
+            250
+          </AppText>
+          <AppText style={styles.statLabel}>Người theo dõi</AppText>
+        </View>
+      </View>
+
+      {/* D. TABS */}
+      <View style={styles.tabContainer}>
+        <Pressable
+          style={[
+            styles.tabItem,
+            activeTab === "recipes" && styles.tabItemActive,
+          ]}
+          onPress={() => setActiveTab("recipes")}
+        >
+          <AppText
+            variant="bold"
+            style={[
+              styles.tabText,
+              activeTab === "recipes"
+                ? styles.tabTextActive
+                : styles.tabTextInactive,
+            ]}
+          >
+            Công thức
+          </AppText>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.tabItem,
+            activeTab === "favorites" && styles.tabItemActive,
+          ]}
+          onPress={() => setActiveTab("favorites")}
+        >
+          <AppText
+            variant="bold"
+            style={[
+              styles.tabText,
+              activeTab === "favorites"
+                ? styles.tabTextActive
+                : styles.tabTextInactive,
+            ]}
+          >
+            Yêu thích
+          </AppText>
+        </Pressable>
+      </View>
+    </View>
+  );
+
+  // --- 4. RENDER MÓN ĂN (CARD GRID) ---
+  const renderItem = ({ item }: { item: any }) => (
+    <Pressable
+      style={styles.card}
+      onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
+    >
+      <Image
+        source={{ uri: item.thumbnail }}
+        style={styles.cardImage}
+        resizeMode="cover"
+      />
+      <View style={styles.cardBody}>
+        <AppText variant="bold" style={styles.cardTitle} numberOfLines={1}>
           {item.title}
         </AppText>
-        <AppText variant="light" style={styles.recipeDesc}>
-          {item.description}
+        <AppText style={styles.cardSub} numberOfLines={1}>
+          {item.description || "Món ngon"}
         </AppText>
 
-        <View style={styles.recipeMetaRow}>
-          <View style={styles.metaItem}>
-            <StarIcon width={12} height={12} />
-            <AppText variant="light" style={styles.metaText}>
-              {item.rating}
-            </AppText>
+        <View style={styles.cardFooter}>
+          <View style={styles.metaRow}>
+            <Ionicons name="star" size={12} color={PRIMARY_COLOR} />
+            <AppText style={styles.metaText}>{item.rating || 5}</AppText>
           </View>
-
-          <View style={styles.metaItem}>
-            <ClockIcon width={12} height={12} />
-            <AppText variant="light" style={styles.metaText}>
-              {item.time}
-            </AppText>
+          <View style={styles.metaRow}>
+            <Feather name="clock" size={12} color={PRIMARY_COLOR} />
+            <AppText style={styles.metaText}>{item.time || "30 phút"}</AppText>
           </View>
         </View>
       </View>
     </Pressable>
   );
 
-  const renderCollectionCard = (item: CollectionCard) => (
-    <Pressable key={item.id} style={styles.collectionCard}>
-      <Image source={item.image} style={styles.collectionImage} />
-      <View style={styles.collectionFooter}>
-        <AppText variant="medium" style={styles.collectionTitle}>
-          {item.title}
-        </AppText>
-      </View>
-    </Pressable>
-  );
-
   return (
     <AppSafeView style={styles.safeArea}>
-      <View style={styles.container}>
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.topRow}>
-            <Image source={PROFILE_USER.avatar} style={styles.avatar} />
-
-            <View style={styles.userInfo}>
-              <AppText variant="medium" style={styles.name}>
-                {PROFILE_USER.fullName}
-              </AppText>
-              <AppText variant="light" style={styles.handle}>
-                {PROFILE_USER.handle}
-              </AppText>
-              <AppText variant="light" style={styles.bio}>
-                {PROFILE_USER.bio}
-              </AppText>
-            </View>
-
-            <View style={styles.topActions}>
-              <Pressable style={styles.actionCircleSoft}>
-                <PlusIcon width={16} height={16} />
-              </Pressable>
-
-              <Pressable
-                style={styles.actionCircleSoft}
-                onPress={() => navigation.navigate("SettingsScreen")}
-              >
-                <MenuIcon width={16} height={16} />
-              </Pressable>
-            </View>
+      <FlatList
+        data={activeTab === "recipes" ? myRecipes : []}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        numColumns={2}
+        columnWrapperStyle={styles.columnWrapper}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={
+          <View style={{ alignItems: "center", marginTop: 40 }}>
+            <AppText style={{ color: "#999" }}>Chưa có món ăn nào.</AppText>
           </View>
+        }
+      />
 
-          <View style={styles.actionRow}>
-            <Pressable
-              style={styles.primaryPill}
-              onPress={() => navigation.navigate("EditProfileScreen")}
-            >
-              <AppText variant="medium" style={styles.primaryPillText}>
-                Chỉnh Sửa Hồ Sơ
-              </AppText>
-            </Pressable>
-
-            <Pressable style={styles.primaryPill}>
-              <AppText variant="medium" style={styles.primaryPillText}>
-                Chia Sẻ Hồ Sơ
-              </AppText>
-            </Pressable>
-          </View>
-
-          <View style={styles.statsCard}>
-            <View style={styles.statItem}>
-              <AppText variant="medium" style={styles.statValue}>
-                {PROFILE_USER.stats.savedRecipes}
-              </AppText>
-              <AppText variant="light" style={styles.statLabel}>
-                Công thức đã lưu
-              </AppText>
-            </View>
-
-            <View style={styles.statDivider} />
-
-            <View style={styles.statItem}>
-              <AppText variant="medium" style={styles.statValue}>
-                {PROFILE_USER.stats.following}
-              </AppText>
-              <AppText variant="light" style={styles.statLabel}>
-                Lượt theo dõi
-              </AppText>
-            </View>
-
-            <View style={styles.statDivider} />
-
-            <View style={styles.statItem}>
-              <AppText variant="medium" style={styles.statValue}>
-                {PROFILE_USER.stats.followers}
-              </AppText>
-              <AppText variant="light" style={styles.statLabel}>
-                Người theo dõi
-              </AppText>
-            </View>
-          </View>
-
-          <View style={styles.tabRow}>
-            <Pressable
-              style={styles.tabItem}
-              onPress={() => setSection("recipes")}
-            >
-              <AppText
-                variant="medium"
-                style={
-                  section === "recipes" ? styles.tabTextActive : styles.tabText
-                }
-              >
-                Công thức
-              </AppText>
-              {section === "recipes" && <View style={styles.tabUnderline} />}
-            </Pressable>
-
-            <Pressable
-              style={styles.tabItem}
-              onPress={() => setSection("favorites")}
-            >
-              <AppText
-                variant="medium"
-                style={
-                  section === "favorites"
-                    ? styles.tabTextActive
-                    : styles.tabText
-                }
-              >
-                Yêu thích
-              </AppText>
-              {section === "favorites" && <View style={styles.tabUnderline} />}
-            </Pressable>
-          </View>
-
-          {section === "recipes" ? (
-            <View style={styles.recipeGrid}>
-              {profileRecipes.map(renderRecipeCard)}
-            </View>
-          ) : (
-            <View style={styles.collectionList}>
-              {profileCollections.map(renderCollectionCard)}
-              <Pressable style={styles.createCollectionBtn}>
-                <AppText variant="medium" style={styles.createCollectionText}>
-                  + Tạo bộ sưu tập
-                </AppText>
-              </Pressable>
-            </View>
-          )}
-
-          <AppBottomSpace height={90} />
-        </ScrollView>
-
-        <AppMainNavBar activeTab={activeTab} onTabPress={setActiveTab} />
+      {/* NAVIGATION BAR NỔI */}
+      <View style={styles.navBarWrapper}>
+        <AppMainNavBar
+          activeTab={activeNavTab}
+          onTabPress={(tab) => {
+            setActiveNavTab(tab);
+            if (tab === "home") navigation.navigate("HomeScreen");
+            // Xử lý các tab khác...
+          }}
+        />
       </View>
     </AppSafeView>
   );
@@ -242,157 +258,127 @@ const ProfileScreen: React.FC = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: "#fff" },
-  container: { flex: 1, backgroundColor: "#fff" },
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: H_PADDING, paddingTop: 10 },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
 
-  topRow: { flexDirection: "row", alignItems: "flex-start" },
-  avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    borderWidth: 1,
-    borderColor: "#f1f1f1",
-  },
-  userInfo: { flex: 1, paddingLeft: 12, paddingRight: 10 },
-  name: { fontSize: 20, color: AppLightColor.primary_color, fontWeight: "800" },
-  handle: {
-    marginTop: 2,
-    color: AppLightColor.primary_color,
-    fontWeight: "700",
-    opacity: 0.65,
-    fontSize: 13,
-  },
-  bio: { marginTop: 6, color: "#111", fontSize: 12, lineHeight: 16 },
-  topActions: {
+  // Header Config
+  headerContainer: { paddingHorizontal: 16, paddingTop: 10 },
+
+  // 1. Profile Row
+  profileRow: {
     flexDirection: "row",
-    alignItems: "center",
-    columnGap: 8,
-    marginTop: 8,
+    alignItems: "flex-start",
+    marginBottom: 20,
   },
+  avatarWrapper: {
+    borderWidth: 2,
+    borderColor: "#4CAF50", // Viền xanh lá
+    borderRadius: 50,
+    padding: 2,
+  },
+  avatar: { width: 80, height: 80, borderRadius: 40 },
+  infoCol: { flex: 1, marginLeft: 16, justifyContent: "center", paddingTop: 4 },
+  nameText: { fontSize: 20, color: PRIMARY_COLOR, marginBottom: 2 },
+  handleText: { fontSize: 14, color: PRIMARY_COLOR, marginBottom: 8 },
+  bioText: { fontSize: 13, color: "#333", lineHeight: 18 },
 
-  actionCircleSoft: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+  topIcons: { flexDirection: "row" },
+  iconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#FFEBEA",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ffe3e2",
   },
 
-  actionRow: { marginTop: 14, flexDirection: "row", columnGap: 12 },
-  primaryPill: {
+  // 2. Buttons Row
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 24,
+  },
+  actionBtn: {
     flex: 1,
-    backgroundColor: AppLightColor.primary_color,
-    borderRadius: 999,
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  primaryPillText: { fontSize: 13, color: "#fff", fontWeight: "700" },
-
-  statsCard: {
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: "#ffb6b5",
-    borderRadius: 14,
-    flexDirection: "row",
-    paddingVertical: 10,
-  },
-  statItem: { flex: 1, alignItems: "center" },
-  statValue: { fontSize: 16, fontWeight: "800", color: "#111" },
-  statLabel: { marginTop: 4, fontSize: 11, color: "#333" },
-  statDivider: { width: 1, height: 34, backgroundColor: "#ffd1d0" },
-
-  tabRow: { marginTop: 14, flexDirection: "row" },
-  tabItem: { flex: 1, alignItems: "center", paddingBottom: 10 },
-  tabText: { fontSize: 16, fontWeight: "800", color: "#111" },
-  tabTextActive: { fontSize: 16, fontWeight: "800", color: "#111" },
-  tabUnderline: {
-    position: "absolute",
-    bottom: 2,
-    width: 140,
-    height: 3,
-    borderRadius: 999,
-    backgroundColor: AppLightColor.primary_color,
-  },
-
-  recipeGrid: {
-    marginTop: 10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  recipeCard: {
-    width: CARD_W,
-    marginBottom: 14,
-    overflow: "visible",
-    alignItems: "center",
-  },
-  recipeImageWrap: {
-    width: "92%",
-    borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: "#eee",
-  },
-  recipeImage: { width: "100%", height: 120 },
-  recipeInfo: {
-    width: "100%",
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#ffb6b5",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginTop: -12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  recipeTitle: {
-    fontSize: 18,
-    lineHeight: 22,
-    fontWeight: "800",
-    color: "#111",
-  },
-  recipeDesc: { marginTop: 2, fontSize: 12, color: "#333" },
-  recipeMetaRow: {
-    marginTop: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  metaItem: { flexDirection: "row", alignItems: "center", columnGap: 6 },
-  metaText: {
-    color: AppLightColor.primary_color,
-    fontWeight: "700",
-    fontSize: 12,
-  },
-
-  collectionList: { marginTop: 10, rowGap: 14 },
-  collectionCard: {
+    height: 44,
+    backgroundColor: PRIMARY_COLOR,
     borderRadius: 22,
-    borderWidth: 1,
-    borderColor: "#ffb6b5",
-    overflow: "hidden",
-    backgroundColor: "#fff",
-  },
-  collectionImage: { width: "100%", height: 150 },
-  collectionFooter: {
-    paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: PRIMARY_COLOR,
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 4 },
   },
-  collectionTitle: { fontSize: 16, fontWeight: "800", color: "#111" },
+  actionBtnText: { color: "#fff", fontSize: 15 },
 
-  createCollectionBtn: {
-    marginTop: 4,
-    alignSelf: "center",
-    paddingHorizontal: 26,
+  // 3. Stats Row
+  statsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: PRIMARY_COLOR,
+    borderRadius: 16,
     paddingVertical: 12,
-    borderRadius: 999,
-    backgroundColor: "#ffe3e2",
+    paddingHorizontal: 10,
+    marginBottom: 24,
   },
-  createCollectionText: { fontSize: 13, fontWeight: "800", color: "#111" },
+  statItem: { alignItems: "center", flex: 1 },
+  statNumber: { fontSize: 16, color: "#333" },
+  statLabel: { fontSize: 11, color: "#666", marginTop: 2 },
+  verticalDivider: { width: 1, height: "80%", backgroundColor: "#eee" },
+
+  // 4. Tabs
+  tabContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 16,
+  },
+  tabItem: { paddingBottom: 10, flex: 1, alignItems: "center" },
+  tabItemActive: { borderBottomWidth: 3, borderBottomColor: PRIMARY_COLOR },
+  tabText: { fontSize: 18 },
+  tabTextActive: { color: "#333" },
+  tabTextInactive: { color: "#999" },
+
+  // List & Grid
+  listContent: { paddingBottom: 100 },
+  columnWrapper: {
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+
+  // Card Style
+  card: {
+    width: CARD_WIDTH,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginBottom: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  cardImage: {
+    width: "100%",
+    height: CARD_WIDTH,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  cardBody: { padding: 10 },
+  cardTitle: { fontSize: 15, color: "#333", marginBottom: 4 },
+  cardSub: { fontSize: 12, color: "#666", marginBottom: 8 },
+  cardFooter: { flexDirection: "row", justifyContent: "space-between" },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  metaText: { fontSize: 11, color: PRIMARY_COLOR },
+
+  // Nav Bar Wrapper
+  navBarWrapper: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
 });

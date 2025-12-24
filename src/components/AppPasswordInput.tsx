@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import {
   View,
   TextInput,
@@ -14,46 +14,53 @@ import { AppLightColor } from "../styles/color";
 
 interface PasswordInputProps extends TextInputProps {
   style?: StyleProp<TextStyle>;
+  children?: ReactNode;
 }
 
-const AppPasswordInput = ({ style, ...rest }: PasswordInputProps) => {
+const AppPasswordInput = ({ style, children, ...rest }: PasswordInputProps) => {
   const [visible, setVisible] = useState(false);
 
   return (
     <View style={styles.inputWrap}>
-      <TextInput
-        allowFontScaling={false}
-        secureTextEntry={!visible}
-        placeholderTextColor={AppLightColor.placeholder_text}
-        {...rest}
-        style={[styles.input, styles.eyeInput, style]}
-      />
+      <View style={styles.iconTextCon}>
+        {children}
+        <TextInput
+          allowFontScaling={false}
+          secureTextEntry={!visible}
+          placeholderTextColor={AppLightColor.placeholder_text}
+          {...rest}
+          style={[styles.input, styles.eyeInput, style]}
+        />
+      </View>
+
       <Pressable
         style={styles.eyeBtn}
         onPress={() => setVisible(!visible)}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Ionicons
-          name={visible ? "eye" : "eye-off"}
-          size={20}
-          color={AppLightColor.primary_color}
-        />
+        <Ionicons name={visible ? "eye" : "eye-off"} size={20} color={"grey"} />
       </Pressable>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  inputWrap: { position: "relative" },
+  inputWrap: {
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "grey",
+    height: 50,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+    width: 343
+
+  },
   input: {
-    height: 52,
-    borderRadius: 999,
-    paddingHorizontal: 22,
-    backgroundColor: AppLightColor.secondary_color,
-    color: AppLightColor.primary_text,
     fontWeight: "600",
     fontSize: 16,
     letterSpacing: 0.5,
+    width: 288,
   },
   eyeInput: {
     paddingRight: 52,
@@ -68,6 +75,9 @@ const styles = StyleSheet.create({
     height: 28,
     alignItems: "center",
     justifyContent: "center",
+  },
+  iconTextCon: {
+    flexDirection: "row",
   },
 });
 

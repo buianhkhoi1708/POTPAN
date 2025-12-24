@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, View, Alert, ActivityIndicator } from "react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 
 import AppSafeView from "../components/AppSafeView";
@@ -8,8 +8,10 @@ import AppBottomSpace from "../components/AppBottomSpace";
 import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
 import { AppLightColor } from "../styles/color";
 
-import BackArrowIcon from "../assets/images/backarrow.svg";
+// --- IMPORT STORE ---
+import { useAuthStore } from "../store/useAuthStore";
 
+import BackArrowIcon from "../assets/images/backarrow.svg";
 import Setting1Icon from "../assets/images/setting-1.svg";
 import Setting2Icon from "../assets/images/setting-2.svg";
 import Setting3Icon from "../assets/images/setting-3.svg";
@@ -22,7 +24,6 @@ const ROBOTO_SLAB_BOLD = "RobotoSlab-Bold";
 const SETTINGS_ITEM_FONT_SIZE = 20;
 const DELETE_BTN_FONT_SIZE = 20;
 
-// modal lớn hơn
 const MODAL_TITLE_SIZE = 22;
 const MODAL_MESSAGE_SIZE = 14;
 const MODAL_BTN_TEXT_SIZE = 15;
@@ -41,6 +42,7 @@ type ConfirmModalProps = {
   message: string;
   onClose: () => void;
   onConfirm: () => void;
+  loading?: boolean; // Thêm prop loading để hiện vòng quay khi đang xử lý
 };
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -49,15 +51,11 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   message,
   onClose,
   onConfirm,
+  loading
 }) => {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <Pressable style={styles.modalOverlay} onPress={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.modalOverlay} onPress={loading ? undefined : onClose}>
         <Pressable style={styles.modalCard} onPress={() => {}}>
           <AppText variant="bold" style={styles.modalTitle}>
             {title}
@@ -68,16 +66,28 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </AppText>
 
           <View style={styles.modalBtnRow}>
-            <Pressable style={styles.modalBtnGhost} onPress={onClose}>
+            {/* Nút Hủy */}
+            <Pressable 
+              style={[styles.modalBtnGhost, loading && { opacity: 0.5 }]} 
+              onPress={loading ? undefined : onClose}
+            >
               <AppText variant="bold" style={styles.modalBtnGhostText}>
                 Quay lại
               </AppText>
             </Pressable>
 
-            <Pressable style={styles.modalBtnPrimary} onPress={onConfirm}>
-              <AppText variant="bold" style={styles.modalBtnPrimaryText}>
-                Xác nhận
-              </AppText>
+            {/* Nút Xác nhận */}
+            <Pressable 
+              style={[styles.modalBtnPrimary, loading && { opacity: 0.5 }]} 
+              onPress={loading ? undefined : onConfirm}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <AppText variant="bold" style={styles.modalBtnPrimaryText}>
+                  Xác nhận
+                </AppText>
+              )}
             </Pressable>
           </View>
         </Pressable>
@@ -90,6 +100,11 @@ const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
 
+  // --- LẤY HÀM TỪ STORE ---
+  const logout = useAuthStore((state) => state.logout);
+  const deleteAccount = useAuthStore((state) => state.deleteAccount);
+  const isLoading = useAuthStore((state) => state.isLoading);
+
   const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
@@ -98,10 +113,28 @@ const SettingsScreen: React.FC = () => {
     if (isFocused) setActiveTab("profile");
   }, [isFocused]);
 
-  const goHomeReset = () => {
-    setDeleteModalVisible(false);
-    setLogoutModalVisible(false);
-    navigation.reset({ index: 0, routes: [{ name: "Home" }] });
+  // --- XỬ LÝ ĐĂNG XUẤT ---
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Không cần navigation.reset, AppNavigator sẽ tự chuyển về AuthStack
+      setLogoutModalVisible(false);
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể đăng xuất.");
+    }
+  };
+
+  // --- XỬ LÝ XÓA TÀI KHOẢN ---
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteAccount();
+      // Không cần navigation.reset, AppNavigator sẽ tự chuyển về AuthStack
+      setDeleteModalVisible(false);
+      Alert.alert("Thông báo", "Tài khoản của bạn đã được xóa vĩnh viễn.");
+    } catch (error: any) {
+      setDeleteModalVisible(false);
+      Alert.alert("Lỗi xóa tài khoản", error.message || "Vui lòng thử lại sau.");
+    }
   };
 
   const rows = useMemo<SettingRow[]>(
@@ -113,11 +146,13 @@ const SettingsScreen: React.FC = () => {
         showNext: true,
         onPress: () => navigation.navigate("NotificationSettingsScreen"),
       },
-      { key: "support", 
+      { 
+        key: "support", 
         title: "Trung tâm hỗ trợ", 
         Icon: Setting2Icon, 
         showNext: true, 
-        onPress: () => navigation.navigate("SupportCenterScreen") },
+        onPress: () => navigation.navigate("SupportCenterScreen") 
+      },
       { key: "privacy", title: "Chính sách bảo mật", Icon: Setting3Icon, showNext: true },
       {
         key: "language",
@@ -132,7 +167,7 @@ const SettingsScreen: React.FC = () => {
         title: "Đăng xuất",
         Icon: Setting6Icon,
         showNext: false,
-        onPress: () => setLogoutModalVisible(true),
+        onPress: () => setLogoutModalVisible(true), // Mở modal đăng xuất
       },
     ],
     [navigation]
@@ -195,20 +230,24 @@ const SettingsScreen: React.FC = () => {
           <AppBottomSpace height={90} />
         </ScrollView>
 
+        {/* MODAL XÓA TÀI KHOẢN */}
         <ConfirmModal
           visible={deleteModalVisible}
           title="Xóa tài khoản"
-          message="Bạn có muốn xóa tài khoản?"
+          message="Hành động này không thể hoàn tác. Mọi dữ liệu của bạn sẽ bị xóa vĩnh viễn."
+          loading={isLoading}
           onClose={() => setDeleteModalVisible(false)}
-          onConfirm={goHomeReset}
+          onConfirm={handleDeleteAccount}
         />
 
+        {/* MODAL ĐĂNG XUẤT */}
         <ConfirmModal
           visible={logoutModalVisible}
           title="Đăng xuất"
-          message="Bạn có muốn đăng xuất?"
+          message="Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?"
+          loading={isLoading}
           onClose={() => setLogoutModalVisible(false)}
-          onConfirm={goHomeReset}
+          onConfirm={handleLogout}
         />
 
         <AppMainNavBar
@@ -308,23 +347,22 @@ const styles = StyleSheet.create({
     fontFamily: ROBOTO_SLAB_BOLD,
   },
 
-  // MODAL: rộng hơn + cao hơn
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.55)",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 12, // giảm padding để modal rộng hơn
+    paddingHorizontal: 12,
   },
   modalCard: {
-    width: "96%", // rộng hơn
+    width: "96%",
     maxWidth: 520,
     borderRadius: 20,
     backgroundColor: "#fff",
     paddingHorizontal: 26,
-    paddingTop: 22, // cao hơn
-    paddingBottom: 20, // cao hơn
-    minHeight: 140, // ép cao hơn một chút
+    paddingTop: 22,
+    paddingBottom: 20,
+    minHeight: 140,
   },
   modalTitle: {
     textAlign: "center",
@@ -349,7 +387,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ffe3e2",
     borderRadius: 999,
-    paddingVertical: 12, // nút cao hơn
+    paddingVertical: 12,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -363,7 +401,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: AppLightColor.primary_color,
     borderRadius: 999,
-    paddingVertical: 12, // nút cao hơn
+    paddingVertical: 12,
     alignItems: "center",
     justifyContent: "center",
   },

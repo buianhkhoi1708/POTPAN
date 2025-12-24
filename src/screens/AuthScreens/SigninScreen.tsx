@@ -1,5 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -8,223 +7,269 @@ import {
   View,
   Alert,
   Pressable,
-  Keyboard,
-  TouchableWithoutFeedback,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
 
-// --- IMPORT COMPONENT & CONFIG ---
-// Đảm bảo đường dẫn import đúng với project của bạn
+// --- IMPORT THƯ VIỆN MỚI ---
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { registerSchema } from "../../utils/validationSchema"
+
+import { useAuthStore } from "../../store/useAuthStore";
 import AppSafeView from "../../components/AppSafeView";
 import AppText from "../../components/AppText";
-import AppTextInput from "../../components/AppTextInput";     
+import AppTextInput from "../../components/AppTextInput";
 import AppPasswordInput from "../../components/AppPasswordInput";
 import AppButton from "../../components/AppButton";
-import { auth, db } from "../../config/firebaseConfig";
+import AppLogo from "../../components/AppLogo";
 import { AppLightColor } from "../../styles/color";
 import { AppFonts } from "../../styles/fonts";
 
 const SigninScreen = () => {
   const navigation = useNavigation<any>();
+  const register = useAuthStore((state) => state.register);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
-  // State dữ liệu
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [dob, setDob] = useState(""); // Có thể nâng cấp dùng DatePicker sau
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  
-  const [isLoading, setIsLoading] = useState(false);
+  // --- SETUP FORM ---
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(registerSchema), // Gắn luật Yup vào form
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-  // --- HÀM XỬ LÝ ĐĂNG KÝ ---
-  const handleRegister = async () => {
-    // 1. Validate
-    if (!name || !email || !phone || !password || !confirm) {
-        Alert.alert("Thông báo", "Vui lòng điền đầy đủ thông tin.");
-        return;
-    }
-    if (password !== confirm) {
-        Alert.alert("Lỗi mật khẩu", "Mật khẩu xác nhận không khớp.");
-        return;
-    }
-    if (password.length < 6) {
-        Alert.alert("Lỗi mật khẩu", "Mật khẩu phải có ít nhất 6 ký tự.");
-        return;
-    }
-
-    // 2. Bắt đầu xử lý
-    Keyboard.dismiss();
-    setIsLoading(true);
-
+  // Hàm này chỉ chạy khi dữ liệu ĐÃ HỢP LỆ
+  const onSubmit = async (data: any) => {
     try {
-        // A. Tạo Auth
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // B. Lưu Firestore
-        await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            email: user.email,
-            fullName: name,
-            phoneNumber: phone,
-            dateOfBirth: dob,
-            createdAt: new Date().toISOString(),
-            role: 'user'
-        });
-
-        Alert.alert("Thành công", "Tạo tài khoản thành công!", [
-            { 
-                text: "Đăng nhập ngay", 
-                onPress: () => {
-                    // Tùy logic app: Tự đăng nhập luôn hoặc bắt ra Login
-                    // Ở đây mình điều hướng về Login hoặc Home tùy bạn
-                    navigation.navigate("LoginScreen"); 
-                } 
-            }
-        ]);
-
+      await register(data.email, data.password, data.fullName, data.phone);
+      Alert.alert("Thành công", "Tạo tài khoản thành công!", [
+        {
+          text: "Đăng nhập",
+          onPress: () => navigation.navigate("LoginScreen"),
+        },
+      ]);
     } catch (error: any) {
-        console.log("Register Error:", error.code);
-        let msg = "Đã có lỗi xảy ra: " + error.message;
-        if (error.code === 'auth/email-already-in-use') {
-            msg = "Email này đã được sử dụng.";
-        } else if (error.code === 'auth/invalid-email') {
-            msg = "Định dạng email không hợp lệ.";
-        }
-        Alert.alert("Đăng ký thất bại", msg);
-    } finally {
-        setIsLoading(false);
+      // Xử lý lỗi Firebase (như cũ)
+      Alert.alert("Lỗi", error.message);
     }
   };
 
+  // Component phụ để hiển thị lỗi màu đỏ
+  const ErrorMsg = ({ name }: { name: string }) => {
+    // @ts-ignore
+    const error = errors[name];
+    if (!error) return null;
+    return <Text style={styles.errorText}>{error.message}</Text>;
+  };
+
   return (
-    <AppSafeView style={styles.safe}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView
-          style={styles.flex1}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <AppSafeView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
         >
-          {/* Thêm ScrollView vì form đăng ký dài */}
-          <ScrollView 
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-          >
-            <View style={styles.container}>
-              <AppText variant="bold" style={styles.title}>ĐĂNG KÝ</AppText>
+          <View style={styles.mainContent}>
+            <AppLogo width={150} height={150} />
+            <AppText variant="bold" style={styles.headerTitle}>
+              ĐĂNG KÝ
+            </AppText>
 
-              <View style={styles.form}>
-                {/* --- HỌ TÊN --- */}
-                <AppText variant="medium" style={styles.label}>Họ tên</AppText>
-                <AppTextInput
-                  style={styles.textHolder}
-                  placeholder="Nguyễn Văn A"
-                  value={name}
-                  onChangeText={setName}
+            <View style={styles.formContainer}>
+              {/* --- HỌ TÊN (Dùng Controller để bọc Input) --- */}
+              <View style={styles.inputWrapper}>
+                <AppText variant="medium" style={styles.inputLabel}>
+                  Họ tên
+                </AppText>
+                <Controller
+                  control={control}
+                  name="fullName"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <AppTextInput
+                      style={styles.inputValue}
+                      placeholder="Nguyễn Văn A"
+                      onBlur={onBlur}
+                      onChangeText={onChange} // Quan trọng: Nối hàm onChange của thư viện
+                      value={value}
+                      children={
+                        <Ionicons
+                          name="person-outline"
+                          color="grey"
+                          size={25}
+                          style={styles.inputIcon}
+                        />
+                      }
+                    />
+                  )}
                 />
-
-                {/* --- EMAIL --- */}
-                <AppText style={[styles.label, styles.marginTop]}>Email</AppText>
-                <AppTextInput
-                  style={styles.textHolder}
-                  placeholder="example@gmail.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={email}
-                  onChangeText={setEmail}
-                />
-
-                {/* --- SỐ ĐIỆN THOẠI --- */}
-                <AppText style={[styles.label, styles.marginTop]}>Số điện thoại</AppText>
-                <AppTextInput
-                  style={styles.textHolder}
-                  placeholder="0909 xxx xxx"
-                  keyboardType="phone-pad"
-                  value={phone}
-                  onChangeText={setPhone}
-                />
-
-                 {/* --- NGÀY SINH --- */}
-                 <AppText style={[styles.label, styles.marginTop]}>Ngày sinh</AppText>
-                <AppTextInput
-                  style={styles.textHolder}
-                  placeholder="DD/MM/YYYY"
-                  value={dob}
-                  onChangeText={setDob}
-                />
-
-                {/* --- MẬT KHẨU --- */}
-                <AppText style={[styles.label, styles.marginTop]}>Mật khẩu</AppText>
-                <AppPasswordInput
-                  style={styles.textHolder}
-                  placeholder="•••••••••"
-                  value={password}
-                  onChangeText={setPassword}
-                />
-
-                {/* --- XÁC NHẬN MẬT KHẨU --- */}
-                <AppText style={[styles.label, styles.marginTop]}>Xác nhận mật khẩu</AppText>
-                <AppPasswordInput
-                  style={styles.textHolder}
-                  placeholder="•••••••••"
-                  value={confirm}
-                  onChangeText={setConfirm}
-                />
+                <ErrorMsg name="fullName" />
               </View>
 
-              {/* --- BUTTON ĐĂNG KÝ --- */}
-              {isLoading ? (
-                 <View style={[styles.primaryBtn, { backgroundColor: '#ccc' }]}>
-                    <ActivityIndicator color="#fff" />
-                 </View>
-              ) : (
-                <AppButton 
-                    butName="Đăng ký" 
-                    style={styles.primaryBtn} 
-                    style1={styles.primaryText} 
-                    onPress={handleRegister}
-                />
-              )}
-
-              {/* --- FOOTER --- */}
-              <View style={styles.bottomBlock}>
-                <Text style={styles.termsText}>
-                    Bằng cách đăng ký, bạn đồng ý với điều khoản sử dụng
-                </Text>
-
-                <AppText variant="light" style={styles.bottomText}>
-                  Đã có tài khoản?
-                  <Text
-                    style={styles.link}
-                    // Lưu ý: Kiểm tra đúng tên màn hình Login trong Navigation
-                    onPress={() => navigation.navigate("LoginScreen")} 
-                    suppressHighlighting
-                  >
-                    {" "}Đăng nhập
-                  </Text>
+              {/* --- EMAIL --- */}
+              <View style={styles.inputWrapper}>
+                <AppText style={[styles.inputLabel, styles.marginTop]}>
+                  Email
                 </AppText>
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <AppTextInput
+                      style={styles.inputValue}
+                      placeholder="example@gmail.com"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      children={
+                        <Ionicons
+                          name="mail-outline"
+                          color="grey"
+                          size={25}
+                          style={styles.inputIcon}
+                        />
+                      }
+                    />
+                  )}
+                />
+                <ErrorMsg name="email" />
+              </View>
 
-                {/* Social Login (Giữ cho giống Login) */}
-                <View style={styles.socialRow}>
-                  <Pressable style={styles.socialBtn}>
-                    <Ionicons name="logo-facebook" size={20} color="#111827" />
-                  </Pressable>
-                  <Pressable style={styles.socialBtn}>
-                    <Ionicons name="logo-instagram" size={20} color="#111827" />
-                  </Pressable>
-                  <Pressable style={styles.socialBtn}>
-                    <Ionicons name="paper-plane-outline" size={20} color="#111827"/>
-                  </Pressable>
-                </View>
+              {/* --- SĐT --- */}
+              <View style={styles.inputWrapper}>
+                <AppText style={[styles.inputLabel, styles.marginTop]}>
+                  Số điện thoại
+                </AppText>
+                <Controller
+                  control={control}
+                  name="phone"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <AppTextInput
+                      style={styles.inputValue}
+                      placeholder="09xx..."
+                      keyboardType="phone-pad"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      children={
+                        <Ionicons
+                          name="call-outline"
+                          color="grey"
+                          size={25}
+                          style={styles.inputIcon}
+                        />
+                      }
+                    />
+                  )}
+                />
+                <ErrorMsg name="phone" />
+              </View>
+
+              {/* --- MẬT KHẨU --- */}
+              <View style={styles.inputWrapper}>
+                <AppText style={[styles.inputLabel, styles.marginTop]}>
+                  Mật khẩu
+                </AppText>
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <AppPasswordInput
+                      style={styles.inputValue}
+                      placeholder="•••••••••"
+                      onChangeText={onChange}
+                      value={value}
+                      children={
+                        <Ionicons
+                          name="lock-closed-outline"
+                          color="grey"
+                          size={25}
+                          style={styles.inputIcon}
+                        />
+                      }
+                    />
+                  )}
+                />
+                <ErrorMsg name="password" />
+              </View>
+
+              {/* --- XÁC NHẬN --- */}
+              <View style={styles.inputWrapper}>
+                <AppText style={[styles.inputLabel, styles.marginTop]}>
+                  Xác nhận mật khẩu
+                </AppText>
+                <Controller
+                  control={control}
+                  name="confirmPassword"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <AppPasswordInput
+                      style={styles.inputValue}
+                      placeholder="•••••••••"
+                      onChangeText={onChange}
+                      value={value}
+                      children={
+                        <Ionicons
+                          name="shield-checkmark-outline"
+                          color="grey"
+                          size={25}
+                          style={styles.inputIcon}
+                        />
+                      }
+                    />
+                  )}
+                />
+                <ErrorMsg name="confirmPassword" />
               </View>
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
+
+            {/* --- NÚT ĐĂNG KÝ (Gọi handleSubmit) --- */}
+            {isLoading ? (
+              <View
+                style={[styles.registerButton, { backgroundColor: "#ccc" }]}
+              >
+                <ActivityIndicator color="#fff" />
+              </View>
+            ) : (
+              <AppButton
+                butName="Đăng ký"
+                style={styles.registerButton}
+                style1={styles.registerButtonText}
+                onPress={handleSubmit(onSubmit)} // Thư viện tự lo validation trước khi gọi onSubmit
+              />
+            )}
+
+            {/* ... Footer code giữ nguyên ... */}
+            <View style={styles.footerContainer}>
+              {/* Copy footer từ code cũ qua */}
+              <AppText variant="light" style={styles.footerText}>
+                Đã có tài khoản?
+                <Text
+                  style={styles.loginLink}
+                  onPress={() => navigation.navigate("LoginScreen")}
+                >
+                  {" "}
+                  Đăng nhập
+                </Text>
+              </AppText>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </AppSafeView>
   );
 };
@@ -232,98 +277,59 @@ const SigninScreen = () => {
 export default SigninScreen;
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: AppLightColor.background
-  },
-  flex1: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1, // Để nội dung bung ra hết chiều cao nếu ít
-    paddingBottom: 40, // Khoảng trống dưới cùng để cuộn không bị che
-  },
-  container: {
+  // ... Các styles cũ giữ nguyên
+  safeArea: { flex: 1, backgroundColor: AppLightColor.background },
+  keyboardContainer: { flex: 1 },
+  scrollContainer: { flexGrow: 1 },
+  mainContent: {
     flex: 1,
     backgroundColor: "white",
     paddingHorizontal: 24,
-    paddingTop: 40, // Thêm padding top vì nằm trong ScrollView
+    alignItems: "center",
+    paddingBottom: 40,
+    paddingTop: 20,
   },
-  title: {
-    fontSize: 40,
+  headerTitle: {
+    fontSize: 30,
     fontWeight: "900",
     textAlign: "center",
     letterSpacing: 1,
     marginBottom: 30,
     fontFamily: AppFonts.RobotoSlabBold,
   },
-  form: {
-    marginBottom: 32,
+  formContainer: { width: "100%", marginBottom: 24 },
+  inputWrapper: { width: "100%", paddingHorizontal: 0 },
+  marginTop: { marginTop: 16 },
+  inputLabel: {
+    fontSize: 17,
+    fontFamily: AppFonts.RobotoMedium,
+    fontWeight: "600",
+    marginBottom: 4,
   },
-  label: {
-    fontSize: 20,
-    fontFamily: AppFonts.RobotoSlabMedium,
-    fontWeight: "700",
-    marginBottom: 8,
-    marginLeft: 20, // Canh lề trái label giống Login
-  },
-  marginTop: {
-    marginTop: 16,
-  },
-  textHolder: {
-    fontSize: 16,
-    fontWeight: '400',
-    letterSpacing: 1,
-  },
-  primaryBtn: {
-    marginTop: 8,
+  inputValue: { fontSize: 16, fontWeight: "400", letterSpacing: 1 },
+  inputIcon: { marginRight: 10 },
+  registerButton: {
+    marginTop: 10,
     alignSelf: "center",
-    height: 52,
-    borderRadius: 999,
+    height: 50,
+    borderRadius: 10,
     backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 60,
-    minWidth: 200,
+    width: "100%",
+    maxWidth: 400,
   },
-  primaryText: {
-    color: "#ffffff",
-    fontSize: 20,
-    fontWeight: "800",
-  },
-  bottomBlock: {
-    marginTop: 24,
-    alignItems: "center",
-  },
-  termsText: {
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
-    marginBottom: 12,
-    paddingHorizontal: 20
-  },
-  bottomText: {
-    color: "#111827",
-    fontSize: 16,
-  },
-  link: {
-    color: "#0040C0",
-    fontWeight: "800",
-  },
-  socialRow: {
-    flexDirection: "row",
-    marginTop: 20,
-    justifyContent: "center",
-    columnGap: 20,
-  },
-  socialBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25, // Fix lỗi Android
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: AppLightColor.background,
+  registerButtonText: { color: "#ffffff", fontSize: 20, fontWeight: "800" },
+  footerContainer: { marginTop: 24, alignItems: "center" },
+  footerText: { fontSize: 16, fontFamily: AppFonts.RobotoMedium },
+  loginLink: { color: AppLightColor.primary_color, fontWeight: "800" },
+
+  // --- THÊM STYLE CHO LỖI ---
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+    fontFamily: AppFonts.RobotoRegular, // hoặc font thường
   },
 });

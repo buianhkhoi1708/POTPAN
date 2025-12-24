@@ -1,140 +1,229 @@
-// src/screens/EditProfileScreen.tsx
-
-import React, { useState } from "react";
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  TextInput,
-  View,
-  StyleSheet,
+import React, { useState, useEffect } from "react";
+import { 
+  View, 
+  StyleSheet, 
+  Alert, 
+  ActivityIndicator, 
+  Pressable, 
+  TextInput, 
+  ScrollView, 
+  Image 
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+
+// --- THƯ VIỆN UPLOAD ẢNH ---
+import * as ImagePicker from 'expo-image-picker';
+import { decode } from 'base64-arraybuffer';
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
-import AppBottomSpace from "../components/AppBottomSpace";
-import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
-import AppSearchModal from "../components/AppSearchModal";
+import AppMainNavBar from "../components/AppMainNavBar"; 
+import { useAuthStore } from "../store/useAuthStore";
+import { supabase } from "../config/supabaseClient";
 
-import BackArrow from "../assets/images/backarrow.svg";
-import SearchIcon from "../assets/images/search.svg";
-import NotificationIcon from "../assets/images/notification.svg";
+const PRIMARY_COLOR = "#F06560";
 
-import { AppLightColor } from "../styles/color";
-
-const EditProfileScreen: React.FC = () => {
+const EditProfileScreen = () => {
   const navigation = useNavigation<any>();
-  const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
-  const [searchVisible, setSearchVisible] = useState(false);
+  const { profile, updateProfile, isLoading, user } = useAuthStore();
 
-  const [fullName, setFullName] = useState("Bùi Anh Khôi");
-  const [nickname, setNickname] = useState("KhoiABui");
-  const [bio, setBio] = useState("Nấu ăn là niềm đam mê to lớn của tôi");
-  const [link, setLink] = useState("");
+  // State Form
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState(""); 
+  const [bio, setBio] = useState(""); 
+  const [website, setWebsite] = useState("");
+  
+  // State xử lý ảnh
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false); // Loading khi đang up ảnh
+
+  // Load dữ liệu cũ
+  useEffect(() => {
+    if (profile) {
+      setName(profile.full_name || "");
+      setUsername(profile.username || ""); 
+      setBio(profile.bio || "");
+      setWebsite(profile.website || "");
+      setAvatarUrl(profile.avatar_url || null);
+    }
+  }, [profile]);
+
+  // --- HÀM 1: CHỌN ẢNH TỪ MÁY (Đã sửa lỗi Warning MediaTypeOptions) ---
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Cần quyền", "Vui lòng cấp quyền truy cập ảnh để thay đổi avatar.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      // 👇 QUAY LẠI DÙNG CÁI NÀY ĐỂ HẾT LỖI ĐỎ
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+      allowsEditing: true,
+      aspect: [1, 1], 
+      quality: 0.5,
+      base64: true,   
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const selectedImage = result.assets[0];
+      uploadImageToSupabase(selectedImage.base64, selectedImage.uri);
+    }
+  };
+
+  // --- HÀM 2: UPLOAD LÊN SUPABASE ---
+  const uploadImageToSupabase = async (base64Image: string | null | undefined, imageUri: string) => {
+    if (!base64Image || !user) return;
+
+    try {
+      setIsUploading(true);
+      
+      // Tạo tên file duy nhất: user_id + thời gian
+      const fileExt = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // Upload file vào bucket 'avatars'
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, decode(base64Image), {
+          contentType: `image/${fileExt}`,
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Lấy đường dẫn công khai (Public URL)
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Cập nhật state để hiển thị ảnh mới ngay lập tức
+      setAvatarUrl(data.publicUrl);
+      
+    } catch (error: any) {
+      Alert.alert("Lỗi Upload", error.message);
+      console.log("Upload Error:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // --- HÀM 3: LƯU THÔNG TIN ---
+  const handleSave = async () => {
+    if (!name.trim()) return Alert.alert("Lỗi", "Họ tên không được để trống");
+    
+    try {
+      // Gửi thông tin + URL ảnh mới nhất lên server
+      await updateProfile(
+        name, 
+        profile?.phone_number || "", 
+        avatarUrl, 
+        username, 
+        bio, 
+        website
+      );
+      Alert.alert("Thành công", "Đã cập nhật hồ sơ!");
+      navigation.goBack();
+    } catch (error: any) {
+      console.log("Lỗi Save:", error);
+      Alert.alert("Lỗi", "Không thể cập nhật. " + (error.message || ""));
+    }
+  };
 
   return (
-    <AppSafeView style={styles.safeArea}>
-      <View style={styles.container}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          <View style={styles.header}>
-            <Pressable
-              style={styles.headerIconCircle}
-              onPress={() => navigation.goBack()}
-            >
-              <BackArrow width={18} height={18} />
-            </Pressable>
+    <AppSafeView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.iconBtn}>
+           <Ionicons name="arrow-back" size={24} color="#fff" />
+        </Pressable>
+        <AppText variant="bold" style={styles.headerTitle}>Chỉnh Sửa Hồ Sơ</AppText>
+        <View style={{width: 36}} /> 
+      </View>
 
-            <View style={styles.headerTitleWrap} pointerEvents="none">
-              <AppText variant="title" style={styles.headerTitle}>
-                Chỉnh Sửa Hồ Sơ
-              </AppText>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        
+        {/* --- PHẦN AVATAR (Có nút bấm thay đổi) --- */}
+        <View style={styles.avatarSection}>
+          <Pressable onPress={pickImage} disabled={isUploading}>
+            <View style={styles.avatarWrapper}>
+              <Image 
+                source={{ uri: avatarUrl || "https://i.pravatar.cc/300" }} 
+                style={styles.avatar} 
+              />
+              
+              {/* Lớp phủ loading khi đang upload */}
+              {isUploading && (
+                <View style={styles.uploadingOverlay}>
+                  <ActivityIndicator color="#fff" />
+                </View>
+              )}
+              
+              {/* Icon Camera */}
+              <View style={styles.cameraIcon}>
+                <Ionicons name="camera" size={20} color="#fff" />
+              </View>
             </View>
+          </Pressable>
+          <AppText style={{marginTop: 10, color: '#888'}}>Chạm để đổi ảnh đại diện</AppText>
+        </View>
 
-            <View style={styles.headerRight}>
-              <Pressable
-                style={styles.headerIconCircle}
-                onPress={() => setSearchVisible(true)}
-              >
-                <SearchIcon width={18} height={18} />
-              </Pressable>
-
-              <Pressable
-                style={styles.headerIconCircle}
-                onPress={() => navigation.navigate("Notification")}
-              >
-                <NotificationIcon width={18} height={18} />
-              </Pressable>
-            </View>
-          </View>
-
-          <View style={styles.avatarWrap}>
-            <Image
-              source={require("../assets/images/avt-profile.png")}
-              style={styles.avatar}
+        {/* Form Inputs */}
+        <View style={styles.form}>
+          {/* 1. HỌ TÊN */}
+          <View style={styles.inputGroup}>
+            <AppText variant="bold" style={styles.label}>Họ Tên</AppText>
+            <TextInput 
+              style={styles.input} value={name} onChangeText={setName} placeholder="Nhập họ tên"
             />
           </View>
 
-          <View style={styles.form}>
-            <AppText variant="medium" style={styles.label}>
-              Họ Tên
-            </AppText>
-            <TextInput
-              value={fullName}
-              onChangeText={setFullName}
-              style={styles.inputPill}
+          {/* 2. BIỆT DANH */}
+          <View style={styles.inputGroup}>
+            <AppText variant="bold" style={styles.label}>Biệt Danh</AppText>
+            <TextInput 
+              style={styles.input} value={username} onChangeText={setUsername} placeholder="@nickname"
             />
-
-            <AppText variant="medium" style={styles.label}>
-              Biệt Danh
-            </AppText>
-            <TextInput
-              value={nickname}
-              onChangeText={setNickname}
-              style={styles.inputPill}
-            />
-
-            <AppText variant="medium" style={styles.label}>
-              Giới Thiệu Bản Thân
-            </AppText>
-            <TextInput
-              value={bio}
-              onChangeText={setBio}
-              style={styles.inputBio}
-              multiline
-            />
-
-            <AppText variant="medium" style={styles.label}>
-              Thêm Liên Kết
-            </AppText>
-            <TextInput
-              value={link}
-              onChangeText={setLink}
-              style={styles.inputPill}
-            />
-
-            <Pressable
-              style={styles.saveBtn}
-              onPress={() => navigation.goBack()}
-            >
-              <AppText variant="medium" style={styles.saveText}>
-                Lưu
-              </AppText>
-            </Pressable>
           </View>
 
-          <AppBottomSpace height={90} />
-        </ScrollView>
+          {/* 3. GIỚI THIỆU */}
+          <View style={styles.inputGroup}>
+            <AppText variant="bold" style={styles.label}>Giới Thiệu</AppText>
+            <TextInput 
+              style={[styles.input, styles.textArea]} value={bio} onChangeText={setBio}
+              placeholder="Mô tả về bạn..." multiline numberOfLines={4} textAlignVertical="top"
+            />
+          </View>
 
-        <AppSearchModal
-          visible={searchVisible}
-          onClose={() => setSearchVisible(false)}
+          {/* 4. WEBSITE */}
+          <View style={styles.inputGroup}>
+            <AppText variant="bold" style={styles.label}>Website</AppText>
+            <TextInput 
+              style={styles.input} value={website} onChangeText={setWebsite} placeholder="https://..." autoCapitalize="none"
+            />
+          </View>
+
+          {/* NÚT LƯU */}
+          <View style={styles.btnContainer}>
+            {isLoading ? (
+               <ActivityIndicator size="large" color={PRIMARY_COLOR} />
+            ) : (
+               <Pressable style={styles.saveBtn} onPress={handleSave}>
+                 <AppText variant="bold" style={styles.saveBtnText}>Lưu</AppText>
+               </Pressable>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Nav Bar dưới cùng */}
+      <View style={styles.navBarWrapper}>
+        <AppMainNavBar 
+          activeTab="profile" 
+          onTabPress={(tab) => { if(tab === 'home') navigation.navigate('HomeScreen'); }} 
         />
-
-        <AppMainNavBar activeTab={activeTab} onTabPress={setActiveTab} />
       </View>
     </AppSafeView>
   );
@@ -143,67 +232,57 @@ const EditProfileScreen: React.FC = () => {
 export default EditProfileScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: "#fff" },
-  container: { flex: 1, backgroundColor: "#fff" },
-  scrollContent: { paddingHorizontal: 26, paddingTop: 8 },
-
-  header: {
-    height: 44,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  container: { flex: 1, backgroundColor: '#fff' },
+  
+  // Header
+  header: { 
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', 
+    paddingHorizontal: 20, paddingVertical: 15 
   },
-  headerTitleWrap: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    alignItems: "center",
+  headerTitle: { fontSize: 22, color: PRIMARY_COLOR },
+  iconBtn: {
+    width: 36, height: 36, borderRadius: 18, backgroundColor: PRIMARY_COLOR,
+    alignItems: 'center', justifyContent: 'center'
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: AppLightColor.primary_color,
+  
+  scrollContent: { paddingBottom: 100 },
+  
+  // Avatar Styles
+  avatarSection: { alignItems: 'center', marginVertical: 20 },
+  avatarWrapper: { position: 'relative' },
+  avatar: { 
+    width: 120, height: 120, borderRadius: 60, 
+    borderWidth: 3, borderColor: '#C8E6C9' 
   },
-  headerRight: { flexDirection: "row", columnGap: 10 },
-
-  headerIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: AppLightColor.primary_color,
-    alignItems: "center",
-    justifyContent: "center",
+  cameraIcon: {
+    position: 'absolute', bottom: 0, right: 0,
+    backgroundColor: PRIMARY_COLOR, width: 36, height: 36, borderRadius: 18,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#fff'
   },
-
-  avatarWrap: { alignItems: "center", marginTop: 14 },
-  avatar: { width: 120, height: 120, borderRadius: 60 },
-
-  form: { marginTop: 12 },
-  label: { fontSize: 14, fontWeight: "700", marginTop: 14 },
-  inputPill: {
-    marginTop: 8,
-    backgroundColor: "#ffe3e2",
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 14,
-  },
-  inputBio: {
-    marginTop: 8,
-    backgroundColor: "#ffe3e2",
-    borderRadius: 22,
-    padding: 14,
-    minHeight: 96,
-    fontSize: 14,
+  uploadingOverlay: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 60,
+    alignItems: 'center', justifyContent: 'center'
   },
 
+  // Form
+  form: { paddingHorizontal: 24 },
+  inputGroup: { marginBottom: 20 },
+  label: { fontSize: 16, color: '#333', marginBottom: 8 },
+  input: { 
+    borderWidth: 1, borderColor: '#999', borderRadius: 25, 
+    paddingHorizontal: 20, paddingVertical: 12, fontSize: 16, backgroundColor: '#fff'
+  },
+  textArea: { height: 100, borderRadius: 20, paddingTop: 15 },
+  
+  // Button
+  btnContainer: { marginTop: 10, alignItems: 'center' },
   saveBtn: {
-    marginTop: 20,
-    alignSelf: "center",
-    backgroundColor: AppLightColor.primary_color,
-    borderRadius: 999,
-    paddingHorizontal: 64,
-    paddingVertical: 10,
+    backgroundColor: PRIMARY_COLOR, width: '60%', height: 50, borderRadius: 25,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: PRIMARY_COLOR, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 5, elevation: 4
   },
-  saveText: { color: "#fff", fontSize: 16, fontWeight: "800" },
+  saveBtnText: { color: '#fff', fontSize: 20 },
+  
+  navBarWrapper: { position: 'absolute', bottom: 0, left: 0, right: 0 }
 });

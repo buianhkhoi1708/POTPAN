@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Children, ReactNode } from "react";
 import {
   View,
   TextInput,
@@ -11,33 +11,51 @@ import { AppLightColor } from "../styles/color";
 
 interface AppTextInputProps extends TextInputProps {
   style?: StyleProp<TextStyle>;
+  children?: ReactNode;
 }
 
-const AppTextInput = ({ style, ...rest }: AppTextInputProps) => {
+const AppTextInput = ({ style, children, ...rest }: AppTextInputProps) => {
   return (
     <View style={styles.inputWrap}>
-      <TextInput
-        allowFontScaling={false}
-        placeholderTextColor={AppLightColor.placeholder_text}
-        {...rest}
-        style={[styles.input, style]}
-      />
+      <View style={styles.inputContainer}>
+        {children}
+        <TextInput
+          allowFontScaling={false}
+          placeholderTextColor={AppLightColor.placeholder_text}
+          {...rest}
+          style={[styles.input, style]}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  inputWrap: { position: "relative" },
+  inputWrap: {
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "grey",
+    height: 50,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    flexDirection: "row",
+    width: 343
+
+  },
   input: {
-    height: 52,
-    borderRadius: 999,
-    paddingHorizontal: 22,
-    backgroundColor: AppLightColor.secondary_color,
+    height: 50,
+    width: 300,
+    borderRadius: 10,
     color: AppLightColor.primary_text,
     fontWeight: "600",
     fontSize: 20,
     letterSpacing: 0.5,
     textAlignVertical: "center",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: 'center'
   },
 });
 
