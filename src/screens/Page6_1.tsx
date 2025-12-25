@@ -70,6 +70,7 @@ const categories: CategoryItem[] = [
 
 // 1. Header Mới (Nút Tròn Đỏ - Icon Trắng)
 function CategoriesHeader({ title, onBack }: { title: string; onBack: () => void }) {
+  const navigation = useNavigation<any>();
   return (
     <View style={h.header}>
       <Pressable onPress={onBack} style={h.circleBtn} hitSlop={10}>
@@ -79,7 +80,11 @@ function CategoriesHeader({ title, onBack }: { title: string; onBack: () => void
       <Text style={h.title}>{title}</Text>
 
       <View style={h.rightGroup}>
-        <Pressable style={h.circleBtn}>
+        {/* ✅ 3. Thêm onPress chuyển sang màn hình SearchScreen */}
+        <Pressable 
+          style={h.circleBtn}
+          onPress={() => navigation.navigate("SearchScreen")}
+        >
           <Ionicons name="search" size={30} color="#fff" />
         </Pressable>
         <Pressable style={h.circleBtn}>

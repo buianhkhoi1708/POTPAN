@@ -132,13 +132,11 @@ function DetailHeader({ title, onBack }: { title: string; onBack: () => void }) 
       </Pressable>
       <Text style={h.title}>{title}</Text>
       <View style={h.rightGroup}>
-        <Pressable 
-          style={h.circleBtn}
-        >
-          <Ionicons name="search" size={30} color="#fff" />
-        </Pressable>
         <Pressable style={h.circleBtn}
           onPress={() => navigation.navigate("SearchScreen")}>
+          <Ionicons name="search" size={30} color="#fff" />
+        </Pressable>
+        <Pressable style={h.circleBtn}>
           <Ionicons name="notifications" size={30} color="#fff" />
         </Pressable>
       </View>
