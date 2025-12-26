@@ -1,6 +1,6 @@
+import "./src/config/i18n";
 import React from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 import { AppNavigator } from './src/navigations/AppStackNavigator';
 import { 
   useFonts, 

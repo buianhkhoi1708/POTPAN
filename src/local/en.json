@@ -1,0 +1,165 @@
+{
+  "common": {
+    "loading": "Loading data...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "require_login": "You need to login to perform this action.",
+    "back": "Cancel"
+  },
+  "home": {
+    "greeting": "Hello",
+    "featured_recipes": "Featured Recipes",
+    "recent_recipes": "Recent Recipes",
+    "famous_chefs": "Famous Chefs"
+  },
+  "profile": {
+    "my_recipes": "My Recipes",
+    "no_recipes": "No recipes found.",
+    "followers": "Followers",
+    "following": "Following",
+    "follow": "Follow",
+    "recipes": "Recipes",
+    "my_collections": "My collections",
+    "create_collect": "Create new collections",
+    "view_detail": "Your collections",
+    "edit_profile": "Edit your profile",
+    "share_profile": "Share your profile"
+
+    
+
+  },
+  "recipe_detail": {
+    "view": "View",
+    "cooked_by": "Recipe by",
+    "chef_default": "Chef",
+    "description": "Description",
+    "no_description": "No description available.",
+    "ingredients": "Ingredients",
+    "items": "items",
+    "steps": "Instructions",
+    "steps_count": "steps",
+    "start_cooking": "Start Cooking",
+    "options_title": "Options",
+    "already_saved_msg": "This recipe is already saved. What would you like to do?",
+    "remove_save": "Unsave",
+    "change_collection": "Change Collection",
+    "remove_success": "Recipe removed from saved list.",
+    "save_success": "Saved to collection!",
+    "share_suffix": "Check it out on Cooking App",
+    "share_error": "Cannot share this content"
+  },
+  "data_map": {
+    "category": {
+      "Món mặn": "Savory Dish",
+      "Món canh": "Soup",
+      "Tráng miệng": "Dessert",
+      "Bánh ngọt": "Pastry",
+      "Nước uống": "Drinks",
+      "Đồ uống": "Drinks",
+      "Ăn vặt": "Snacks"
+    }
+  },
+  "community": {
+    "screen_title": "Community",
+    "tabs": {
+      "hot": "Hot 🔥",
+      "new": "New ✨",
+      "old": "Old ⏳"
+    },
+    "by": "By",
+    "default_desc": "Delicious recipes waiting for you to discover...",
+    "anonymous_chef": "Chef",
+    "empty_list": "No posts found."
+  },
+  "common1": {
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    }
+  },
+  "category": {
+    "screen_title": "Category"
+  },
+  "recipe": {
+    "time_format": "{{count}} mins"
+  },
+  "search": {
+    "placeholder": "Search recipes, description...",
+    "sections": {
+      "category": "Category",
+      "cuisine": "Cuisine",
+      "difficulty": "Difficulty",
+      "time": "Cooking Time"
+    },
+    "cuisine": {
+      "vietnam": "Vietnam",
+      "international": "International"
+    },
+    "time": {
+      "under_30": "Under 30 mins",
+      "30_60": "30 - 60 mins",
+      "over_60": "Over 60 mins"
+    },
+    "reset": "Reset",
+    "apply": "Search"
+  },
+  "settings": {
+    "title": "Settings",
+    "notifications": "Notifications",
+    "support": "Support Center",
+    "privacy": "Policy",
+    "language": "Language",
+    "logout": "Logout",
+    "logout_confirm": "Are you sure you want to log out of the app?",
+    "delete_account": "Delete Account",
+    "delete_confirm": "This action cannot be undone. All your data will be permanently deleted.",
+    "back": "Go back",
+    "confirm": "Confirm"
+  },
+"language": {
+    "title": "Language Settings",
+    "current_language": "Current Language",
+    "available_languages": "All Languages",
+    "info": "Selecting a new language will update the app interface immediately.",
+    "names": {
+      "vi": "Vietnamese",
+      "en": "English",
+      "fr": "French",
+      "ja": "Japanese",
+      "ko": "Korean",
+      "zh": "Chinese"
+    }
+  },
+  
+  "chef": {
+    "follow": "Follow",
+    "following": "Following",
+    "sections": {
+      "top_trending": "Top 5 Trending",
+      "favorites": "Favorite Chefs",
+      "new_faces": "New Faces"
+    }
+  },
+  "search1": {
+    "result_title": "Search Results",
+    "all_recipes": "your filter",
+    "summary": "Found {{count}} recipes for {{keyword}}",
+    "no_result": "No results found",
+    "empty_hint": "Try checking your spelling or using different keywords!"
+  },
+  "follow": {
+    "my_list": "My Connections",
+    "user_list": "User",
+    "followers": "Followers",
+    "unfollow_title": "Unfollow",
+    "unfollow_msg": "Are you sure you want to unfollow this person?",
+    "remove_follower_title": "Remove Follower",
+    "remove_follower_msg": "This person will no longer see your posts.",
+    "yes": "Yes"
+  }
+}
+
+  
+

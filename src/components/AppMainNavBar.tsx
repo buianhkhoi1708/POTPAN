@@ -1,17 +1,12 @@
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import type { SvgProps } from "react-native-svg";
+import { Ionicons } from "@expo/vector-icons"; // 👇 1. Import Ionicons
 import { AppLightColor } from "../styles/color";
-import HomeIcon from "../assets/images/home.svg";
-import WorldIcon from "../assets/images/world.svg";
-import CategoryIcon from "../assets/images/category.svg";
-import ProfileIcon from "../assets/images/profile.svg";
-import ActiveHomeIcon from "../assets/images/active-home.svg";
-import ActiveWorldIcon from "../assets/images/active-world.svg";
-import ActiveCategoryIcon from "../assets/images/active-category.svg";
-import ActiveProfileIcon from "../assets/images/active-profile.svg";
-import { RootStackParamList } from "../type/types";
+// Không cần import SVG nữa
+
+// Nếu bạn chưa có file types, có thể dùng any tạm thời hoặc import đúng đường dẫn
+// import { RootStackParamList } from "../type/types"; 
 
 export type MainTabKey = "home" | "world" | "category" | "profile";
 
@@ -22,24 +17,41 @@ interface MainBottomNavProps {
 
 type TabConfig = {
   key: MainTabKey;
-  Icon: React.ComponentType<SvgProps>;
-  ActiveIcon: React.ComponentType<SvgProps>;
+  iconName: keyof typeof Ionicons.glyphMap;       // Tên icon khi chưa chọn
+  activeIconName: keyof typeof Ionicons.glyphMap; // Tên icon khi đang chọn
 };
 
+// 👇 2. Cấu hình Icon
 const TABS: TabConfig[] = [
-  { key: "home", Icon: HomeIcon, ActiveIcon: ActiveHomeIcon },
-  { key: "world", Icon: WorldIcon, ActiveIcon: ActiveWorldIcon },
-  { key: "category", Icon: CategoryIcon, ActiveIcon: ActiveCategoryIcon },
-  { key: "profile", Icon: ProfileIcon, ActiveIcon: ActiveProfileIcon },
+  { 
+    key: "home", 
+    iconName: "home-outline", 
+    activeIconName: "home" 
+  },
+  { 
+    key: "world", 
+    iconName: "earth-outline", // Hoặc dùng "people-outline" nếu muốn biểu tượng nhóm người
+    activeIconName: "earth" 
+  },
+  { 
+    key: "category", 
+    iconName: "grid-outline", 
+    activeIconName: "grid" 
+  },
+  { 
+    key: "profile", 
+    iconName: "person-outline", 
+    activeIconName: "person" 
+  },
 ];
 
-const AppMainNavBar = ({ activeTab, onTabPress } : MainBottomNavProps) => {
-  const navigation = useNavigation<RootStackParamList>();
+const AppMainNavBar = ({ activeTab, onTabPress }: MainBottomNavProps) => {
+  const navigation = useNavigation<any>(); // Dùng any để tránh lỗi type nếu chưa config kỹ
 
   const ROUTE_BY_TAB: Record<MainTabKey, string> = {
     home: "HomeScreen",
-    world: "FamousChefs",
-    category: "Category",
+    world: "CommunityScreen",
+    category: "CategoriesScreen", 
     profile: "ProfileScreen",
   };
 
@@ -57,8 +69,7 @@ const AppMainNavBar = ({ activeTab, onTabPress } : MainBottomNavProps) => {
       <View style={styles.container}>
         {TABS.map((tab) => {
           const isActive = tab.key === activeTab;
-          const IconComponent = isActive ? tab.ActiveIcon : tab.Icon;
-
+          
           return (
             <Pressable
               key={tab.key}
@@ -66,7 +77,15 @@ const AppMainNavBar = ({ activeTab, onTabPress } : MainBottomNavProps) => {
               onPress={() => handlePress(tab.key)}
               android_ripple={{ color: "#ffe0dd", borderless: true }}
             >
-              <IconComponent width={20} height={20} />
+              {/* 👇 3. Render Ionicons */}
+              <Ionicons 
+                name={isActive ? tab.activeIconName : tab.iconName} 
+                size={22} 
+                // Logic màu: 
+                // - Nếu Active (nền trắng) -> Icon màu Chính
+                // - Nếu Inactive (nền màu chính) -> Icon màu Trắng
+                color={isActive ? AppLightColor.primary_color : "#ffffff"} 
+              />
             </Pressable>
           );
         })}
@@ -84,33 +103,41 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 24,
     alignItems: "center",
+    // pointerEvents="box-none" ở View cha giúp bấm xuyên qua vùng trống 
+    // (nhưng style này phải hỗ trợ bởi props pointerEvents ở trên)
   },
   container: {
-    width: "78%",
+    width: "80%", // Tăng nhẹ chiều rộng để thoáng hơn
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderRadius: 999,
     backgroundColor: AppLightColor.primary_color,
     paddingHorizontal: 24,
-    paddingVertical: 8,
+    paddingVertical: 10, // Tăng padding dọc một chút
+    // Shadow
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.2, // Đậm hơn chút cho nổi
     shadowRadius: 8,
     elevation: 8,
   },
   tab: {
     borderRadius: 999,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    marginHorizontal: 4,
+    paddingVertical: 6,
     alignItems: "center",
     justifyContent: "center",
   },
   tabActive: {
     backgroundColor: "#ffffff",
     paddingHorizontal: 18,
-    paddingVertical: 6,
+    paddingVertical: 8,
+    // Thêm shadow nhẹ cho nút active
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
 });

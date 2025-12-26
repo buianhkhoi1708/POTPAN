@@ -1,0 +1,146 @@
+{
+  "common": {
+    "loading": "Đang tải dữ liệu...",
+    "error": "Có lỗi xảy ra",
+    "success": "Thành công",
+    "cancel": "Hủy",
+    "require_login": "Bạn cần đăng nhập để thực hiện chức năng này."
+  },
+  "home": {
+    "greeting": "Xin chào",
+    "featured_recipes": "Công thức nổi bật",
+    "recent_recipes": "Công thức gần đây",
+    "famous_chefs": "Đầu bếp nổi tiếng"
+  },
+  "profile": {
+    "my_recipes": "Công thức của tôi",
+    "no_recipes": "Chưa có món ăn nào.",
+    "following": "Đang theo dõi",
+    "followers": "Người theo dõi",
+    "follow": "Follow",
+    "recipes": "Công thức",
+    "my_collections": "Bộ sưu tập",
+    "create_collect": "Tạo bộ sưu tập mới",
+    "view_detail": "Bộ sưu tập của bạn",
+    "recipes_saved": "Công thức",
+        "edit_profile": "Chỉnh sửa",
+    "share_profile": "Chia sẻ"
+
+  },
+  "recipe_detail": {
+    "view": "Xem",
+    "cooked_by": "Công thức bởi",
+    "chef_default": "Đầu bếp",
+    "description": "Mô tả",
+    "no_description": "Chưa có mô tả cho món ăn này.",
+    "ingredients": "Nguyên liệu",
+    "items": "mục",
+    "steps": "Cách làm",
+    "steps_count": "bước",
+    "start_cooking": "Bắt Đầu Nấu",
+    "options_title": "Tùy chọn",
+    "already_saved_msg": "Món này đã có trong bộ sưu tập. Bạn muốn làm gì?",
+    "remove_save": "Bỏ lưu",
+    "change_collection": "Đổi bộ sưu tập",
+    "remove_success": "Đã bỏ lưu món ăn này.",
+    "save_success": "Đã lưu vào bộ sưu tập!",
+    "share_suffix": "Xem ngay trên App Nấu Ăn",
+    "share_error": "Không thể chia sẻ nội dung này"
+  },
+  "data_map": {
+    "category": {
+      "Món mặn": "Món mặn",
+      "Món canh": "Món canh",
+      "Tráng miệng": "Tráng miệng",
+      "Bánh ngọt": "Bánh ngọt",
+      "Nước uống": "Nước uống",
+      "Đồ uống": "Nước uống",
+      "Ăn vặt": "Ăn vặt"
+    }
+  },
+  
+  "community": {
+    "screen_title": "Cộng đồng",
+    "tabs": {
+      "hot": "Nổi bật 🔥",
+      "new": "Mới nhất ✨",
+      "old": "Cũ nhất ⏳"
+    },
+    "by": "Bởi",
+    "default_desc": "Món ngon hấp dẫn đang chờ bạn khám phá...",
+    "anonymous_chef": "Đầu bếp",
+    "empty_list": "Chưa có bài đăng nào."
+  },
+  "common1": {
+    "difficulty": {
+      "easy": "Dễ",
+      "medium": "Tr.bình",
+      "hard": "Khó"
+    }
+  },
+   "recipe": {
+    "time_format": "{{count}} phút"
+  },
+
+  "search": {
+    "placeholder": "Tìm tên món, mô tả...",
+    "sections": {
+      "category": "Danh mục",
+      "cuisine": "Xuất xứ",
+      "difficulty": "Độ khó",
+      "time": "Thời gian"
+    },
+    "cuisine": {
+      "vietnam": "Việt Nam",
+      "international": "Quốc tế"
+    },
+    "time": {
+      "under_30": "< 30 phút",
+      "30_60": "30 - 60 phút",
+      "over_60": "> 60 phút"
+    },
+    "reset": "Thiết lập lại",
+    "apply": "Áp dụng"
+  },
+  "language": {
+    "title": "Cài đặt ngôn ngữ",
+    "current_language": "Ngôn ngữ hiện tại",
+    "available_languages": "Tất cả ngôn ngữ",
+    "info": "Chọn ngôn ngữ mới sẽ cập nhật giao diện ứng dụng ngay lập tức.",
+    "names": {
+      "vi": "Tiếng Việt",
+      "en": "Tiếng Anh",
+      "fr": "Tiếng Pháp",
+      "ja": "Tiếng Nhật",
+      "ko": "Tiếng Hàn",
+      "zh": "Tiếng Trung"
+    }
+  },
+  "chef": {
+    "follow": "Theo dõi",
+    "following": "Đã theo dõi",
+    "sections": {
+      "top_trending": "Top 5 Xu hướng",
+      "favorites": "Đầu bếp được yêu thích",
+      "new_faces": "Gương mặt mới"
+    }
+  },
+  "search1": {
+    "result_title": "Kết quả tìm kiếm",
+    "all_recipes": "Bộ lọc của bạn",
+    "summary": "Tìm thấy {{count}} món cho \"{{keyword}}\"",
+    "no_result": "Không tìm thấy kết quả",
+    "empty_hint": "Thử nhập đúng chính tả hoặc sử dụng từ khóa khác nhé!"
+  },
+  "follow": {
+    "my_list": "Danh sách của tôi",
+    "user_list": "Người dùng",
+    "followers": "Người theo dõi",
+    "unfollow_title": "Bỏ theo dõi",
+    "unfollow_msg": "Bạn có chắc muốn bỏ theo dõi người này?",
+    "remove_follower_title": "Xóa người theo dõi",
+    "remove_follower_msg": "Người này sẽ không thấy bài viết của bạn nữa."
+  }
+}
+
+  

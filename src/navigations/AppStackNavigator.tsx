@@ -21,7 +21,18 @@ import SettingsScreen from "../screens/SettingsScreen";
 import NotificationSettingsScreen from "../screens/NotificationSettingsScreen";
 import SupportCenterScreen from "../screens/SupportCenterScreen";
 import LanguageScreen from "../screens/LanguageScreen";
-import RecipeDetailScreen from "../screens/RecipeDetailsScreen";
+import RecipeDetailScreen from "../screens/RecipeDetailScreen";
+import SearchResultScreen from "../screens/SearchResultScreen";
+import ChefProfileScreen from "../screens/ChefProfileScreen";
+import FollowScreen from "../screens/FollowScreen";
+import CreateRecipeScreen from "../screens/CreateRecipeScreen";
+import ReviewScreen from "../screens/ReviewScreen";
+import CollectionDetailScreen from "../screens/CollectionDetailScreen";
+import CategoriesScreen from "../screens/CategoriesScreen";
+import CategoryDetailScreen from "../screens/CategoryDetailScreen";
+import CommunityScreen from "../screens/CommunityScreen";
+import FamousChefsScreen from "../screens/FamousChefsScreen";
+import AdminDashboardScreen from "../screens/AdminDashBoardScreen";
 
 // --- IMPORT TYPES & STORE ---
 import { RootStackParamList } from "../type/types";
@@ -57,6 +68,27 @@ function MainStack() {
       <Stack.Screen name="SupportCenterScreen" component={SupportCenterScreen} />
       <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
       <Stack.Screen name="RecipeDetailScreen" component={RecipeDetailScreen} />
+      <Stack.Screen name="SearchResultScreen" component={SearchResultScreen} />
+      <Stack.Screen name="ChefProfileScreen" component={ChefProfileScreen} />
+      <Stack.Screen name="FollowScreen" component={FollowScreen} />
+      <Stack.Screen name="ReviewScreen" component={ReviewScreen} />
+      <Stack.Screen name="CreateRecipeScreen" component={CreateRecipeScreen} />
+      <Stack.Screen name="CollectionDetailScreen" component={CollectionDetailScreen} />
+      <Stack.Screen name="CategoriesScreen" component={CategoriesScreen} />
+      <Stack.Screen name="CategoryDetailScreen" component={CategoryDetailScreen} />
+      <Stack.Screen name="CommunityScreen" component={CommunityScreen} />
+      <Stack.Screen name="FamousChefsScreen" component={FamousChefsScreen} />
+      <Stack.Screen name="AdminDashboardScreen" component={AdminDashboardScreen} />
+
+
+
+
+
+
+
+
+
+
     </Stack.Navigator>
   );
 }

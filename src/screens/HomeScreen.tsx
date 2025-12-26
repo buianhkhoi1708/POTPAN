@@ -1,35 +1,38 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import {
-  Image,
-  Pressable,
   ScrollView,
   View,
   StyleSheet,
-  Dimensions,
   ActivityIndicator,
   RefreshControl,
-  Alert
+  Dimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  Pressable
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useIsFocused } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
+
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppBottomSpace from "../components/AppBottomSpace";
-import { AppLightColor } from "../styles/color";
 import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
+import AppSearchModal, { SearchFilters } from "../components/AppSearchModal";
 
-// --- SVG Icons ---
-import SearchIcon from "../assets/images/search.svg";
-import NotificationIcon from "../assets/images/notification.svg";
-import SaveIcon from "../assets/images/save.svg";
-import AppSearchModal from "../components/AppSearchModal";
+import AppRecipeCard from "../components/AppRecipeCard";
+import AppChefCard, { Chef } from "../components/AppChefCard";
+import AppCategoryList from "../components/AppCategoryList";
+import AppHeader from "../components/AppHeader"; // Header chung
 
-// --- SUPABASE & STORE ---
+import { AppLightColor } from "../styles/color";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
 
-// 👇 1. IMPORT HÀM SEED DATA
-import { seedDataToSupabase } from "../utils/seedData"; 
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_MARGIN = 16;
+const CARD_WIDTH = SCREEN_WIDTH - 40;
+const SNAP_INTERVAL = CARD_WIDTH + CARD_MARGIN;
 
 type Recipe = {
   id: any;
@@ -39,187 +42,145 @@ type Recipe = {
   rating: number;
   description?: string;
   user_id?: string;
+  difficulty?: string;
 };
-
-type Chef = {
-  id: any;
-  avatar_url: string | null;
-  full_name: string;
-};
-
-type HomeCategoryKey = "family" | "breakfast" | "lunch" | "dinner";
-
-const { width: SCREEN_W } = Dimensions.get("window");
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const isFocused = useIsFocused();
-  const { user, profile } = useAuthStore(); 
+  const { user, profile } = useAuthStore();
+  const { t } = useTranslation();
 
-  // --- STATE ---
-  const [selectedCategory, setSelectedCategory] = useState<HomeCategoryKey>("family");
+  const [unreadCount, setUnreadCount] = useState(0);
+  const featuredScrollRef = useRef<ScrollView>(null);
+  const scrollIndex = useRef(0);
+  const autoScrollTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const [selectedCategory, setSelectedCategory] = useState<string>("1");
   const [activeTab, setActiveTab] = useState<MainTabKey>("home");
   const [searchVisible, setSearchVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Dữ liệu API
   const [featuredList, setFeaturedList] = useState<Recipe[]>([]);
   const [myRecipesList, setMyRecipesList] = useState<Recipe[]>([]);
   const [recentList, setRecentList] = useState<Recipe[]>([]);
   const [chefList, setChefList] = useState<Chef[]>([]);
 
-  // Danh mục
-  const homeCategories = [
-    { id: "family", label: "Gia đình" },
-    { id: "breakfast", label: "Ăn sáng" },
-    { id: "lunch", label: "Ăn trưa" },
-    { id: "dinner", label: "Ăn tối" },
-  ];
+  // Dữ liệu danh mục (Đã dịch)
+  const homeCategories = useMemo(() => [
+    { id: "1", label: t("data_map.category.Món mặn"), dbValue: "Món mặn" },
+    { id: "2", label: t("data_map.category.Món canh"), dbValue: "Món canh" },
+    { id: "3", label: t("data_map.category.Tráng miệng"), dbValue: "Tráng miệng" },
+    { id: "4", label: t("data_map.category.Bánh ngọt"), dbValue: "Bánh ngọt" },
+    { id: "5", label: t("data_map.category.Đồ uống"), dbValue: "Đồ uống" },
+    { id: "6", label: t("data_map.category.Ăn vặt"), dbValue: "Ăn vặt" },
+  ], [t]);
 
   useEffect(() => {
     if (isFocused) setActiveTab("home");
   }, [isFocused]);
 
-  // --- HÀM FETCH DỮ LIỆU ---
-  const fetchAllData = async () => {
+  const fetchUnreadCount = useCallback(async () => {
     try {
-      if(!refreshing) setLoading(true);
+      if (!user) return;
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
 
-      // 1. Công thức nổi bật 
-      const { data: featuredData } = await supabase
-        .from("recipes").select("*").order("rating", { ascending: false }).limit(5);
-      if (featuredData) setFeaturedList(featuredData);
+      if (error) throw error;
+      if (count !== null) setUnreadCount(count);
+    } catch (err) {
+      console.log("Lỗi đếm thông báo:", err);
+    }
+  }, [user]);
 
-      // 2. Công thức của tôi 
-      if (user) {
-        const { data: myData } = await supabase
-          .from("recipes").select("*").eq("user_id", user.id);
-        if (myData) setMyRecipesList(myData);
-      }
+  useEffect(() => {
+    if (isFocused) fetchUnreadCount();
+  }, [isFocused, fetchUnreadCount]);
 
-      // 3. Đầu bếp nổi tiếng 
-      const { data: chefData } = await supabase
-        .from("users").select("id, full_name, avatar_url").limit(6);
-      if (chefData) setChefList(chefData);
+  const fetchAllData = useCallback(async () => {
+    try {
+      if (!refreshing) setLoading(true);
+      const [featuredResult, chefResult, recentResult, myResult] =
+        await Promise.all([
+          supabase.from("recipes").select("*").order("rating", { ascending: false }).limit(5),
+          supabase.from("users").select("id, full_name, avatar_url").limit(6),
+          supabase.from("recipes").select("*").order("created_at", { ascending: false }).limit(6),
+          user ? supabase.from("recipes").select("*").eq("user_id", user.id) : Promise.resolve({ data: null }),
+        ]);
 
-      // 4. Công thức gần đây 
-      const { data: recentData } = await supabase
-        .from("recipes").select("*").order("created_at", { ascending: false }).limit(6);
-      if (recentData) setRecentList(recentData);
-
+      if (featuredResult.data) setFeaturedList(featuredResult.data);
+      if (chefResult.data) setChefList(chefResult.data);
+      if (recentResult.data) setRecentList(recentResult.data);
+      if (myResult.data) setMyRecipesList(myResult.data);
     } catch (error) {
       console.log("Lỗi tải trang chủ:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchAllData();
-  }, [user]);
+  }, [fetchAllData]);
+
+  // Auto scroll logic
+  useEffect(() => {
+    if (featuredList.length === 0) return;
+    const startAutoScroll = () => {
+      if (autoScrollTimer.current) clearInterval(autoScrollTimer.current);
+      autoScrollTimer.current = setInterval(() => {
+        if (!featuredScrollRef.current) return;
+        let nextIndex = scrollIndex.current + 1;
+        let shouldAnimate = true;
+        if (nextIndex >= featuredList.length) {
+          nextIndex = 0;
+          shouldAnimate = false;
+        }
+        scrollIndex.current = nextIndex;
+        featuredScrollRef.current.scrollTo({ x: nextIndex * SNAP_INTERVAL, animated: shouldAnimate });
+      }, 4000);
+    };
+    startAutoScroll();
+    return () => {
+      if (autoScrollTimer.current) clearInterval(autoScrollTimer.current);
+    };
+  }, [featuredList]);
+
+  const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / SNAP_INTERVAL);
+    scrollIndex.current = newIndex;
+  };
 
   const onRefresh = () => {
     setRefreshing(true);
     fetchAllData();
   };
 
-  // --- RENDER FUNCTIONS ---
-  const renderFeaturedCard = (item: Recipe) => (
-    <Pressable key={item.id} style={styles.featuredCard} onPress={() => navigation.navigate("RecipeDetailScreen", { item })}>
-      <View style={styles.featuredImageWrap}>
-        <Image source={{ uri: item.thumbnail || "https://via.placeholder.com/400" }} style={styles.featuredImage} />
-        <Pressable style={styles.featuredHeart}>
-          <SaveIcon width={22} height={22} stroke="#ffffff" fill="none" />
-        </Pressable>
-      </View>
-      <View style={styles.featuredInfo}>
-        <AppText variant="bold" style={styles.featuredTitle} numberOfLines={1}>{item.title}</AppText>
-        <AppText variant="light" style={styles.featuredDesc} numberOfLines={2}>{item.description || "Món ngon hấp dẫn..."}</AppText>
-        <View style={styles.featuredMetaRow}>
-          <View style={styles.featuredMetaLeft}>
-            <Ionicons name="time-outline" size={12} color={AppLightColor.primary_color} />
-            <AppText variant="light" style={styles.featuredMetaText}>{item.time}</AppText>
-          </View>
-          <View style={styles.featuredMetaRight}>
-            <AppText variant="light" style={styles.featuredMetaText}>{item.rating}</AppText>
-            <Ionicons name="star" size={12} color={AppLightColor.primary_color} />
-          </View>
-        </View>
-      </View>
-    </Pressable>
-  );
+  const handleSearchSubmit = (filters: SearchFilters) => {
+    setSearchVisible(false);
+    navigation.navigate("SearchResultScreen", { filters });
+  };
 
-  const renderSmallRecipeCard = (item: Recipe, extraStyle?: any) => (
-    <Pressable key={item.id} style={[styles.smallCard, extraStyle]} onPress={() => navigation.navigate("RecipeDetailScreen", { item })}>
-      <View style={styles.smallImageWrap}>
-        <Image source={{ uri: item.thumbnail || "https://via.placeholder.com/200" }} style={styles.smallImage} />
-        <Pressable style={styles.smallHeart}>
-          <SaveIcon width={20} height={20} stroke="#ffffff" fill="none" />
-        </Pressable>
-      </View>
-      <View style={styles.smallInfo}>
-        <AppText variant="bold" style={styles.smallTitle} numberOfLines={1}>{item.title}</AppText>
-        <View style={styles.smallMetaRow}>
-          <View style={styles.smallMetaLeft}>
-            <Ionicons name="time-outline" size={12} color={AppLightColor.primary_color} />
-            <AppText variant="light" style={styles.smallMetaText}>{item.time}</AppText>
-          </View>
-          <View style={styles.smallMetaRight}>
-            <AppText variant="light" style={styles.smallMetaText}>{item.rating || 0}</AppText>
-            <Ionicons name="star" size={12} color={AppLightColor.primary_color} />
-          </View>
-        </View>
-      </View>
-    </Pressable>
-  );
-
-  const renderChefCard = (chef: Chef) => (
-    <View key={chef.id} style={styles.chefCard}>
-      <Image source={{ uri: chef.avatar_url || "https://i.pravatar.cc/150" }} style={styles.chefImage} />
-    </View>
-  );
-
-  // --- RENDER MAIN ---
   return (
     <AppSafeView style={styles.safeArea}>
       <View style={styles.container}>
-        
-        {/* 👇 2. NÚT TEST DATA (Sẽ hiện ngay trên đầu trang) */}
-        <Pressable 
-          onPress={async () => {
-             await seedDataToSupabase();
-             onRefresh(); // Tự động reload lại list sau khi push xong
-          }} 
-          style={{ backgroundColor: 'blue', padding: 8, alignItems: 'center', justifyContent: 'center' }}
-        >
-          <AppText style={{color: '#fff', fontSize: 12, fontWeight: 'bold'}}>
-             🛠️ Bấm để Push Data Local & Reload
-          </AppText>
-        </Pressable>
-        {/* -------------------------------------------------- */}
-
         {/* HEADER */}
-        <View style={styles.header}>
-          <View>
-            <AppText variant="bold" style={styles.hello}>
-              Xin chào, {profile?.full_name || "Bùi Anh Khải"}!
-            </AppText>
-          </View>
-
-          <View style={styles.headerIcons}>
-            <Pressable style={styles.headerIconCircle} onPress={() => setSearchVisible(true)}>
-              <SearchIcon width={18} height={18} />
-            </Pressable>
-            <Pressable style={styles.headerIconCircle} onPress={() => navigation.navigate("NotificationScreen" as never)}>
-              <NotificationIcon width={18} height={18} />
-            </Pressable>
-          </View>
-        </View>
+        <AppHeader 
+          userName={profile?.full_name || t("home.greeting")}
+          unreadCount={unreadCount}
+          onSearchPress={() => setSearchVisible(true)}
+          onNotificationPress={() => navigation.navigate("NotificationScreen")}
+        />
 
         {loading && !refreshing ? (
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={AppLightColor.primary_color} />
+            <AppText variant="light" style={styles.loadingText}>{t("common.loading")}</AppText>
           </View>
         ) : (
           <ScrollView
@@ -227,82 +188,117 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={AppLightColor.primary_color}/>
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={AppLightColor.primary_color} />
             }
           >
             {/* CATEGORY LIST */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
-              {homeCategories.map((cat) => {
-                const isActive = cat.id === selectedCategory;
-                return (
-                  <Pressable key={cat.id} onPress={() => setSelectedCategory(cat.id as any)} style={styles.categoryItem}>
-                    <AppText variant="bold" style={isActive ? [styles.categoryText, styles.categoryTextActive] : styles.categoryText}>
-                      {cat.label}
-                    </AppText>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
+            <AppCategoryList
+              categories={homeCategories}
+              selectedId={selectedCategory}
+              onSelect={(id) => setSelectedCategory(id)}
+            />
 
-            {/* FEATURED */}
+            {/* SECTION: NỔI BẬT */}
             <View style={styles.sectionHeader}>
-              <AppText variant="bold" style={[styles.sectionTitle, styles.sectionTitlePrimary]}>Công thức nổi bật</AppText>
+              <AppText variant="bold" style={styles.sectionTitle}>{t("home.featured_recipes")}</AppText>
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} pagingEnabled snapToAlignment="center" contentContainerStyle={styles.featuredRow}>
-              {featuredList.length > 0 ? featuredList.map(renderFeaturedCard) : <AppText style={{marginLeft:20, color:'#999'}}>Đang tải...</AppText>}
-            </ScrollView>
+            {featuredList.length > 0 ? (
+              <ScrollView
+                ref={featuredScrollRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                snapToInterval={SNAP_INTERVAL}
+                decelerationRate="fast"
+                contentContainerStyle={styles.featuredRow}
+                onMomentumScrollEnd={onMomentumScrollEnd}
+              >
+                {featuredList.map((item, index) => (
+                  <AppRecipeCard
+                    key={item.id}
+                    item={item}
+                    variant="featured"
+                    onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
+                    style={{ marginRight: index === featuredList.length - 1 ? 0 : CARD_MARGIN }}
+                  />
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="restaurant-outline" size={48} color="#ccc" />
+                <AppText style={styles.emptyText}>{t("profile.no_recipes")}</AppText>
+              </View>
+            )}
 
-            {/* MY RECIPES */}
+            {/* SECTION: CÔNG THỨC CỦA TÔI */}
             {myRecipesList.length > 0 && (
               <View style={styles.mySectionWrapper}>
                 <View style={styles.mySectionHeader}>
                   <View style={styles.sectionPillWrap}>
-                    <View style={styles.sectionPillBg} />
                     <View style={styles.sectionPill}>
-                      <AppText variant="bold" style={styles.sectionPillText}>Công thức của tôi</AppText>
-                      <View style={{ marginTop: 50, padding: 20 }}></View>
+                      <Ionicons name="bookmark" size={16} color="#fff" style={{ marginRight: 6 }} />
+                      <AppText variant="bold" style={styles.sectionPillText}>{t("profile.my_recipes")}</AppText>
                     </View>
                   </View>
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.mySectionList}>
-                  {myRecipesList.map((item) => renderSmallRecipeCard(item))}
+                  {myRecipesList.map((item) => (
+                    <AppRecipeCard
+                      key={item.id}
+                      item={item}
+                      variant="small"
+                      onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
+                      style={{ marginRight: 16 }}
+                    />
+                  ))}
                 </ScrollView>
               </View>
             )}
 
-            {/* CHEFS */}
+            {/* SECTION: ĐẦU BẾP */}
             <View style={styles.sectionHeader}>
-              <Pressable onPress={() => navigation.navigate("FamousChefs" as never)}>
-                <AppText variant="title" style={[styles.sectionTitle, styles.sectionTitlePrimary]}>Các đầu bếp nổi tiếng</AppText>
+              <Pressable style={styles.sectionTitleRow} onPress={() => navigation.navigate("FamousChefsScreen")}>
+                  <AppText variant="title" style={styles.sectionTitle}>👨‍🍳 {t("home.famous_chefs")}</AppText>
+                  <Ionicons name="chevron-forward" size={20} color={AppLightColor.primary_color} />
               </Pressable>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
-              {chefList.map(renderChefCard)}
+              {chefList.map((chef) => (
+                <AppChefCard key={chef.id} item={chef} style={{ marginRight: 16 }} />
+              ))}
             </ScrollView>
 
-            {/* RECENT */}
+            {/* SECTION: GẦN ĐÂY */}
             <View style={styles.sectionHeader}>
-              <AppText variant="bold" style={[styles.sectionTitle, styles.sectionTitlePrimary]}>Công thức gần đây</AppText>
+              <AppText variant="bold" style={styles.sectionTitle}>⏰ {t("home.recent_recipes")}</AppText>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListBottom}>
-              {recentList.map((item) => renderSmallRecipeCard(item, styles.smallCardRecent))}
+              {recentList.map((item) => (
+                <AppRecipeCard
+                  key={item.id}
+                  item={item}
+                  variant="small"
+                  onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
+                  style={{ marginRight: 12 }}
+                />
+              ))}
             </ScrollView>
-
-            <AppBottomSpace height={60} />
+            <AppBottomSpace height={80} />
           </ScrollView>
         )}
 
-        <AppSearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
-
-        <AppMainNavBar
-          activeTab={activeTab}
-          onTabPress={(tab) => {
+        {/* SEARCH MODAL */}
+        <AppSearchModal
+          visible={searchVisible}
+          onClose={() => setSearchVisible(false)}
+          onSubmit={handleSearchSubmit}
+        />
+        
+        {/* NAV BAR */}
+        <AppMainNavBar activeTab={activeTab} onTabPress={(tab) => {
             setActiveTab(tab);
-            if (tab === "home") navigation.navigate("HomeScreen" as never);
-            if (tab === "world") navigation.navigate("FamousChefs" as never);
-            if (tab === "profile") navigation.navigate("ProfileScreen" as never);
-            if (tab === "category") navigation.navigate("Page2" as never);
-          }}
+            if(tab === 'profile') navigation.navigate("ProfileScreen");
+            if(tab === 'world') navigation.navigate("FamousChefsScreen");
+          }} 
         />
       </View>
     </AppSafeView>
@@ -311,55 +307,39 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
 export default HomeScreen;
 
-// --- STYLES (Giữ nguyên) ---
+// --- STYLES ĐÃ DỌN DẸP ---
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: "#fff" },
   container: { flex: 1, backgroundColor: "#fff" },
-  header: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  hello: { fontSize: 26, color: AppLightColor.primary_text },
-  headerIcons: { flexDirection: "row", alignItems: "center", columnGap: 10 },
-  headerIconCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: AppLightColor.primary_color, alignItems: "center", justifyContent: "center" },
+  
+  // Đã xóa các style header cũ (header, headerGreeting, hello, icons...) vì dùng AppHeader
+
+  loadingContainer: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 60 },
+  loadingText: { marginTop: 12, color: "#666", fontSize: 14 },
+  
+  emptyContainer: { alignItems: "center", justifyContent: "center", paddingVertical: 40, paddingHorizontal: 20 },
+  emptyText: { marginTop: 12, color: "#999", fontSize: 14, textAlign: "center" },
+  
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 16 },
-  categoryRow: { paddingHorizontal: 16, paddingBottom: 8 },
-  categoryItem: { marginRight: 16, paddingVertical: 4 },
-  categoryText: { color: AppLightColor.primary_color },
-  categoryTextActive: { color: AppLightColor.primary_color },
-  sectionHeader: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4 },
-  sectionTitle: { color: AppLightColor.primary_text },
-  sectionTitlePrimary: { color: AppLightColor.primary_color },
-  featuredRow: { paddingHorizontal: 20, paddingBottom: 12 },
-  featuredCard: { width: SCREEN_W - 40, marginRight: 16 },
-  featuredImageWrap: { borderRadius: 18, overflow: "hidden", backgroundColor: "#eee" },
-  featuredImage: { width: "100%", height: 200 },
-  featuredHeart: { position: "absolute", top: 10, right: 10, width: 30, height: 30, borderRadius: 15, backgroundColor: AppLightColor.primary_color, alignItems: "center", justifyContent: "center" },
-  featuredInfo: { backgroundColor: "#ffffff", borderRadius: 18, borderWidth: 1, borderColor: AppLightColor.primary_color, paddingHorizontal: 14, paddingVertical: 10, marginTop: -14, marginHorizontal: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.12, shadowRadius: 2, elevation: 2 },
-  featuredTitle: { fontSize: 18, color: "#000" },
-  featuredDesc: { fontSize: 13, color: "#555", marginTop: 2 },
-  featuredMetaRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 6 },
-  featuredMetaLeft: { flexDirection: "row", alignItems: "center", columnGap: 4 },
-  featuredMetaRight: { flexDirection: "row", alignItems: "center", columnGap: 4 },
-  featuredMetaText: { fontSize: 12, color: AppLightColor.primary_color },
-  mySectionWrapper: { marginTop: 8, marginHorizontal: -16, backgroundColor: AppLightColor.primary_color, borderRadius: 8, paddingBottom: 18 },
-  mySectionHeader: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 4 },
-  mySectionList: { paddingHorizontal: 32, paddingTop: 4, paddingBottom: 12 },
-  sectionPillWrap: { alignItems: "center", justifyContent: "center" },
-  sectionPillBg: { position: "absolute", left: 0, right: 0, height: 6, borderRadius: 3, backgroundColor: "#ffffff" },
-  sectionPill: { paddingHorizontal: 32, paddingVertical: 4, borderRadius: 999, backgroundColor: "#ffffff" },
-  sectionPillText: { color: AppLightColor.primary_color },
-  horizontalList: { paddingHorizontal: 16, paddingBottom: 8 },
-  horizontalListBottom: { paddingHorizontal: 16, paddingBottom: 24 },
-  smallCard: { width: 190, marginRight: 16, overflow: "visible", paddingBottom: 10 },
-  smallCardRecent: { borderRadius: 10, padding: 4, overflow: "visible" },
-  smallImageWrap: { borderRadius: 10, overflow: "hidden", backgroundColor: "#eee", position: "relative" },
-  smallImage: { width: "100%", height: 120 },
-  smallHeart: { position: "absolute", top: 8, right: 8, width: 30, height: 30, borderRadius: 15, backgroundColor: AppLightColor.primary_color, alignItems: "center", justifyContent: "center" },
-  smallInfo: { backgroundColor: "#ffffff", borderRadius: 10, borderWidth: 1, borderColor: AppLightColor.primary_color, paddingHorizontal: 10, paddingVertical: 8, marginTop: -10, marginHorizontal: 0, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.14, shadowRadius: 3, elevation: 3 },
-  smallTitle: { fontSize: 18, color: "#000" },
-  smallMetaRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 4 },
-  smallMetaLeft: { flexDirection: "row", alignItems: "center", columnGap: 4 },
-  smallMetaRight: { flexDirection: "row", alignItems: "center", columnGap: 4 },
-  smallMetaText: { fontSize: 12, color: AppLightColor.primary_color },
-  chefCard: { width: 90, height: 90, borderRadius: 16, overflow: "hidden", marginRight: 12, backgroundColor: "#eee" },
-  chefImage: { width: "100%", height: "100%" },
+  
+  sectionHeader: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12 },
+  sectionTitleRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  sectionTitle: { fontSize: 20, color: AppLightColor.primary_text, fontWeight: "700" },
+  
+  featuredRow: { paddingHorizontal: 20, paddingBottom: 20 },
+  horizontalList: { paddingHorizontal: 20, paddingBottom: 16 },
+  horizontalListBottom: { paddingHorizontal: 20, paddingBottom: 24 },
+  
+  mySectionWrapper: {
+    marginTop: 8, marginHorizontal: 16, backgroundColor: AppLightColor.primary_color,
+    borderRadius: 16, paddingBottom: 20,
+    shadowColor: AppLightColor.primary_color, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15, shadowRadius: 8, elevation: 5,
+  },
+  mySectionHeader: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
+  mySectionList: { paddingHorizontal: 16 },
+  sectionPillWrap: { alignItems: "center" },
+  sectionPill: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20, backgroundColor: "#fff" },
+  sectionPillText: { color: AppLightColor.primary_color, fontSize: 16 },
 });
