@@ -4,30 +4,380 @@
     "error": "An error occurred",
     "success": "Success",
     "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "back": "Go back",
+    "save": "Save",
+    "saving": "Saving...",
+    "try_again": "Please try again later.",
+    "empty_list": "No data found",
     "require_login": "You need to login to perform this action.",
-    "back": "Cancel"
+    "notification": "Notification",
+    "feature_developing": "This feature is under development",
+    "error_occurred": "An error occurred, please try again.",
+    "you": "You",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "just_now": "Just now",
+    "empty_notifications": "No notifications yet.",
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    }
   },
+  "auth": {
+  "login_title": "LOGIN",
+  "register_title": "SIGN IN",
+  "login_button": "Login",
+  "register_button": "Sign Up",
+  "email_label": "Email",
+  "email_placeholder": "example@gmail.com",
+  "password_label": "Password",
+  "password_placeholder": "Ex: 12345",
+  "confirm_password_label": "Confirm Password",
+  "fullname_label": "Full Name",
+  "fullname_placeholder": "John Doe",
+  "phone_label": "Phone Number",
+  "phone_placeholder": "09xx...",
+  "forgot_password": "Forgot password?",
+  "no_account": "Don't have an account?",
+  "has_account": "Already have an account?",
+  "signup_link": " Sign up",
+  "login_link": " Login",
+  "or_social": "Or continue with",
+  "logout_confirm": "Are you sure you want to log out of the app?",
+  "delete_account_confirm": "This action cannot be undone. All your data will be permanently deleted.",
+  "register_success_title": "Success",
+  "register_success_msg": "Account created successfully! Please check your email to verify.",
+  "errors": {
+    "login_title": "Login Error",
+    "register_title": "Registration Error",
+    "invalid_credentials": "Invalid email or password.",
+    "email_not_confirmed": "Please verify your email before logging in.",
+    "user_already_exists": "User already registered.",
+    "too_many_requests": "Too many attempts. Please try again later.",
+    "weak_password": "Password is too weak (min 6 characters).",
+    "unknown": "An error occurred, please try again."
+  }
+},
   "home": {
     "greeting": "Hello",
     "featured_recipes": "Featured Recipes",
     "recent_recipes": "Recent Recipes",
     "famous_chefs": "Famous Chefs"
   },
+  "category": {
+  "screen_title": "Categories",
+  "savory": "Savory Dish",
+  "soup": "Soup",
+  "dessert": "Dessert",
+  "cake": "Pastry",
+  "drink": "Drinks",
+  "snack": "Snacks"
+},
+  "search": {
+    "placeholder": "Search recipes, description...",
+    "reset": "Reset",
+    "apply": "Search",
+    "sections": {
+      "category": "Category",
+      "cuisine": "Cuisine",
+      "difficulty": "Difficulty",
+      "time": "Cooking Time"
+    },
+    "filters": {
+      "cuisine_vn": "Vietnam",
+      "cuisine_int": "International",
+      "time_under_30": "Under 30 mins",
+      "time_30_60": "30 - 60 mins",
+      "time_over_60": "Over 60 mins"
+    },
+    "results": {
+      "title": "Search Results",
+      "my_filter": "Your filter",
+      "summary": "Found {{count}} recipes for \"{{keyword}}\"",
+      "not_found": "No results found",
+      "empty_hint": "Try checking your spelling or using different keywords!"
+    }
+  },
+  "recipe": {
+    "view": "View",
+    "cooked_by": "Recipe by",
+    "chef_default": "Chef",
+    "description": "Description",
+    "no_description": "No description available.",
+    "ingredients": "Ingredients",
+    "items_count": "items",
+    "steps": "Instructions",
+    "steps_count": "steps",
+    "start_cooking": "Start Cooking",
+    "time_format": "{{count}} mins",
+    "options": {
+      "title": "Options",
+      "already_saved": "This recipe is already saved. What would you like to do?",
+      "remove_save": "Unsave",
+      "change_collection": "Change Collection",
+      "remove_success": "Recipe removed from saved list.",
+      "save_success": "Saved to collection!",
+      "share_suffix": "Check it out on Cooking App",
+      "share_error": "Cannot share this content"
+    }
+  },
+  "create_recipe": {
+    "new_title": "Create New Recipe",
+    "edit_title": "Edit Recipe",
+    "post": "Post",
+    "uploading_image": "Uploading image...",
+    "section_basic": "Basic Information",
+    "section_ingredients": "Ingredients",
+    "section_steps": "Steps",
+    "add_ingredient": "Add Ingredient",
+    "add_step": "Add Step",
+    "step_label": "Step",
+    "form": {
+      "thumbnail": "Thumbnail",
+      "name": "Recipe Name",
+      "description": "Description",
+      "time": "Time",
+      "difficulty": "Difficulty",
+      "category": "Category"
+    },
+    "placeholder": {
+      "thumbnail": "Tap to select image",
+      "name": "Enter recipe name",
+      "description": "Describe your recipe...",
+      "time": "Ex: 30 minutes",
+      "ing_amount": "Amount",
+      "ing_name": "Ingredient name",
+      "step_title": "Step title",
+      "step_desc": "Describe the step..."
+    }
+  },
   "profile": {
-    "my_recipes": "My Recipes",
-    "no_recipes": "No recipes found.",
-    "followers": "Followers",
+    "new_user": "New User",
+    "no_username": "No username",
+    "no_bio": "No bio yet",
+    "edit_profile": "Edit",
+    "share_profile": "Share",
+    "recipes_saved": "Recipes",
     "following": "Following",
+    "followers": "Followers",
+    "my_recipes": "My Recipes",
+    "my_collections": "Collections",
+    "create_collect": "New Collection",
+    "view_detail": "View details",
+    "no_recipes": "No recipes found.",
+    "no_collections": "No collections found.",
+    "share_msg": "Check out this profile:",
+    "share_title": "Share Profile",
+    "pending": "Pending",
+    "delete_collection_title": "Delete Collection",
+    "delete_collection_msg": "Are you sure you want to delete \"{{name}}\"?",
+    "delete_collection_success": "Collection deleted.",
+    "delete_collection_error": "Cannot delete collection."
+  },
+  "community": {
+    "screen_title": "Community",
+    "tabs": {
+      "hot": "Hot 🔥",
+      "new": "New ✨",
+      "old": "Old ⏳"
+    },
+    "by": "By",
+    "default_desc": "Delicious recipes waiting for you to discover...",
+    "anonymous_chef": "Chef",
+    "empty_list": "No posts found."
+  },
+  "chef": {
     "follow": "Follow",
-    "recipes": "Recipes",
-    "my_collections": "My collections",
-    "create_collect": "Create new collections",
-    "view_detail": "Your collections",
-    "edit_profile": "Edit your profile",
-    "share_profile": "Share your profile"
-
-    
-
+    "following": "Following",
+    "message": "Message",
+    "default_bio": "No bio available.",
+    "recipe_list": "Recipe List",
+    "no_recipes": "This chef has no recipes yet.",
+    "anonymous": "Anonymous Chef",
+    "sections": {
+      "top_trending": "Top 5 Trending",
+      "favorites": "Favorite Chefs",
+      "new_faces": "New Faces"
+    },
+    "modal": {
+      "my_list": "My Connections",
+      "unfollow_title": "Unfollow",
+      "unfollow_msg": "Are you sure you want to unfollow this person?",
+      "remove_follower_title": "Remove Follower",
+      "remove_follower_msg": "This person will no longer see your posts."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "notifications": "Notifications",
+    "support": "Support Center",
+    "privacy": "Policy",
+    "language": "Language",
+    "logout": "Logout",
+    "logout_confirm": "Are you sure you want to log out?",
+    "delete_confirm": "This action cannot be undone. All your data will be permanently deleted.",
+    "delete_success": "Account deleted successfully.",
+    "delete_account": "Delete Account",
+    "language_screen": {
+      "title": "Language Settings",
+      "current": "Current Language",
+      "available": "All Languages",
+      "info": "Selecting a new language will update the app interface immediately.",
+      "names": {
+        "vi": "Vietnamese",
+        "en": "English",
+        "fr": "French",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "zh": "Chinese"
+      }
+    }
+  },
+  "alert": {
+    "title_error": "Error",
+    "title_success": "Success",
+    "permission_required": "Permission Required",
+    "permission_desc_photo": "App needs photo library permission to upload recipes.",
+    "pick_image_error": "Cannot select image, please try again.",
+    "login_required": "Please login to create recipes.",
+    "recipe_submitted": "Recipe submitted and waiting for Admin approval!",
+    "save_error": "Cannot save recipe.",
+    "confirm_exit_title": "Exit?",
+    "confirm_exit_desc": "Changes have not been saved. Are you sure you want to exit?",
+    "delete_recipe_title": "Delete Recipe",
+    "delete_recipe_msg": "Are you sure you want to delete this recipe? This action cannot be undone.",
+    "delete_recipe_success": "Recipe deleted.",
+    "delete_recipe_error": "Cannot delete recipe.",
+    "confirm_delete": "Delete"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "tabs": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "users": "Users"
+    },
+    "role": "Role",
+    "actions": {
+      "approve": "Approve",
+      "delete": "Delete"
+    },
+    "alerts": {
+      "fetch_error": "Cannot fetch data.",
+      "rls_error": "RLS Permission Error. Please check Policy.",
+      "approve_success": "Recipe approved and notification sent!",
+      "delete_success": "Data deleted.",
+      "delete_error": "Cannot delete.",
+      "confirm_delete_user": "Delete this user?",
+      "confirm_delete_post": "Delete this post?",
+      "name_required": "Full name cannot be empty.",
+    "update_success": "Profile updated successfully!",
+    "update_error": "Cannot update profile.",
+    "upload_error": "Error uploading image."
+    },
+    "notifications": {
+      "approve_title": "Recipe Approved ✅",
+      "approve_msg": "Your recipe \"{{title}}\" has been approved by Admin and is now public.",
+      "reject_title": "Recipe Rejected ❌",
+      "reject_msg": "Your recipe \"{{title}}\" has been deleted due to violation or rejection."
+    }
+  },
+  "collection": {
+    "count_suffix": "recipes",
+    "empty_msg": "No recipes in this collection.",
+    "explore": "Explore Now"
+  },
+  "data_map": {
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "category": {
+      "Món mặn": "Savory Dish",
+      "Món canh": "Soup",
+      "Tráng miệng": "Dessert",
+      "Bánh ngọt": "Pastry",
+      "Đồ uống": "Drinks",
+      "Ăn vặt": "Snacks"
+    }
+},
+"edit_profile": {
+    "title": "Edit Profile",
+    "change_avatar_hint": "Tap to change avatar",
+    "save": "Save",
+    "label": {
+      "name": "Full Name",
+      "username": "Username",
+      "bio": "Bio",
+      "website": "Website"
+    },
+    "placeholder": {
+      "name": "Enter full name",
+      "username": "@nickname",
+      "bio": "Describe yourself...",
+      "website": "https://..."
+    }
+  },
+  "follow": {
+    "my_list": "My Connections",
+    "user_list": "Users",
+    "followers": "Followers",
+    "unfollow_title": "Unfollow",
+    "unfollow_msg": "Are you sure you want to unfollow this user?",
+    "remove_follower_title": "Remove Follower",
+    "remove_follower_msg": "This user will no longer see your posts.",
+    "yes": "Yes",
+    "remove": "Remove"
+  },
+  "intro": {
+    "step1": {
+      "title": "Vietnamese Cuisine",
+      "subtitle": "Authentic Vietnamese dishes"
+    },
+    "step2": {
+      "title": "European Cuisine",
+      "subtitle": "The essence of Western culture"
+    },
+    "step3": {
+      "title": "Key Features",
+      "subtitle": "Providing users with a great experience",
+      "features": {
+        "search": "Recipe Search",
+        "suggest": "Recommendations",
+        "social": "Social Network"
+      }
+    },
+    "step4": {
+      "title": "WELCOME",
+      "subtitle": "Find the best recipes from world-famous chefs",
+      "btn_new": "I'm new here",
+      "btn_old": "I have an account"
+    }
+  },
+  "welcome": {
+    "slogan": "Cooking made easy with POTPAN",
+    "get_started": "Get Started"
+  },
+  "language": {
+    "title": "Language Settings",
+    "current_language": "Current Language",
+    "available_languages": "All Languages",
+    "info": "Selecting a new language will update the app interface immediately.",
+    "names": {
+      "vi": "Vietnamese",
+      "en": "English",
+      "zh": "Chinese"
+    }
+  },
+  "notification_settings": {
+    "general": "General Notification",
+    "sound": "Sound",
+    "sfx": "SFX",
+    "vibrate": "Vibrate"
   },
   "recipe_detail": {
     "view": "View",
@@ -49,117 +399,72 @@
     "share_suffix": "Check it out on Cooking App",
     "share_error": "Cannot share this content"
   },
-  "data_map": {
-    "category": {
-      "Món mặn": "Savory Dish",
-      "Món canh": "Soup",
-      "Tráng miệng": "Dessert",
-      "Bánh ngọt": "Pastry",
-      "Nước uống": "Drinks",
-      "Đồ uống": "Drinks",
-      "Ăn vặt": "Snacks"
-    }
+  "review": {
+    "title": "Reviews",
+    "write_review": "Write your review",
+    "placeholder": "Share your thoughts...",
+    "submit": "Submit Review",
+    "anonymous": "Anonymous User",
+    "alert_login": "Please login to review.",
+    "alert_rating": "Please select a rating.",
+    "alert_duplicate": "You have already reviewed this recipe!",
+    "alert_success": "Thank you for your review!",
+    "alert_error": "Cannot submit review.",
+    "empty_list": "No reviews yet."
   },
-  "community": {
-    "screen_title": "Community",
+  "support": {
+    "title": "Support Center",
+    "faq_general": {
+      "q1": "What can I do in the Help Center?",
+      "q2": "How to update account information?",
+      "q3": "I didn't receive OTP, what should I do?"
+    },
+    "faq_account": {
+      "q1": "How to reset my password?",
+      "q2": "How to change email/phone number?"
+    },
+    "faq_service": {
+      "q1": "How does bookmark feature work?",
+      "q2": "How to create and manage collections?"
+    },
     "tabs": {
-      "hot": "Hot 🔥",
-      "new": "New ✨",
-      "old": "Old ⏳"
+      "faq": "FAQ",
+      "contact": "Contact",
+      "general": "General",
+      "account": "Account",
+      "service": "Service"
     },
-    "by": "By",
-    "default_desc": "Delicious recipes waiting for you to discover...",
-    "anonymous_chef": "Chef",
-    "empty_list": "No posts found."
-  },
-  "common1": {
-    "difficulty": {
-      "easy": "Easy",
-      "medium": "Medium",
-      "hard": "Hard"
+    "search_placeholder": "Search help...",
+    "contact": {
+      "web": "Website",
+      "fb": "Facebook",
+      "wa": "Whatsapp",
+      "ig": "Instagram"
     }
   },
-  "category": {
-    "screen_title": "Category"
+  "validation": {
+    "required": "This field is required",
+    "email_invalid": "Invalid email format",
+    "phone_invalid": "Invalid phone number",
+    "password_min": "Password must be at least {{min}} characters",
+    "password_mismatch": "Passwords must match",
+    "min_length": "Must be at least {{min}} characters",
+    "max_length": "Must be at most {{max}} characters",
+    "time_format": "Invalid format (e.g., 30 mins)",
+    "image_required": "Please select an image",
+    "min_ingredients": "At least 1 ingredient required",
+    "min_steps": "At least 1 step required"
   },
-  "recipe": {
-    "time_format": "{{count}} mins"
-  },
-  "search": {
-    "placeholder": "Search recipes, description...",
-    "sections": {
-      "category": "Category",
-      "cuisine": "Cuisine",
-      "difficulty": "Difficulty",
-      "time": "Cooking Time"
-    },
-    "cuisine": {
-      "vietnam": "Vietnam",
-      "international": "International"
-    },
-    "time": {
-      "under_30": "Under 30 mins",
-      "30_60": "30 - 60 mins",
-      "over_60": "Over 60 mins"
-    },
-    "reset": "Reset",
-    "apply": "Search"
-  },
-  "settings": {
-    "title": "Settings",
-    "notifications": "Notifications",
-    "support": "Support Center",
-    "privacy": "Policy",
-    "language": "Language",
-    "logout": "Logout",
-    "logout_confirm": "Are you sure you want to log out of the app?",
-    "delete_account": "Delete Account",
-    "delete_confirm": "This action cannot be undone. All your data will be permanently deleted.",
-    "back": "Go back",
-    "confirm": "Confirm"
-  },
-"language": {
-    "title": "Language Settings",
-    "current_language": "Current Language",
-    "available_languages": "All Languages",
-    "info": "Selecting a new language will update the app interface immediately.",
-    "names": {
-      "vi": "Vietnamese",
-      "en": "English",
-      "fr": "French",
-      "ja": "Japanese",
-      "ko": "Korean",
-      "zh": "Chinese"
-    }
-  },
-  
-  "chef": {
-    "follow": "Follow",
-    "following": "Following",
-    "sections": {
-      "top_trending": "Top 5 Trending",
-      "favorites": "Favorite Chefs",
-      "new_faces": "New Faces"
-    }
-  },
-  "search1": {
-    "result_title": "Search Results",
-    "all_recipes": "your filter",
-    "summary": "Found {{count}} recipes for {{keyword}}",
-    "no_result": "No results found",
-    "empty_hint": "Try checking your spelling or using different keywords!"
-  },
-  "follow": {
-    "my_list": "My Connections",
-    "user_list": "User",
-    "followers": "Followers",
-    "unfollow_title": "Unfollow",
-    "unfollow_msg": "Are you sure you want to unfollow this person?",
-    "remove_follower_title": "Remove Follower",
-    "remove_follower_msg": "This person will no longer see your posts.",
-    "yes": "Yes"
+  "collection_modal": {
+    "title": "Save to Collection",
+    "create_new": "Create new collection",
+    "placeholder_name": "Collection name...",
+    "save_here": "Save here",
+    "permission_title": "Permission Required",
+    "permission_desc": "Please allow access to photos.",
+    "upload_error": "Upload Error",
+    "network_error": "Please check your network connection.",
+    "create_error": "Cannot create collection",
+    "save_error": "Cannot save recipe"
   }
 }
-
-  
-

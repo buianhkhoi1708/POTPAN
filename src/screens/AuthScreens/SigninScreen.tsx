@@ -13,10 +13,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-// --- IMPORT THƯ VIỆN MỚI ---
+// --- IMPORT I18N ---
+import { useTranslation } from "react-i18next";
+
+// --- IMPORT THƯ VIỆN & SCHEMA ---
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { registerSchema } from "../../utils/validationSchema"
+import { getRegisterSchema } from "../../utils/validationSchema"
 
 import { useAuthStore } from "../../store/useAuthStore";
 import AppSafeView from "../../components/AppSafeView";
@@ -30,6 +33,8 @@ import { AppFonts } from "../../styles/fonts";
 
 const SigninScreen = () => {
   const navigation = useNavigation<any>();
+  const { t } = useTranslation(); // Khởi tạo hook dịch
+  
   const register = useAuthStore((state) => state.register);
   const isLoading = useAuthStore((state) => state.isLoading);
 
@@ -39,7 +44,7 @@ const SigninScreen = () => {
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(registerSchema), // Gắn luật Yup vào form
+    resolver: yupResolver(getRegisterSchema(t)),
     defaultValues: {
       fullName: "",
       email: "",
@@ -49,23 +54,40 @@ const SigninScreen = () => {
     },
   });
 
-  // Hàm này chỉ chạy khi dữ liệu ĐÃ HỢP LỆ
+  // --- HÀM XỬ LÝ ĐĂNG KÝ ---
   const onSubmit = async (data: any) => {
     try {
       await register(data.email, data.password, data.fullName, data.phone);
-      Alert.alert("Thành công", "Tạo tài khoản thành công!", [
-        {
-          text: "Đăng nhập",
-          onPress: () => navigation.navigate("LoginScreen"),
-        },
-      ]);
+      
+      // Thông báo thành công
+      Alert.alert(
+        t("auth.register_success_title"), 
+        t("auth.register_success_msg"), 
+        [
+          {
+            text: t("auth.login_button"),
+            onPress: () => navigation.navigate("LoginScreen"),
+          },
+        ]
+      );
     } catch (error: any) {
-      // Xử lý lỗi Firebase (như cũ)
-      Alert.alert("Lỗi", error.message);
+      // --- XỬ LÝ LỖI SUPABASE ---
+      let msg = error.message || t("auth.errors.unknown");
+      const errTitle = t("auth.errors.register_title");
+
+      // Map lỗi Supabase sang ngôn ngữ user chọn
+      if (msg.includes("User already registered")) {
+        msg = t("auth.errors.user_already_exists");
+      } else if (msg.includes("Password should be at least")) {
+        msg = t("auth.errors.weak_password");
+      } else if (msg.includes("Too many requests")) {
+         msg = t("auth.errors.too_many_requests");
+      }
+
+      Alert.alert(errTitle, msg);
     }
   };
 
-  // Component phụ để hiển thị lỗi màu đỏ
   const ErrorMsg = ({ name }: { name: string }) => {
     // @ts-ignore
     const error = errors[name];
@@ -86,14 +108,14 @@ const SigninScreen = () => {
           <View style={styles.mainContent}>
             <AppLogo width={150} height={150} />
             <AppText variant="bold" style={styles.headerTitle}>
-              ĐĂNG KÝ
+              {t("auth.register_title")}
             </AppText>
 
             <View style={styles.formContainer}>
-              {/* --- HỌ TÊN (Dùng Controller để bọc Input) --- */}
+              {/* --- HỌ TÊN --- */}
               <View style={styles.inputWrapper}>
                 <AppText variant="medium" style={styles.inputLabel}>
-                  Họ tên
+                  {t("auth.fullname_label")}
                 </AppText>
                 <Controller
                   control={control}
@@ -101,9 +123,9 @@ const SigninScreen = () => {
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppTextInput
                       style={styles.inputValue}
-                      placeholder="Nguyễn Văn A"
+                      placeholder={t("auth.fullname_placeholder")}
                       onBlur={onBlur}
-                      onChangeText={onChange} // Quan trọng: Nối hàm onChange của thư viện
+                      onChangeText={onChange}
                       value={value}
                       children={
                         <Ionicons
@@ -122,7 +144,7 @@ const SigninScreen = () => {
               {/* --- EMAIL --- */}
               <View style={styles.inputWrapper}>
                 <AppText style={[styles.inputLabel, styles.marginTop]}>
-                  Email
+                  {t("auth.email_label")}
                 </AppText>
                 <Controller
                   control={control}
@@ -130,7 +152,7 @@ const SigninScreen = () => {
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppTextInput
                       style={styles.inputValue}
-                      placeholder="example@gmail.com"
+                      placeholder={t("auth.email_placeholder")}
                       keyboardType="email-address"
                       autoCapitalize="none"
                       onBlur={onBlur}
@@ -153,7 +175,7 @@ const SigninScreen = () => {
               {/* --- SĐT --- */}
               <View style={styles.inputWrapper}>
                 <AppText style={[styles.inputLabel, styles.marginTop]}>
-                  Số điện thoại
+                  {t("auth.phone_label")}
                 </AppText>
                 <Controller
                   control={control}
@@ -161,7 +183,7 @@ const SigninScreen = () => {
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppTextInput
                       style={styles.inputValue}
-                      placeholder="09xx..."
+                      placeholder={t("auth.phone_placeholder")}
                       keyboardType="phone-pad"
                       onBlur={onBlur}
                       onChangeText={onChange}
@@ -183,7 +205,7 @@ const SigninScreen = () => {
               {/* --- MẬT KHẨU --- */}
               <View style={styles.inputWrapper}>
                 <AppText style={[styles.inputLabel, styles.marginTop]}>
-                  Mật khẩu
+                  {t("auth.password_label")}
                 </AppText>
                 <Controller
                   control={control}
@@ -191,7 +213,7 @@ const SigninScreen = () => {
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppPasswordInput
                       style={styles.inputValue}
-                      placeholder="•••••••••"
+                      placeholder={t("auth.password_placeholder")}
                       onChangeText={onChange}
                       value={value}
                       children={
@@ -211,7 +233,7 @@ const SigninScreen = () => {
               {/* --- XÁC NHẬN --- */}
               <View style={styles.inputWrapper}>
                 <AppText style={[styles.inputLabel, styles.marginTop]}>
-                  Xác nhận mật khẩu
+                  {t("auth.confirm_password_label")}
                 </AppText>
                 <Controller
                   control={control}
@@ -219,7 +241,7 @@ const SigninScreen = () => {
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppPasswordInput
                       style={styles.inputValue}
-                      placeholder="•••••••••"
+                      placeholder={t("auth.password_placeholder")}
                       onChangeText={onChange}
                       value={value}
                       children={
@@ -237,7 +259,7 @@ const SigninScreen = () => {
               </View>
             </View>
 
-            {/* --- NÚT ĐĂNG KÝ (Gọi handleSubmit) --- */}
+            {/* --- NÚT ĐĂNG KÝ --- */}
             {isLoading ? (
               <View
                 style={[styles.registerButton, { backgroundColor: "#ccc" }]}
@@ -246,24 +268,21 @@ const SigninScreen = () => {
               </View>
             ) : (
               <AppButton
-                butName="Đăng ký"
+                butName={t("auth.register_button")}
                 style={styles.registerButton}
                 style1={styles.registerButtonText}
-                onPress={handleSubmit(onSubmit)} // Thư viện tự lo validation trước khi gọi onSubmit
+                onPress={handleSubmit(onSubmit)}
               />
             )}
 
-            {/* ... Footer code giữ nguyên ... */}
             <View style={styles.footerContainer}>
-              {/* Copy footer từ code cũ qua */}
               <AppText variant="light" style={styles.footerText}>
-                Đã có tài khoản?
+                {t("auth.has_account")}
                 <Text
                   style={styles.loginLink}
                   onPress={() => navigation.navigate("LoginScreen")}
                 >
-                  {" "}
-                  Đăng nhập
+                  {t("auth.login_link")}
                 </Text>
               </AppText>
             </View>
@@ -277,7 +296,6 @@ const SigninScreen = () => {
 export default SigninScreen;
 
 const styles = StyleSheet.create({
-  // ... Các styles cũ giữ nguyên
   safeArea: { flex: 1, backgroundColor: AppLightColor.background },
   keyboardContainer: { flex: 1 },
   scrollContainer: { flexGrow: 1 },
@@ -288,6 +306,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: 40,
     paddingTop: 20,
+    
   },
   headerTitle: {
     fontSize: 30,
@@ -323,13 +342,11 @@ const styles = StyleSheet.create({
   footerContainer: { marginTop: 24, alignItems: "center" },
   footerText: { fontSize: 16, fontFamily: AppFonts.RobotoMedium },
   loginLink: { color: AppLightColor.primary_color, fontWeight: "800" },
-
-  // --- THÊM STYLE CHO LỖI ---
   errorText: {
     color: "red",
     fontSize: 12,
     marginTop: 4,
     marginLeft: 4,
-    fontFamily: AppFonts.RobotoRegular, // hoặc font thường
+    fontFamily: AppFonts.RobotoRegular,
   },
 });

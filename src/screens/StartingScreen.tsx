@@ -8,7 +8,6 @@ import AppLogo from "../components/AppLogo";
 import { AppLightColor } from "../styles/color";
 import { RootStackParamList } from "../type/types";
 
-type NavigationProp = StackNavigationProp<RootStackParamList, "IntroduceScreen">;
 
 const StartingScreen = () => {
 

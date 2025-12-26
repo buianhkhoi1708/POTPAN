@@ -1,6 +1,8 @@
-// src/screens/Introduce1.tsx
-import { ImageBackground, StyleSheet, View, Image } from "react-native";
-import React, { useEffect } from "react";
+// src/screens/Introduce2.tsx
+import { ImageBackground, StyleSheet, View } from "react-native";
+import React from "react";
+import { useTranslation } from "react-i18next"; // 👈 Import i18n
+
 import AppText from "../components/AppText";
 import AppSafeView from "../components/AppSafeView";
 import { AppLightColor } from "../styles/color";
@@ -8,22 +10,27 @@ import { AppFonts } from "../styles/fonts";
 import AppIntroduceNavBar from "../components/AppIntroduceNavBar";
 
 const Introduce2Screen = () => {
+  const { t } = useTranslation(); // 👈 Khởi tạo hook
+
   return (
-    <AppSafeView style = {styles.safe}>
+    <AppSafeView style={styles.safe}>
       <ImageBackground
         source={require("../assets/images/bgIntro2.png")}
         style={styles.container}
       >
         <View style={styles.textContainer}>
           <View style={styles.text1Container}>
+            {/* Tiêu đề */}
             <AppText variant="bold" style={styles.text}>
-              Món ăn Châu Âu
+              {t("intro.step2.title")}
             </AppText>
           </View>
+          {/* Phụ đề */}
           <AppText variant="light" style={styles.text1}>
-            Tinh hoa văn hoá phương tây
+            {t("intro.step2.subtitle")}
           </AppText>
         </View>
+        
         <AppIntroduceNavBar
           NavScreen="Introduce3Screen"
           style={styles.navBar}

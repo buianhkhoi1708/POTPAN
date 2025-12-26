@@ -6,20 +6,25 @@ import {
   StyleSheet,
   Dimensions,
   ViewStyle,
+  Alert,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
+import * as Haptics from "expo-haptics"; // Thêm rung phản hồi
+
 import AppText from "./AppText";
 import { AppLightColor } from "../styles/color";
-import SaveIcon from "../assets/images/save.svg";
-// 👇 1. Import Hook dịch
-import { useTranslation } from "react-i18next";
 import { formatRecipeTime } from "../utils/format";
+
+// 👇 1. Import Stores
+import { useAuthStore } from "../store/useAuthStore";
+import { useCollectionStore } from "../store/useCollectionStore";
 
 type Recipe = {
   id: any;
   title: string;
   thumbnail: string | null;
-  time: string | number; // Chấp nhận cả string hoặc number từ DB
+  time: string | number;
   rating: number;
   description?: string;
 };
@@ -42,11 +47,48 @@ const AppRecipeCard = ({
   style,
 }: RecipeCardProps) => {
   const isFeatured = variant === "featured";
-
-  // 👇 2. Khởi tạo hàm t
   const { t } = useTranslation();
+  
+  // 👇 2. Lấy dữ liệu từ Store
+  const { user } = useAuthStore();
+  const { savedRecipeIds, toggleSave } = useCollectionStore();
 
-const formattedTime = formatRecipeTime(item.time, t);
+  // 👇 3. Kiểm tra xem món này đã được like chưa
+  const isSaved = savedRecipeIds.includes(item.id);
+
+  const formattedTime = formatRecipeTime(item.time, t);
+
+  // 👇 4. Hàm xử lý khi bấm tim
+  const handleToggleLike = async () => {
+    if (!user) {
+      Alert.alert(t("common.notification"), t("review.alert_login"));
+      return;
+    }
+
+    // Tạo rung nhẹ để tăng trải nghiệm
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    // Gọi hàm toggle trong store
+    await toggleSave(user.id, item.id);
+  };
+
+  // Component hiển thị nút Tim (Dùng chung cho cả 2 variant)
+  const HeartButton = ({ isSmall = false }) => (
+    <Pressable
+      style={isSmall ? styles.smallHeartButton : styles.heartButton}
+      onPress={(e) => {
+        e.stopPropagation(); // Ngăn sự kiện click xuyên qua Card
+        handleToggleLike();
+      }}
+    >
+      {/* Thay SVG bằng Ionicons để dễ đổi màu */}
+      <Ionicons
+        name={isSaved ? "heart" : "heart-outline"}
+        size={isSmall ? 20 : 24}
+        color={isSaved ? "#FF3B30" : "#ffffff"} // Đỏ nếu đã like, Trắng nếu chưa
+      />
+    </Pressable>
+  );
 
   if (isFeatured) {
     return (
@@ -61,24 +103,15 @@ const formattedTime = formatRecipeTime(item.time, t);
             style={styles.image}
             resizeMode="cover"
           />
-          <Pressable style={styles.heartButton}>
-            <SaveIcon width={22} height={22} stroke="#ffffff" fill="none" />
-          </Pressable>
+          {/* 👇 Nhúng nút tim vào đây */}
+          <HeartButton />
         </View>
         <View style={styles.featuredInfo}>
-          <AppText
-            variant="bold"
-            style={styles.featuredTitle}
-            numberOfLines={2}
-          >
+          <AppText variant="bold" style={styles.featuredTitle} numberOfLines={2}>
             {item.title}
           </AppText>
-          <AppText
-            variant="light"
-            style={styles.featuredDesc}
-            numberOfLines={2}
-          >
-            {item.description || "Món ngon hấp dẫn..."}
+          <AppText variant="light" style={styles.featuredDesc} numberOfLines={2}>
+            {item.description || t("recipe_detail.no_description")}
           </AppText>
 
           <View style={styles.metaRow}>
@@ -88,20 +121,15 @@ const formattedTime = formatRecipeTime(item.time, t);
                 size={14}
                 color={AppLightColor.primary_color}
               />
-              {/* 👇 Hiển thị thời gian đã dịch */}
               <AppText variant="light" style={styles.metaText}>
                 {formattedTime}
               </AppText>
             </View>
             <View style={styles.metaRight}>
               <AppText variant="light" style={styles.metaText}>
-                {item.rating.toFixed(1)}
+                {item.rating?.toFixed(1)}
               </AppText>
-              <Ionicons
-                name="star"
-                size={14}
-                color={AppLightColor.primary_color}
-              />
+              <Ionicons name="star" size={14} color={AppLightColor.primary_color} />
             </View>
           </View>
         </View>
@@ -121,9 +149,8 @@ const formattedTime = formatRecipeTime(item.time, t);
           style={styles.image}
           resizeMode="cover"
         />
-        <Pressable style={styles.smallHeartButton}>
-          <SaveIcon width={20} height={20} stroke="#ffffff" fill="none" />
-        </Pressable>
+        {/* 👇 Nhúng nút tim vào đây */}
+        <HeartButton isSmall={true} />
       </View>
 
       <View style={styles.smallInfo}>
@@ -140,7 +167,6 @@ const formattedTime = formatRecipeTime(item.time, t);
               size={12}
               color={AppLightColor.primary_color}
             />
-            {/* 👇 Hiển thị thời gian đã dịch */}
             <AppText variant="light" style={styles.metaText}>
               {formattedTime}
             </AppText>
@@ -149,11 +175,7 @@ const formattedTime = formatRecipeTime(item.time, t);
             <AppText variant="light" style={styles.metaText}>
               {item.rating?.toFixed(1) || "0.0"}
             </AppText>
-            <Ionicons
-              name="star"
-              size={12}
-              color={AppLightColor.primary_color}
-            />
+            <Ionicons name="star" size={12} color={AppLightColor.primary_color} />
           </View>
         </View>
       </View>
@@ -186,6 +208,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     height: 200,
   },
+  // Nút tim lớn cho Featured Card
   heartButton: {
     position: "absolute",
     top: 12,
@@ -193,14 +216,10 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(255, 59, 48, 0.9)",
+    backgroundColor: "rgba(0, 0, 0, 0.3)", // Nền mờ đen để icon trắng/đỏ nổi bật
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    // Loại bỏ shadow đỏ cũ, dùng style phẳng hiện đại hơn
   },
   featuredInfo: {
     backgroundColor: "#fff",
@@ -215,13 +234,13 @@ const styles = StyleSheet.create({
     elevation: 6,
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.05)",
-    height: 140, // Height cho Featured (giữ nguyên vì nó to)
+    height: 140,
     justifyContent: "space-between",
   },
   featuredTitle: { fontSize: 18, color: "#1a1a1a", lineHeight: 24, height: 48 },
   featuredDesc: { fontSize: 13, color: "#666", lineHeight: 18, height: 36 },
 
-  // --- Small Card (Đã update cho 1 dòng) ---
+  // --- Small Card ---
   smallCard: { width: SMALL_WIDTH },
   smallImageWrap: {
     borderRadius: 12,
@@ -229,6 +248,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     height: 120,
   },
+  // Nút tim nhỏ cho Small Card
   smallHeartButton: {
     position: "absolute",
     top: 8,
@@ -236,14 +256,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "rgba(255, 59, 48, 0.9)",
+    backgroundColor: "rgba(0, 0, 0, 0.3)", // Nền mờ
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
   },
 
   smallInfo: {
@@ -259,21 +274,17 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.05)",
-
-    // 👇 UPDATE QUAN TRỌNG NHẤT Ở ĐÂY
-    height: 80, // Giảm từ 96 xuống 80 (đủ cho 1 dòng tên + meta)
+    height: 80,
     justifyContent: "space-between",
   },
 
   smallTitlePlaceholder: {
-    // 👇 Chiều cao cố định đúng 1 dòng
     height: 22,
     justifyContent: "center",
   },
   smallTitle: {
     fontSize: 15,
     color: "#1a1a1a",
-    // 👇 Line height khớp với placeholder
     lineHeight: 22,
   },
 });

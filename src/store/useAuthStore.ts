@@ -12,7 +12,8 @@ interface UserProfile {
   email: string;
   username?: string | null; // Biệt danh
   bio?: string | null;      // Giới thiệu
-  website?: string | null;  // Liên kết
+  website?: string | null; 
+  role?: string; // Liên kết
 }
 
 // 2. Định nghĩa Interface cho Store

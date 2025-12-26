@@ -4,23 +4,23 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  Pressable,
   Dimensions,
-  Platform,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next"; // Import i18n
 
 // --- COMPONENTS & CONFIG ---
 import { supabase } from "../config/supabaseClient";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppRecipeCard from "../components/AppRecipeCard";
-import AppBottomSpace from "../components/AppBottomSpace"; // Để tránh bị che bởi iPhone Home Indicator
+import AppHeader from "../components/AppHeader"; // <-- Dùng Header chuẩn
+import AppBottomSpace from "../components/AppBottomSpace";
 import { AppLightColor } from "../styles/color";
 
 const { width } = Dimensions.get("window");
+
 // Tính toán kích thước card cho Grid 2 cột
 const PADDING = 16;
 const GAP = 12;
@@ -32,6 +32,7 @@ const CategoryDetailScreen = () => {
   const { t } = useTranslation();
 
   // Lấy params truyền từ màn hình Categories
+  // categoryTitle đã được dịch (t(...)) từ màn hình trước
   const { categoryTitle, categoryDbValue } = route.params || {};
 
   const [recipes, setRecipes] = useState<any[]>([]);
@@ -45,6 +46,7 @@ const CategoryDetailScreen = () => {
     try {
       setLoading(true);
       // Query database: lấy tất cả recipes có category trùng khớp
+      // categoryDbValue là giá trị gốc trong DB (VD: "Món mặn")
       const { data, error } = await supabase
         .from("recipes")
         .select("*")
@@ -60,7 +62,7 @@ const CategoryDetailScreen = () => {
     }
   };
 
-  // --- RENDER ITEM (Tái sử dụng AppRecipeCard) ---
+  // --- RENDER ITEM ---
   const renderItem = ({ item }: { item: any }) => (
     <AppRecipeCard
       item={item}
@@ -74,25 +76,13 @@ const CategoryDetailScreen = () => {
     <AppSafeView style={styles.safeArea}>
       <View style={styles.container}>
         
-        {/* --- HEADER (Có nút Back) --- */}
-        <View style={styles.header}>
-          <Pressable 
-            onPress={() => navigation.goBack()} 
-            style={styles.backButton}
-            hitSlop={10}
-          >
-            <Ionicons name="arrow-back" size={24} color={AppLightColor.primary_text} />
-          </Pressable>
-          
-          <View style={styles.titleWrapper}>
-            <AppText variant="bold" style={styles.headerTitle} numberOfLines={1}>
-              {categoryTitle || t("common.categories")}
-            </AppText>
-          </View>
-
-          {/* Dummy view để cân bằng layout header */}
-          <View style={{ width: 40 }} />
-        </View>
+        {/* --- HEADER CHUẨN --- */}
+        <AppHeader 
+          title={categoryTitle || t("category.screen_title")}
+          showBack={true}
+          onBackPress={() => navigation.goBack()}
+          showSearch={false} // Có thể bật true nếu muốn thêm search trong danh mục
+        />
 
         {/* --- CONTENT --- */}
         {loading ? (
@@ -104,7 +94,7 @@ const CategoryDetailScreen = () => {
           <View style={styles.emptyContainer}>
             <Ionicons name="file-tray-outline" size={64} color="#ddd" />
             <AppText style={styles.emptyText}>
-              {t("profile.no_recipes")} {/* "Chưa có món ăn nào" */}
+              {t("profile.no_recipes")} {/* Sử dụng key có sẵn: "Chưa có món ăn nào." */}
             </AppText>
           </View>
         ) : (
@@ -136,43 +126,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  // Header Styles
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 12 : 8,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    backgroundColor: "#fff",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 20,
-    backgroundColor: "#F5F5F5", // Nền xám nhẹ cho nút back
-  },
-  titleWrapper: {
-    flex: 1,
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  headerTitle: {
-    fontSize: 20,
-    color: AppLightColor.primary_text,
-    textAlign: "center",
-  },
-
   // Empty State
   emptyContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -40, // Đẩy lên một chút cho cân đối
+    marginTop: -40,
   },
   emptyText: {
     marginTop: 16,

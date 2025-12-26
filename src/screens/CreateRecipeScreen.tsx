@@ -14,16 +14,17 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, Resolver} from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { decode } from "base64-arraybuffer"; // 👈 Cần cài: npm install base64-arraybuffer
+import { decode } from "base64-arraybuffer";
+import { useTranslation } from "react-i18next"; 
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import { AppLightColor } from "../styles/color";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
-import { recipeSchema } from "../utils/validationSchema";
+import { getRecipeSchema } from "../utils/validationSchema";
 
 // --- TYPES ---
 interface IngredientItem {
@@ -55,16 +56,32 @@ const CreateRecipeScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { user } = useAuthStore();
+  const { t } = useTranslation(); // 👈 Init hook
 
   const { isEdit, recipeData } = route.params || {};
 
-  // State lưu dữ liệu ảnh gốc để upload
-  const [imageBase64, setImageBase64] = useState<string | null | undefined>(
-    null
-  );
+  // State
+  const [imageBase64, setImageBase64] = useState<string | null | undefined>(null);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [formChanged, setFormChanged] = useState(false);
+
+  // --- OPTIONS DATA (Mapping for i18n) ---
+  // Value: Giá trị lưu DB (Tiếng Việt), Label: Key để dịch
+  const DIFFICULTY_OPTIONS = [
+    { value: "Dễ", labelKey: "easy" },
+    { value: "Trung bình", labelKey: "medium" },
+    { value: "Khó", labelKey: "hard" },
+  ];
+
+  const CATEGORY_OPTIONS = [
+    { value: "savory", labelKey: "Món mặn" },
+    { value: "soup", labelKey: "Món canh" },
+    { value: "dessert", labelKey: "Tráng miệng" },
+    { value: "cake", labelKey: "Bánh ngọt" },
+    { value: "drink", labelKey: "Đồ uống" },
+    { value: "snack", labelKey: "Ăn vặt" },
+  ];
 
   // --- REACT HOOK FORM ---
   const {
@@ -76,7 +93,7 @@ const CreateRecipeScreen: React.FC = () => {
     watch,
     reset,
   } = useForm<RecipeFormData>({
-    resolver: yupResolver(recipeSchema),
+    resolver: yupResolver(getRecipeSchema(t)) as unknown as Resolver<RecipeFormData>,
     defaultValues: {
       title: "",
       description: "",
@@ -146,10 +163,12 @@ const CreateRecipeScreen: React.FC = () => {
   // --- IMAGE HANDLING ---
   const pickImage = async () => {
     try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Cần quyền", "Ứng dụng cần quyền truy cập ảnh để tải lên.");
+        Alert.alert(
+          t("alert.permission_required"),
+          t("alert.permission_desc_photo")
+        );
         return;
       }
 
@@ -157,37 +176,32 @@ const CreateRecipeScreen: React.FC = () => {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [4, 3],
-        quality: 0.5, // Giảm chất lượng để upload nhanh hơn
-        base64: true, // 👈 QUAN TRỌNG: Cần lấy base64 để upload
+        quality: 0.5,
+        base64: true,
       });
 
       if (!result.canceled && result.assets[0].uri) {
-        // Lưu URI để hiển thị preview
         setValue("thumbnail", result.assets[0].uri, { shouldValidate: true });
-        // Lưu Base64 để upload sau
         setImageBase64(result.assets[0].base64);
       }
     } catch (error) {
       console.error("Lỗi chọn ảnh:", error);
-      Alert.alert("Lỗi", "Không thể chọn ảnh");
+      Alert.alert(t("alert.error_title"), t("alert.pick_image_error"));
     }
   };
 
-  // --- HÀM UPLOAD ẢNH LÊN SUPABASE ---
+  // --- HÀM UPLOAD ẢNH LÊN SUPABASE (Giữ nguyên logic) ---
   const uploadImageToSupabase = async (
     imageUri: string,
     base64Data: string | null | undefined
   ) => {
-    // Nếu là ảnh đã có sẵn trên mạng (link http), không cần upload lại
     if (imageUri.startsWith("http")) return imageUri;
-
     if (!base64Data || !user) throw new Error("Thiếu dữ liệu ảnh để tải lên.");
 
     const fileExt = imageUri.split(".").pop()?.toLowerCase() || "jpg";
     const fileName = `${user.id}/${Date.now()}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    // Upload vào bucket 'recipe_images'
     const { error: uploadError } = await supabase.storage
       .from("recipe_images")
       .upload(filePath, decode(base64Data), {
@@ -197,7 +211,6 @@ const CreateRecipeScreen: React.FC = () => {
 
     if (uploadError) throw uploadError;
 
-    // Lấy Public URL
     const { data } = supabase.storage
       .from("recipe_images")
       .getPublicUrl(filePath);
@@ -205,18 +218,14 @@ const CreateRecipeScreen: React.FC = () => {
     return data.publicUrl;
   };
 
-  // --- INGREDIENT ACTIONS ---
+  // --- INGREDIENT & STEP ACTIONS (Giữ nguyên logic) ---
   const addIngredient = () => {
     const currentIngredients = getValues("ingredients");
     setValue(
       "ingredients",
       [
         ...currentIngredients,
-        {
-          id: `ing-${Date.now()}-${Math.random()}`,
-          quantity: "",
-          name: "",
-        },
+        { id: `ing-${Date.now()}-${Math.random()}`, quantity: "", name: "" },
       ],
       { shouldValidate: true }
     );
@@ -248,18 +257,13 @@ const CreateRecipeScreen: React.FC = () => {
     );
   };
 
-  // --- STEP ACTIONS ---
   const addStep = () => {
     const currentSteps = getValues("steps");
     setValue(
       "steps",
       [
         ...currentSteps,
-        {
-          id: `step-${Date.now()}-${Math.random()}`,
-          title: "",
-          content: "",
-        },
+        { id: `step-${Date.now()}-${Math.random()}`, title: "", content: "" },
       ],
       { shouldValidate: true }
     );
@@ -276,11 +280,7 @@ const CreateRecipeScreen: React.FC = () => {
     }
   };
 
-  const updateStep = (
-    id: string,
-    field: "title" | "content",
-    value: string
-  ) => {
+  const updateStep = (id: string, field: "title" | "content", value: string) => {
     const currentSteps = getValues("steps");
     setValue(
       "steps",
@@ -294,7 +294,7 @@ const CreateRecipeScreen: React.FC = () => {
   // --- FORM SUBMISSION ---
   const onSubmit = async (data: RecipeFormData) => {
     if (!user) {
-      Alert.alert("Lỗi", "Vui lòng đăng nhập để tạo công thức");
+      Alert.alert(t("alert.error_title"), t("alert.login_required"));
       return;
     }
 
@@ -302,9 +302,8 @@ const CreateRecipeScreen: React.FC = () => {
     try {
       let finalThumbnailUrl = data.thumbnail;
 
-      // 1. Upload ảnh nếu có thay đổi (có base64 mới)
       if (imageBase64) {
-        setUploadingImage(true); // Hiển thị trạng thái đang upload
+        setUploadingImage(true);
         finalThumbnailUrl = await uploadImageToSupabase(
           data.thumbnail,
           imageBase64
@@ -312,12 +311,11 @@ const CreateRecipeScreen: React.FC = () => {
         setUploadingImage(false);
       }
 
-      // 2. Chuẩn bị dữ liệu lưu DB
       const payload = {
         title: data.title.trim(),
         description: data.description.trim(),
         time: data.time.trim(),
-        thumbnail: finalThumbnailUrl, // Dùng URL public từ Supabase
+        thumbnail: finalThumbnailUrl,
         ingredients: data.ingredients,
         steps: data.steps,
         category: data.category,
@@ -326,19 +324,18 @@ const CreateRecipeScreen: React.FC = () => {
         updated_at: new Date().toISOString(),
       };
 
-      // 3. Thực hiện Insert hoặc Update
       let error;
       if (isEdit) {
         const { error: updateError } = await supabase
           .from("recipes")
-          .update({ ...payload, status: "pending" }) // Sửa xong cũng phải chờ duyệt lại
+          .update({ ...payload, status: "pending" })
           .eq("id", recipeData.id);
         error = updateError;
       } else {
         const { error: insertError } = await supabase.from("recipes").insert({
           ...payload,
           user_id: user.id,
-          status: "pending", // Mặc định là Chờ duyệt
+          status: "pending",
           created_at: new Date().toISOString(),
         });
         error = insertError;
@@ -346,22 +343,21 @@ const CreateRecipeScreen: React.FC = () => {
 
       if (error) throw error;
 
-      Alert.alert(
-        "Thành công",
-        "Công thức đã được gửi và đang chờ Admin duyệt!",
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              navigation.goBack();
-              if (route.params?.onSuccess) route.params.onSuccess();
-            },
+      Alert.alert(t("alert.success_title"), t("alert.recipe_submitted"), [
+        {
+          text: "OK",
+          onPress: () => {
+            navigation.goBack();
+            if (route.params?.onSuccess) route.params.onSuccess();
           },
-        ]
-      );
+        },
+      ]);
     } catch (error: any) {
       console.error("Lỗi lưu công thức:", error);
-      Alert.alert("Lỗi", error.message || "Không thể lưu công thức.");
+      Alert.alert(
+        t("alert.error_title"),
+        error.message || t("alert.save_error")
+      );
     } finally {
       setLoading(false);
       setUploadingImage(false);
@@ -371,23 +367,29 @@ const CreateRecipeScreen: React.FC = () => {
   // --- NAVIGATION GUARD ---
   const handleGoBack = () => {
     if (formChanged) {
-      Alert.alert("Thoát?", "Thay đổi chưa được lưu. Bạn có chắc muốn thoát?", [
-        { text: "Huỷ", style: "cancel" },
-        {
-          text: "Thoát",
-          style: "destructive",
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      Alert.alert(
+        t("alert.confirm_exit_title"),
+        t("alert.confirm_exit_desc"),
+        [
+          { text: t("common.cancel"), style: "cancel" },
+          {
+            text: t("common.exit"),
+            style: "destructive",
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
     } else {
       navigation.goBack();
     }
   };
 
-  // --- HELPERS RENDER ERROR ---
   const renderError = (field: keyof RecipeFormData) =>
     errors[field] ? (
-      <AppText style={styles.errorText}>{errors[field]?.message}</AppText>
+      <AppText style={styles.errorText}>
+        {/* Nếu validation schema chưa i18n, thông báo lỗi vẫn là tiếng Việt từ schema */}
+        {errors[field]?.message} 
+      </AppText>
     ) : null;
 
   return (
@@ -398,7 +400,7 @@ const CreateRecipeScreen: React.FC = () => {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <AppText variant="bold" style={styles.headerTitle}>
-          {isEdit ? "Chỉnh sửa công thức" : "Tạo công thức mới"}
+          {isEdit ? t("create_recipe.edit_title") : t("create_recipe.new_title")}
         </AppText>
         <View style={{ width: 40 }} />
       </View>
@@ -432,12 +434,14 @@ const CreateRecipeScreen: React.FC = () => {
                     style={{ marginRight: 8 }}
                   />
                   <AppText style={styles.btnPostText}>
-                    {uploadingImage ? "Đang tải ảnh..." : "Đang lưu..."}
+                    {uploadingImage
+                      ? t("create_recipe.uploading_image")
+                      : t("create_recipe.saving")}
                   </AppText>
                 </View>
               ) : (
                 <AppText style={styles.btnPostText}>
-                  {isEdit ? "Lưu thay đổi" : "Đăng bài"}
+                  {isEdit ? t("common.save_changes") : t("create_recipe.post")}
                 </AppText>
               )}
             </TouchableOpacity>
@@ -447,7 +451,7 @@ const CreateRecipeScreen: React.FC = () => {
               onPress={handleGoBack}
               disabled={loading}
             >
-              <AppText style={styles.btnCancelText}>Huỷ bỏ</AppText>
+              <AppText style={styles.btnCancelText}>{t("common.cancel")}</AppText>
             </TouchableOpacity>
           </View>
 
@@ -455,7 +459,7 @@ const CreateRecipeScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.labelRow}>
               <AppText variant="bold" style={styles.label}>
-                Ảnh món ăn *
+                {t("create_recipe.form.thumbnail")} *
               </AppText>
               {renderError("thumbnail")}
             </View>
@@ -482,7 +486,9 @@ const CreateRecipeScreen: React.FC = () => {
               ) : (
                 <View style={styles.uploadPlaceholder}>
                   <MaterialIcons name="photo-camera" size={48} color="#ccc" />
-                  <AppText style={styles.uploadText}>Chạm để chọn ảnh</AppText>
+                  <AppText style={styles.uploadText}>
+                    {t("create_recipe.placeholder.thumbnail")}
+                  </AppText>
                 </View>
               )}
             </TouchableOpacity>
@@ -491,18 +497,20 @@ const CreateRecipeScreen: React.FC = () => {
           {/* BASIC INFO */}
           <View style={styles.section}>
             <AppText variant="bold" style={styles.sectionTitle}>
-              Thông tin cơ bản
+              {t("create_recipe.section_basic")}
             </AppText>
 
             <View style={styles.inputGroup}>
-              <AppText style={styles.inputLabel}>Tên món *</AppText>
+              <AppText style={styles.inputLabel}>
+                {t("create_recipe.form.name")} *
+              </AppText>
               <Controller
                 control={control}
                 name="title"
                 render={({ field: { onChange, value } }) => (
                   <TextInput
                     style={styles.input}
-                    placeholder="Nhập tên món ăn"
+                    placeholder={t("create_recipe.placeholder.name")}
                     value={value}
                     onChangeText={onChange}
                   />
@@ -512,14 +520,16 @@ const CreateRecipeScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputGroup}>
-              <AppText style={styles.inputLabel}>Mô tả *</AppText>
+              <AppText style={styles.inputLabel}>
+                {t("create_recipe.form.description")} *
+              </AppText>
               <Controller
                 control={control}
                 name="description"
                 render={({ field: { onChange, value } }) => (
                   <TextInput
                     style={styles.textArea}
-                    placeholder="Mô tả món ăn..."
+                    placeholder={t("create_recipe.placeholder.description")}
                     value={value}
                     onChangeText={onChange}
                     multiline
@@ -531,14 +541,16 @@ const CreateRecipeScreen: React.FC = () => {
 
             <View style={styles.row}>
               <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-                <AppText style={styles.inputLabel}>Thời gian *</AppText>
+                <AppText style={styles.inputLabel}>
+                  {t("create_recipe.form.time")} *
+                </AppText>
                 <Controller
                   control={control}
                   name="time"
                   render={({ field: { onChange, value } }) => (
                     <TextInput
                       style={styles.input}
-                      placeholder="30 phút"
+                      placeholder={t("create_recipe.placeholder.time")}
                       value={value}
                       onChangeText={onChange}
                     />
@@ -548,28 +560,31 @@ const CreateRecipeScreen: React.FC = () => {
               </View>
 
               <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
-                <AppText style={styles.inputLabel}>Độ khó *</AppText>
+                <AppText style={styles.inputLabel}>
+                  {t("create_recipe.form.difficulty")} *
+                </AppText>
                 <Controller
                   control={control}
                   name="difficulty"
                   render={({ field: { onChange, value } }) => (
                     <View style={styles.selectContainer}>
-                      {["Dễ", "Trung bình", "Khó"].map((level) => (
+                      {DIFFICULTY_OPTIONS.map((option) => (
                         <TouchableOpacity
-                          key={level}
+                          key={option.value}
                           style={[
                             styles.selectOption,
-                            value === level && styles.selectOptionActive,
+                            value === option.value && styles.selectOptionActive,
                           ]}
-                          onPress={() => onChange(level)}
+                          onPress={() => onChange(option.value)}
                         >
                           <AppText
                             style={[
                               styles.selectOptionText,
-                              value === level && styles.selectOptionTextActive,
+                              value === option.value &&
+                                styles.selectOptionTextActive,
                             ]}
                           >
-                            {level}
+                            {t(`data_map.difficulty.${option.labelKey}`)}
                           </AppText>
                         </TouchableOpacity>
                       ))}
@@ -580,36 +595,32 @@ const CreateRecipeScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputGroup}>
-              <AppText style={styles.inputLabel}>Danh mục *</AppText>
+              <AppText style={styles.inputLabel}>
+                {t("create_recipe.form.category")} *
+              </AppText>
               <Controller
                 control={control}
                 name="category"
                 render={({ field: { onChange, value } }) => (
                   <View style={styles.selectContainer}>
-                    {[
-                      "Món mặn",
-                      "Món canh",
-                      "Tráng miệng",
-                      "Bánh ngọt",
-                      "Đồ uống",
-                      "Ăn vặt",
-                    ].map((cat) => (
+                    {CATEGORY_OPTIONS.map((option) => (
                       <TouchableOpacity
-                        key={cat}
+                        key={option.value}
                         style={[
                           styles.selectOption,
-                          value === cat && styles.selectOptionActive,
+                          value === option.value && styles.selectOptionActive,
                           { width: "48%", marginBottom: 8 },
                         ]}
-                        onPress={() => onChange(cat)}
+                        onPress={() => onChange(option.value)}
                       >
                         <AppText
                           style={[
                             styles.selectOptionText,
-                            value === cat && styles.selectOptionTextActive,
+                            value === option.value &&
+                              styles.selectOptionTextActive,
                           ]}
                         >
-                          {cat}
+                          {t(`data_map.category.${option.labelKey}`)}
                         </AppText>
                       </TouchableOpacity>
                     ))}
@@ -623,7 +634,7 @@ const CreateRecipeScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <AppText variant="bold" style={styles.sectionTitle}>
-                Nguyên liệu *
+                {t("create_recipe.section_ingredients")} *
               </AppText>
               {renderError("ingredients")}
             </View>
@@ -638,7 +649,7 @@ const CreateRecipeScreen: React.FC = () => {
                 <View style={styles.ingredientInputs}>
                   <TextInput
                     style={styles.inputSmall}
-                    placeholder="Số lượng"
+                    placeholder={t("create_recipe.placeholder.ing_amount")}
                     value={item.quantity}
                     onChangeText={(text) =>
                       updateIngredient(item.id, "quantity", text)
@@ -646,7 +657,7 @@ const CreateRecipeScreen: React.FC = () => {
                   />
                   <TextInput
                     style={[styles.inputSmall, { flex: 1 }]}
-                    placeholder="Tên nguyên liệu"
+                    placeholder={t("create_recipe.placeholder.ing_name")}
                     value={item.name}
                     onChangeText={(text) =>
                       updateIngredient(item.id, "name", text)
@@ -673,7 +684,9 @@ const CreateRecipeScreen: React.FC = () => {
                 size={20}
                 color={AppLightColor.primary_color}
               />
-              <AppText style={styles.addButtonText}>Thêm nguyên liệu</AppText>
+              <AppText style={styles.addButtonText}>
+                {t("create_recipe.add_ingredient")}
+              </AppText>
             </TouchableOpacity>
           </View>
 
@@ -681,7 +694,7 @@ const CreateRecipeScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <AppText variant="bold" style={styles.sectionTitle}>
-                Các bước thực hiện *
+                {t("create_recipe.section_steps")} *
               </AppText>
               {renderError("steps")}
             </View>
@@ -691,7 +704,7 @@ const CreateRecipeScreen: React.FC = () => {
                 <View style={styles.stepHeader}>
                   <View style={styles.stepNumber}>
                     <AppText style={styles.stepNumberText}>
-                      Bước {index + 1}
+                      {t("create_recipe.step")} {index + 1}
                     </AppText>
                   </View>
                   {watchSteps.length > 1 && (
@@ -709,13 +722,13 @@ const CreateRecipeScreen: React.FC = () => {
                 </View>
                 <TextInput
                   style={[styles.input, { marginBottom: 8 }]}
-                  placeholder="Tiêu đề bước"
+                  placeholder={t("create_recipe.placeholder.step_title")}
                   value={item.title}
                   onChangeText={(text) => updateStep(item.id, "title", text)}
                 />
                 <TextInput
                   style={[styles.textArea, { height: 80 }]}
-                  placeholder="Mô tả cách làm..."
+                  placeholder={t("create_recipe.placeholder.step_desc")}
                   value={item.content}
                   onChangeText={(text) => updateStep(item.id, "content", text)}
                   multiline
@@ -728,7 +741,9 @@ const CreateRecipeScreen: React.FC = () => {
                 size={20}
                 color={AppLightColor.primary_color}
               />
-              <AppText style={styles.addButtonText}>Thêm bước</AppText>
+              <AppText style={styles.addButtonText}>
+                {t("create_recipe.add_step")}
+              </AppText>
             </TouchableOpacity>
           </View>
           <View style={{ height: 100 }} />
@@ -740,7 +755,7 @@ const CreateRecipeScreen: React.FC = () => {
 
 export default CreateRecipeScreen;
 
-// STYLES
+// Styles giữ nguyên như cũ
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#fff" },
   header: {

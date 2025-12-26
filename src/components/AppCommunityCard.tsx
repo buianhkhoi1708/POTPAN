@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import AppText from "./AppText";
 import { AppLightColor } from "../styles/color";
-import { formatRecipeTime } from "../utils/format"; // Helper chúng ta đã viết
+import { formatRecipeTime } from "../utils/format";
 
 // Định nghĩa props
 interface CommunityCardProps {
@@ -30,21 +30,25 @@ const OVERLAP = 64;
 const CARD_W = SCREEN_W - H_PADDING * 2;
 const CONTENT_W = CARD_W - IMAGE_W + OVERLAP;
 
+// Map ánh xạ độ khó (DB Tiếng Việt -> JSON Key Tiếng Anh)
+const DIFFICULTY_MAP: Record<string, string> = {
+  "Dễ": "easy",
+  "Trung bình": "medium",
+  "Khó": "hard",
+  // Thêm dự phòng cho các trường hợp viết thường nếu cần
+  "dễ": "easy",
+  "trung bình": "medium",
+  "khó": "hard"
+};
+
 const AppCommunityCard: React.FC<CommunityCardProps> = ({ item, onPress }) => {
   const { t } = useTranslation();
 
-  // Áp dụng helper format thời gian
+  // Helper format thời gian (đã import)
   const formattedTime = formatRecipeTime(item.time, t);
 
-  const getDifficultyKey = (val: string) => {
-    const value = val?.toLowerCase();
-    if (value === "dễ") return "easy";
-    if (value === "trung bình") return "medium";
-    if (value === "khó") return "hard";
-    return "medium"; // Mặc định
-  };
-
-  const diffKey = getDifficultyKey(item.difficulty);
+  // Lấy key dịch độ khó
+  const diffKey = DIFFICULTY_MAP[item.difficulty];
 
   return (
     <Pressable style={styles.row} onPress={onPress}>
@@ -57,7 +61,7 @@ const AppCommunityCard: React.FC<CommunityCardProps> = ({ item, onPress }) => {
         />
       </View>
 
-      {/* Nội dung bên phải (đè lên ảnh một chút) */}
+      {/* Nội dung bên phải */}
       <View style={styles.contentCard}>
         <View style={styles.textContainer}>
           <AppText variant="bold" style={styles.title} numberOfLines={2}>
@@ -69,6 +73,7 @@ const AppCommunityCard: React.FC<CommunityCardProps> = ({ item, onPress }) => {
           </AppText>
 
           <AppText variant="light" style={styles.author} numberOfLines={1}>
+            {/* Dùng key community.by */}
             {t("community.by")} {item.authorName}
           </AppText>
         </View>
@@ -85,15 +90,15 @@ const AppCommunityCard: React.FC<CommunityCardProps> = ({ item, onPress }) => {
           <View style={styles.metaItem}>
             <Ionicons name="bar-chart-outline" size={14} color={AppLightColor.primary_color} />
             <AppText variant="medium" style={styles.metaText}>
-              {/* Giả sử difficulty truyền vào là 'easy', 'medium', 'hard' */}
-              {t(`common1.difficulty.${diffKey}`)}
+              {/* Logic dịch độ khó: Map -> Dịch. Nếu không map được -> Hiện gốc */}
+              {diffKey ? t(`data_map.difficulty.${diffKey}`) : item.difficulty}
             </AppText>
           </View>
 
           <View style={styles.metaItem}>
             <Ionicons name="star" size={14} color="#FFC107" />
             <AppText variant="medium" style={styles.metaText}>
-              {item.rating?.toFixed(1)}
+              {item.rating ? item.rating.toFixed(1) : "0.0"}
             </AppText>
           </View>
         </View>

@@ -7,10 +7,13 @@ import {
   Pressable, 
   TextInput, 
   ScrollView, 
-  Image 
+  Image,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next"; // 👈 Import i18n
 
 // --- THƯ VIỆN UPLOAD ẢNH ---
 import * as ImagePicker from 'expo-image-picker';
@@ -21,11 +24,13 @@ import AppText from "../components/AppText";
 import AppMainNavBar from "../components/AppMainNavBar"; 
 import { useAuthStore } from "../store/useAuthStore";
 import { supabase } from "../config/supabaseClient";
+import { AppLightColor } from "../styles/color";
 
-const PRIMARY_COLOR = "#F06560";
+const PRIMARY_COLOR = AppLightColor.primary_color;
 
 const EditProfileScreen = () => {
   const navigation = useNavigation<any>();
+  const { t } = useTranslation(); // 👈 Khởi tạo hook
   const { profile, updateProfile, isLoading, user } = useAuthStore();
 
   // State Form
@@ -36,7 +41,7 @@ const EditProfileScreen = () => {
   
   // State xử lý ảnh
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false); // Loading khi đang up ảnh
+  const [isUploading, setIsUploading] = useState(false); 
 
   // Load dữ liệu cũ
   useEffect(() => {
@@ -49,16 +54,15 @@ const EditProfileScreen = () => {
     }
   }, [profile]);
 
-  // --- HÀM 1: CHỌN ẢNH TỪ MÁY (Đã sửa lỗi Warning MediaTypeOptions) ---
+  // --- HÀM 1: CHỌN ẢNH TỪ MÁY ---
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert("Cần quyền", "Vui lòng cấp quyền truy cập ảnh để thay đổi avatar.");
+      Alert.alert(t("alert.permission_required"), t("alert.permission_desc_photo"));
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      // 👇 QUAY LẠI DÙNG CÁI NÀY ĐỂ HẾT LỖI ĐỎ
       mediaTypes: ImagePicker.MediaTypeOptions.Images, 
       allowsEditing: true,
       aspect: [1, 1], 
@@ -79,12 +83,10 @@ const EditProfileScreen = () => {
     try {
       setIsUploading(true);
       
-      // Tạo tên file duy nhất: user_id + thời gian
       const fileExt = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // Upload file vào bucket 'avatars'
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, decode(base64Image), {
@@ -94,16 +96,14 @@ const EditProfileScreen = () => {
 
       if (uploadError) throw uploadError;
 
-      // Lấy đường dẫn công khai (Public URL)
       const { data } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      // Cập nhật state để hiển thị ảnh mới ngay lập tức
       setAvatarUrl(data.publicUrl);
       
     } catch (error: any) {
-      Alert.alert("Lỗi Upload", error.message);
+      Alert.alert(t("alert.title_error"), t("alert.upload_error"));
       console.log("Upload Error:", error);
     } finally {
       setIsUploading(false);
@@ -112,10 +112,9 @@ const EditProfileScreen = () => {
 
   // --- HÀM 3: LƯU THÔNG TIN ---
   const handleSave = async () => {
-    if (!name.trim()) return Alert.alert("Lỗi", "Họ tên không được để trống");
+    if (!name.trim()) return Alert.alert(t("alert.title_error"), t("alert.name_required"));
     
     try {
-      // Gửi thông tin + URL ảnh mới nhất lên server
       await updateProfile(
         name, 
         profile?.phone_number || "", 
@@ -124,11 +123,11 @@ const EditProfileScreen = () => {
         bio, 
         website
       );
-      Alert.alert("Thành công", "Đã cập nhật hồ sơ!");
+      Alert.alert(t("alert.title_success"), t("alert.update_success"));
       navigation.goBack();
     } catch (error: any) {
       console.log("Lỗi Save:", error);
-      Alert.alert("Lỗi", "Không thể cập nhật. " + (error.message || ""));
+      Alert.alert(t("alert.title_error"), error.message || t("alert.update_error"));
     }
   };
 
@@ -139,90 +138,125 @@ const EditProfileScreen = () => {
         <Pressable onPress={() => navigation.goBack()} style={styles.iconBtn}>
            <Ionicons name="arrow-back" size={24} color="#fff" />
         </Pressable>
-        <AppText variant="bold" style={styles.headerTitle}>Chỉnh Sửa Hồ Sơ</AppText>
+        <AppText variant="bold" style={styles.headerTitle}>
+          {t("edit_profile.title")}
+        </AppText>
         <View style={{width: 36}} /> 
       </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
-        {/* --- PHẦN AVATAR (Có nút bấm thay đổi) --- */}
-        <View style={styles.avatarSection}>
-          <Pressable onPress={pickImage} disabled={isUploading}>
-            <View style={styles.avatarWrapper}>
-              <Image 
-                source={{ uri: avatarUrl || "https://i.pravatar.cc/300" }} 
-                style={styles.avatar} 
-              />
-              
-              {/* Lớp phủ loading khi đang upload */}
-              {isUploading && (
-                <View style={styles.uploadingOverlay}>
-                  <ActivityIndicator color="#fff" />
+      
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          
+          {/* --- PHẦN AVATAR --- */}
+          <View style={styles.avatarSection}>
+            <Pressable onPress={pickImage} disabled={isUploading}>
+              <View style={styles.avatarWrapper}>
+                <Image 
+                  source={{ uri: avatarUrl || "https://i.pravatar.cc/300" }} 
+                  style={styles.avatar} 
+                />
+                
+                {isUploading && (
+                  <View style={styles.uploadingOverlay}>
+                    <ActivityIndicator color="#fff" />
+                  </View>
+                )}
+                
+                <View style={styles.cameraIcon}>
+                  <Ionicons name="camera" size={20} color="#fff" />
                 </View>
-              )}
-              
-              {/* Icon Camera */}
-              <View style={styles.cameraIcon}>
-                <Ionicons name="camera" size={20} color="#fff" />
               </View>
+            </Pressable>
+            <AppText style={{marginTop: 10, color: '#888'}}>
+              {t("edit_profile.change_avatar_hint")}
+            </AppText>
+          </View>
+
+          {/* Form Inputs */}
+          <View style={styles.form}>
+            {/* 1. HỌ TÊN */}
+            <View style={styles.inputGroup}>
+              <AppText variant="bold" style={styles.label}>
+                {t("edit_profile.label.name")}
+              </AppText>
+              <TextInput 
+                style={styles.input} 
+                value={name} 
+                onChangeText={setName} 
+                placeholder={t("edit_profile.placeholder.name")}
+              />
             </View>
-          </Pressable>
-          <AppText style={{marginTop: 10, color: '#888'}}>Chạm để đổi ảnh đại diện</AppText>
-        </View>
 
-        {/* Form Inputs */}
-        <View style={styles.form}>
-          {/* 1. HỌ TÊN */}
-          <View style={styles.inputGroup}>
-            <AppText variant="bold" style={styles.label}>Họ Tên</AppText>
-            <TextInput 
-              style={styles.input} value={name} onChangeText={setName} placeholder="Nhập họ tên"
-            />
-          </View>
+            {/* 2. BIỆT DANH */}
+            <View style={styles.inputGroup}>
+              <AppText variant="bold" style={styles.label}>
+                {t("edit_profile.label.username")}
+              </AppText>
+              <TextInput 
+                style={styles.input} 
+                value={username} 
+                onChangeText={setUsername} 
+                placeholder={t("edit_profile.placeholder.username")}
+              />
+            </View>
 
-          {/* 2. BIỆT DANH */}
-          <View style={styles.inputGroup}>
-            <AppText variant="bold" style={styles.label}>Biệt Danh</AppText>
-            <TextInput 
-              style={styles.input} value={username} onChangeText={setUsername} placeholder="@nickname"
-            />
-          </View>
+            {/* 3. GIỚI THIỆU */}
+            <View style={styles.inputGroup}>
+              <AppText variant="bold" style={styles.label}>
+                {t("edit_profile.label.bio")}
+              </AppText>
+              <TextInput 
+                style={[styles.input, styles.textArea]} 
+                value={bio} 
+                onChangeText={setBio}
+                placeholder={t("edit_profile.placeholder.bio")}
+                multiline 
+                numberOfLines={4} 
+                textAlignVertical="top"
+              />
+            </View>
 
-          {/* 3. GIỚI THIỆU */}
-          <View style={styles.inputGroup}>
-            <AppText variant="bold" style={styles.label}>Giới Thiệu</AppText>
-            <TextInput 
-              style={[styles.input, styles.textArea]} value={bio} onChangeText={setBio}
-              placeholder="Mô tả về bạn..." multiline numberOfLines={4} textAlignVertical="top"
-            />
-          </View>
+            {/* 4. WEBSITE */}
+            <View style={styles.inputGroup}>
+              <AppText variant="bold" style={styles.label}>
+                {t("edit_profile.label.website")}
+              </AppText>
+              <TextInput 
+                style={styles.input} 
+                value={website} 
+                onChangeText={setWebsite} 
+                placeholder={t("edit_profile.placeholder.website")}
+                autoCapitalize="none"
+              />
+            </View>
 
-          {/* 4. WEBSITE */}
-          <View style={styles.inputGroup}>
-            <AppText variant="bold" style={styles.label}>Website</AppText>
-            <TextInput 
-              style={styles.input} value={website} onChangeText={setWebsite} placeholder="https://..." autoCapitalize="none"
-            />
+            {/* NÚT LƯU */}
+            <View style={styles.btnContainer}>
+              {isLoading ? (
+                 <ActivityIndicator size="large" color={PRIMARY_COLOR} />
+              ) : (
+                 <Pressable style={styles.saveBtn} onPress={handleSave}>
+                   <AppText variant="bold" style={styles.saveBtnText}>
+                     {t("edit_profile.save")}
+                   </AppText>
+                 </Pressable>
+              )}
+            </View>
           </View>
-
-          {/* NÚT LƯU */}
-          <View style={styles.btnContainer}>
-            {isLoading ? (
-               <ActivityIndicator size="large" color={PRIMARY_COLOR} />
-            ) : (
-               <Pressable style={styles.saveBtn} onPress={handleSave}>
-                 <AppText variant="bold" style={styles.saveBtnText}>Lưu</AppText>
-               </Pressable>
-            )}
-          </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Nav Bar dưới cùng */}
       <View style={styles.navBarWrapper}>
         <AppMainNavBar 
           activeTab="profile" 
-          onTabPress={(tab) => { if(tab === 'home') navigation.navigate('HomeScreen'); }} 
+          onTabPress={(tab) => { 
+            if(tab === 'home') navigation.navigate('HomeScreen');
+            // Thêm các case điều hướng khác nếu cần
+          }} 
         />
       </View>
     </AppSafeView>
@@ -237,7 +271,9 @@ const styles = StyleSheet.create({
   // Header
   header: { 
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', 
-    paddingHorizontal: 20, paddingVertical: 15 
+    paddingHorizontal: 20, paddingVertical: 15,
+    backgroundColor: '#fff', // Đảm bảo header có nền
+    zIndex: 10
   },
   headerTitle: { fontSize: 22, color: PRIMARY_COLOR },
   iconBtn: {

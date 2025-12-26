@@ -4,28 +4,381 @@
     "error": "Có lỗi xảy ra",
     "success": "Thành công",
     "cancel": "Hủy",
-    "require_login": "Bạn cần đăng nhập để thực hiện chức năng này."
+    "confirm": "Xác nhận",
+    "delete": "Xóa",
+    "back": "Trở về",
+    "save": "Lưu",
+    "saving": "Đang lưu...",
+    "try_again": "Vui lòng thử lại sau.",
+    "empty_list": "Danh sách trống",
+    "require_login": "Bạn cần đăng nhập để thực hiện chức năng này.",
+    "notification": "Thông báo",
+    "feature_developing": "Chức năng đang phát triển",
+    "error_occurred": "Có lỗi xảy ra, vui lòng thử lại.",
+    "you": "Bạn",
+    "today": "Hôm nay",
+    "yesterday": "Hôm qua",
+    "just_now": "Vừa xong",
+    "empty_notifications": "Bạn chưa có thông báo nào.",
+    "difficulty": {
+      "easy": "Dễ",
+      "medium": "Tr.bình",
+      "hard": "Khó"
+    }
   },
+  "auth": {
+  "login_title": "ĐĂNG NHẬP",
+  "register_title": "ĐĂNG KÝ",
+  "login_button": "Đăng nhập",
+  "register_button": "Đăng ký",
+  "email_label": "Email",
+  "email_placeholder": "example@gmail.com",
+  "password_label": "Mật khẩu",
+  "password_placeholder": "Vd: 12345",
+  "confirm_password_label": "Xác nhận mật khẩu",
+  "fullname_label": "Họ tên",
+  "fullname_placeholder": "Nguyễn Văn A",
+  "phone_label": "Số điện thoại",
+  "phone_placeholder": "09xx...",
+  "forgot_password": "Quên mật khẩu?",
+  "no_account": "Chưa có tài khoản?",
+  "has_account": "Đã có tài khoản?",
+  "signup_link": " Đăng ký",
+  "login_link": " Đăng nhập",
+  "or_social": "Hoặc tiếp tục với",
+  "logout_confirm": "Bạn xác nhận đăng xuất?",
+  "delete_account_confirm": "Hành động này không thể hoàn tác, mọi dữ liệu sẽ bị xoá vĩnh viễn.",
+  "register_success_title": "Thành công",
+  "register_success_msg": "Tạo tài khoản thành công! Vui lòng kiểm tra email để xác thực.",
+  "errors": {
+    "login_title": "Lỗi đăng nhập",
+    "register_title": "Lỗi đăng ký",
+    "invalid_credentials": "Email hoặc mật khẩu không chính xác.",
+    "email_not_confirmed": "Vui lòng xác thực email trước khi đăng nhập.",
+    "user_already_exists": "Email này đã được đăng ký.",
+    "too_many_requests": "Bạn đã thử quá nhiều lần. Vui lòng thử lại sau ít phút.",
+    "weak_password": "Mật khẩu quá yếu (cần ít nhất 6 ký tự).",
+    "unknown": "Có lỗi xảy ra, vui lòng thử lại."
+  }
+},
   "home": {
     "greeting": "Xin chào",
     "featured_recipes": "Công thức nổi bật",
     "recent_recipes": "Công thức gần đây",
     "famous_chefs": "Đầu bếp nổi tiếng"
   },
+  "category": {
+  "screen_title": "Danh mục",
+  "savory": "Món mặn",
+  "soup": "Món canh",
+  "dessert": "Tráng miệng",
+  "cake": "Bánh ngọt",
+  "drink": "Đồ uống",
+  "snack": "Ăn vặt"
+},
+  "search": {
+    "placeholder": "Tìm tên món, mô tả...",
+    "reset": "Thiết lập lại",
+    "apply": "Áp dụng",
+    "sections": {
+      "category": "Danh mục",
+      "cuisine": "Xuất xứ",
+      "difficulty": "Độ khó",
+      "time": "Thời gian"
+    },
+    "filters": {
+      "cuisine_vn": "Việt Nam",
+      "cuisine_int": "Quốc tế",
+      "time_under_30": "< 30 phút",
+      "time_30_60": "30 - 60 phút",
+      "time_over_60": "> 60 phút"
+    },
+    "results": {
+      "title": "Kết quả tìm kiếm",
+      "my_filter": "Bộ lọc của bạn",
+      "summary": "Tìm thấy {{count}} món cho \"{{keyword}}\"",
+      "not_found": "Không tìm thấy kết quả",
+      "empty_hint": "Thử nhập đúng chính tả hoặc sử dụng từ khóa khác nhé!"
+    }
+  },
+  "recipe": {
+    "view": "Xem",
+    "cooked_by": "Công thức bởi",
+    "chef_default": "Đầu bếp",
+    "description": "Mô tả",
+    "no_description": "Chưa có mô tả cho món ăn này.",
+    "ingredients": "Nguyên liệu",
+    "items_count": "mục",
+    "steps": "Cách làm",
+    "steps_count": "bước",
+    "start_cooking": "Bắt Đầu Nấu",
+    "time_format": "{{count}} phút",
+    "options": {
+      "title": "Tùy chọn",
+      "already_saved": "Món này đã có trong bộ sưu tập. Bạn muốn làm gì?",
+      "remove_save": "Bỏ lưu",
+      "change_collection": "Đổi bộ sưu tập",
+      "remove_success": "Đã bỏ lưu món ăn này.",
+      "save_success": "Đã lưu vào bộ sưu tập!",
+      "share_suffix": "Xem ngay trên App Nấu Ăn",
+      "share_error": "Không thể chia sẻ nội dung này"
+    }
+  },
+  "create_recipe": {
+    "new_title": "Tạo công thức mới",
+    "edit_title": "Chỉnh sửa công thức",
+    "post": "Đăng bài",
+    "uploading_image": "Đang tải ảnh...",
+    "section_basic": "Thông tin cơ bản",
+    "section_ingredients": "Nguyên liệu",
+    "section_steps": "Các bước thực hiện",
+    "add_ingredient": "Thêm nguyên liệu",
+    "add_step": "Thêm bước",
+    "step_label": "Bước",
+    "form": {
+      "thumbnail": "Ảnh món ăn",
+      "name": "Tên món",
+      "description": "Mô tả",
+      "time": "Thời gian",
+      "difficulty": "Độ khó",
+      "category": "Danh mục"
+    },
+    "placeholder": {
+      "thumbnail": "Chạm để chọn ảnh",
+      "name": "Nhập tên món ăn",
+      "description": "Mô tả món ăn...",
+      "time": "Ví dụ: 30 phút",
+      "ing_amount": "Số lượng",
+      "ing_name": "Tên nguyên liệu",
+      "step_title": "Tiêu đề bước",
+      "step_desc": "Mô tả cách làm..."
+    }
+  },
   "profile": {
-    "my_recipes": "Công thức của tôi",
-    "no_recipes": "Chưa có món ăn nào.",
+    "new_user": "Người dùng mới",
+    "no_username": "Chưa có tên người dùng",
+    "no_bio": "Chưa có giới thiệu",
+    "edit_profile": "Chỉnh sửa",
+    "share_profile": "Chia sẻ",
+    "recipes_saved": "Công thức",
     "following": "Đang theo dõi",
     "followers": "Người theo dõi",
-    "follow": "Follow",
-    "recipes": "Công thức",
+    "my_recipes": "Công thức của tôi",
     "my_collections": "Bộ sưu tập",
     "create_collect": "Tạo bộ sưu tập mới",
-    "view_detail": "Bộ sưu tập của bạn",
-    "recipes_saved": "Công thức",
-        "edit_profile": "Chỉnh sửa",
-    "share_profile": "Chia sẻ"
+    "view_detail": "Xem chi tiết",
+    "no_recipes": "Chưa có món ăn nào.",
+    "no_collections": "Chưa có bộ sưu tập nào.",
+    "share_msg": "Hãy xem hồ sơ của",
+    "share_title": "Chia sẻ hồ sơ",
+    "pending": "Chờ duyệt",
+    "delete_collection_title": "Xóa bộ sưu tập",
+    "delete_collection_msg": "Bạn có chắc chắn muốn xóa \"{{name}}\" không?",
+    "delete_collection_success": "Đã xóa bộ sưu tập.",
+    "delete_collection_error": "Không thể xóa bộ sưu tập."
+  },
+  "community": {
+    "screen_title": "Cộng đồng",
+    "tabs": {
+      "hot": "Nổi bật 🔥",
+      "new": "Mới nhất ✨",
+      "old": "Cũ nhất ⏳"
+    },
+    "by": "Bởi",
+    "default_desc": "Món ngon hấp dẫn đang chờ bạn khám phá...",
+    "anonymous_chef": "Đầu bếp",
+    "empty_list": "Chưa có bài đăng nào."
+  },
+  "chef": {
+    "follow": "Theo dõi",
+    "following": "Đã theo dõi",
+    "message": "Nhắn tin",
+    "default_bio": "Chưa có giới thiệu.",
+    "recipe_list": "Danh sách món ăn",
+    "no_recipes": "Đầu bếp này chưa có công thức nào.",
+    "anonymous": "Đầu bếp ẩn danh",
+    "sections": {
+      "top_trending": "Top 5 Xu hướng",
+      "favorites": "Đầu bếp được yêu thích",
+      "new_faces": "Gương mặt mới"
+    },
+    "modal": {
+      "my_list": "Danh sách của tôi",
+      "unfollow_title": "Bỏ theo dõi",
+      "unfollow_msg": "Bạn có chắc muốn bỏ theo dõi người này?",
+      "remove_follower_title": "Xóa người theo dõi",
+      "remove_follower_msg": "Người này sẽ không thấy bài viết của bạn nữa."
+    }
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "notifications": "Thông báo",
+    "support": "Trung tâm trợ giúp",
+    "privacy": "Chính sách",
+    "language": "Ngôn ngữ",
+    "logout": "Đăng xuất",
+    "delete_account": "Xoá tài khoản",
+    "logout_confirm": "Bạn có chắc chắn muốn đăng xuất không?",
+    "delete_confirm": "Hành động này không thể hoàn tác. Mọi dữ liệu của bạn sẽ bị xoá vĩnh viễn.",
+    "delete_success": "Đã xoá tài khoản thành công.",
+    "language_screen": {
+      "title": "Cài đặt ngôn ngữ",
+      "current": "Ngôn ngữ hiện tại",
+      "available": "Tất cả ngôn ngữ",
+      "info": "Chọn ngôn ngữ mới sẽ cập nhật giao diện ứng dụng ngay lập tức.",
+      "names": {
+        "vi": "Tiếng Việt",
+        "en": "Tiếng Anh",
+        "fr": "Tiếng Pháp",
+        "ja": "Tiếng Nhật",
+        "ko": "Tiếng Hàn",
+        "zh": "Tiếng Trung"
+      }
+    }
+  },
+  "alert": {
+    "title_error": "Lỗi",
+    "title_success": "Thành công",
+    "permission_required": "Cần quyền truy cập",
+    "permission_desc_photo": "Ứng dụng cần quyền truy cập thư viện ảnh để tải lên món ăn.",
+    "pick_image_error": "Không thể chọn ảnh, vui lòng thử lại.",
+    "login_required": "Vui lòng đăng nhập để tạo công thức.",
+    "recipe_submitted": "Công thức đã được gửi và đang chờ Admin duyệt!",
+    "save_error": "Không thể lưu công thức.",
+    "confirm_exit_title": "Thoát?",
+    "confirm_exit_desc": "Thay đổi chưa được lưu. Bạn có chắc muốn thoát?",
+    "name_required": "Họ tên không được để trống.",
+    "update_success": "Đã cập nhật hồ sơ thành công!",
+    "update_error": "Không thể cập nhật hồ sơ.",
+    "upload_error": "Lỗi khi tải ảnh lên.",
+    "delete_recipe_title": "Xóa công thức",
+    "delete_recipe_msg": "Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.",
+    "delete_recipe_success": "Đã xóa công thức.",
+    "delete_recipe_error": "Không thể xóa.",
+    "confirm_delete": "Xóa"
+  },
+  "admin": {
+    "dashboard": "Bảng điều khiển Admin",
+    "tabs": {
+      "pending": "Chờ duyệt",
+      "approved": "Đã duyệt",
+      "users": "Người dùng"
+    },
+    "role": "Vai trò",
+    "actions": {
+      "approve": "Duyệt",
+      "delete": "Xóa"
+    },
+    "alerts": {
+      "fetch_error": "Không thể tải dữ liệu.",
+      "rls_error": "Lỗi phân quyền (RLS). Vui lòng kiểm tra Policy.",
+      "approve_success": "Đã duyệt bài và gửi thông báo!",
+      "delete_success": "Đã xóa dữ liệu.",
+      "delete_error": "Không thể xóa.",
+      "confirm_delete_user": "Xóa người dùng này?",
+      "confirm_delete_post": "Xóa bài viết này?"
+    },
+    "notifications": {
+      "approve_title": "Bài viết đã được duyệt ✅",
+      "approve_msg": "Món \"{{title}}\" của bạn đã được Admin duyệt và hiển thị công khai.",
+      "reject_title": "Bài viết bị từ chối ❌",
+      "reject_msg": "Món \"{{title}}\" của bạn đã bị xóa do vi phạm quy định hoặc bị từ chối."
+    }
+  },
+  "collection": {
+    "count_suffix": "món ăn",
+    "empty_msg": "Chưa có món nào trong bộ sưu tập này.",
+    "explore": "Khám phá ngay"
+  },
+  "data_map": {
+    "difficulty": {
+      "easy": "Dễ",
+      "medium": "Trung bình",
+      "hard": "Khó"
+    },
 
+    "category": {
+      "Món mặn": "Món mặn",
+      "Món canh": "Món canh",
+      "Tráng miệng": "Tráng miệng",
+      "Bánh ngọt": "Bánh ngọt",
+      "Đồ uống": "Đồ uống",
+      "Ăn vặt": "Ăn vặt"
+    }
+},
+"edit_profile": {
+    "title": "Chỉnh sửa hồ sơ",
+    "change_avatar_hint": "Chạm để đổi ảnh đại diện",
+    "save": "Lưu",
+    "label": {
+      "name": "Họ Tên",
+      "username": "Biệt Danh",
+      "bio": "Giới Thiệu",
+      "website": "Website"
+    },
+    "placeholder": {
+      "name": "Nhập họ tên",
+      "username": "@nickname",
+      "bio": "Mô tả về bạn...",
+      "website": "https://..."
+    }
+  },
+  "follow": {
+    "my_list": "Danh sách của tôi",
+    "user_list": "Người dùng",
+    "followers": "Người theo dõi",
+    "unfollow_title": "Bỏ theo dõi",
+    "unfollow_msg": "Bạn có chắc muốn bỏ theo dõi người này?",
+    "remove_follower_title": "Xóa người theo dõi",
+    "remove_follower_msg": "Người này sẽ không thấy bài viết của bạn nữa.",
+    "yes": "Đồng ý",
+    "remove": "Xóa"
+  },
+  "intro": {
+    "step1": {
+      "title": "Món ăn Việt Nam",
+      "subtitle": "Món ăn chuẩn Việt"
+    },
+    "step2": {
+      "title": "Món ăn Châu Âu",
+      "subtitle": "Tinh hoa văn hoá phương tây"
+    },
+    "step3": {
+      "title": "Các tính năng chính",
+      "subtitle": "Cung cấp cho người dùng trải nghiệm tuyệt vời",
+      "features": {
+        "search": "Tìm kiếm công thức",
+        "suggest": "Gợi ý món ăn",
+        "social": "Mạng xã hội"
+      }
+    },
+    "step4": {
+      "title": "CHÀO MỪNG BẠN",
+      "subtitle": "Tìm những công thức tốt nhất từ những đầu bếp nổi tiếng thế giới",
+      "btn_new": "Tôi là người mới",
+      "btn_old": "Tôi là người cũ"
+    }
+  },
+  "welcome": {
+    "slogan": "Món gì khó, có POTPAN",
+    "get_started": "Bắt đầu"
+  },
+  "language": {
+    "title": "Cài đặt ngôn ngữ",
+    "current_language": "Ngôn ngữ hiện tại",
+    "available_languages": "Tất cả ngôn ngữ",
+    "info": "Chọn ngôn ngữ mới sẽ cập nhật giao diện ứng dụng ngay lập tức.",
+    "names": {
+      "vi": "Tiếng Việt",
+      "en": "Tiếng Anh",
+      "zh": "Tiếng Trung"
+    }
+  },
+  "notification_settings": {
+    "general": "Thông báo chung",
+    "sound": "Âm thanh",
+    "sfx": "Hiệu ứng (SFX)",
+    "vibrate": "Rung"
   },
   "recipe_detail": {
     "view": "Xem",
@@ -47,100 +400,72 @@
     "share_suffix": "Xem ngay trên App Nấu Ăn",
     "share_error": "Không thể chia sẻ nội dung này"
   },
-  "data_map": {
-    "category": {
-      "Món mặn": "Món mặn",
-      "Món canh": "Món canh",
-      "Tráng miệng": "Tráng miệng",
-      "Bánh ngọt": "Bánh ngọt",
-      "Nước uống": "Nước uống",
-      "Đồ uống": "Nước uống",
-      "Ăn vặt": "Ăn vặt"
-    }
+  "review": {
+    "title": "Đánh giá",
+    "write_review": "Viết đánh giá của bạn",
+    "placeholder": "Chia sẻ cảm nhận của bạn...",
+    "submit": "Gửi đánh giá",
+    "anonymous": "Người dùng ẩn danh",
+    "alert_login": "Vui lòng đăng nhập để đánh giá.",
+    "alert_rating": "Vui lòng chọn số sao.",
+    "alert_duplicate": "Bạn đã đánh giá món này rồi!",
+    "alert_success": "Cảm ơn đánh giá của bạn!",
+    "alert_error": "Không thể gửi đánh giá.",
+    "empty_list": "Chưa có đánh giá nào."
   },
-  
-  "community": {
-    "screen_title": "Cộng đồng",
+  "support": {
+    "title": "Trung Tâm Hỗ Trợ",
+    "faq_general": {
+      "q1": "Tôi có thể làm gì trong mục Trợ giúp?",
+      "q2": "Làm sao để cập nhật thông tin tài khoản?",
+      "q3": "Tôi không nhận được mã OTP thì phải làm sao?"
+    },
+    "faq_account": {
+      "q1": "Quên mật khẩu thì làm thế nào?",
+      "q2": "Đổi email/điện thoại đăng ký ở đâu?"
+    },
+    "faq_service": {
+      "q1": "Tính năng lưu công thức hoạt động ra sao?",
+      "q2": "Tạo bộ sưu tập và quản lý như thế nào?"
+    },
     "tabs": {
-      "hot": "Nổi bật 🔥",
-      "new": "Mới nhất ✨",
-      "old": "Cũ nhất ⏳"
+      "faq": "FAQ",
+      "contact": "Liên hệ",
+      "general": "Tổng Quát",
+      "account": "Tài Khoản",
+      "service": "Dịch Vụ"
     },
-    "by": "Bởi",
-    "default_desc": "Món ngon hấp dẫn đang chờ bạn khám phá...",
-    "anonymous_chef": "Đầu bếp",
-    "empty_list": "Chưa có bài đăng nào."
-  },
-  "common1": {
-    "difficulty": {
-      "easy": "Dễ",
-      "medium": "Tr.bình",
-      "hard": "Khó"
+    "search_placeholder": "Tìm kiếm",
+    "contact": {
+      "web": "Website",
+      "fb": "Facebook",
+      "wa": "Whatsapp",
+      "ig": "Instagram"
     }
   },
-   "recipe": {
-    "time_format": "{{count}} phút"
+  "validation": {
+    "required": "Trường này không được để trống",
+    "email_invalid": "Email không đúng định dạng",
+    "phone_invalid": "Số điện thoại không hợp lệ",
+    "password_min": "Mật khẩu phải có ít nhất {{min}} ký tự",
+    "password_mismatch": "Mật khẩu xác nhận không khớp",
+    "min_length": "Phải có ít nhất {{min}} ký tự",
+    "max_length": "Không được quá {{max}} ký tự",
+    "time_format": "Định dạng không hợp lệ (VD: 30 phút)",
+    "image_required": "Vui lòng chọn ảnh",
+    "min_ingredients": "Cần ít nhất 1 nguyên liệu",
+    "min_steps": "Cần ít nhất 1 bước thực hiện"
   },
-
-  "search": {
-    "placeholder": "Tìm tên món, mô tả...",
-    "sections": {
-      "category": "Danh mục",
-      "cuisine": "Xuất xứ",
-      "difficulty": "Độ khó",
-      "time": "Thời gian"
-    },
-    "cuisine": {
-      "vietnam": "Việt Nam",
-      "international": "Quốc tế"
-    },
-    "time": {
-      "under_30": "< 30 phút",
-      "30_60": "30 - 60 phút",
-      "over_60": "> 60 phút"
-    },
-    "reset": "Thiết lập lại",
-    "apply": "Áp dụng"
-  },
-  "language": {
-    "title": "Cài đặt ngôn ngữ",
-    "current_language": "Ngôn ngữ hiện tại",
-    "available_languages": "Tất cả ngôn ngữ",
-    "info": "Chọn ngôn ngữ mới sẽ cập nhật giao diện ứng dụng ngay lập tức.",
-    "names": {
-      "vi": "Tiếng Việt",
-      "en": "Tiếng Anh",
-      "fr": "Tiếng Pháp",
-      "ja": "Tiếng Nhật",
-      "ko": "Tiếng Hàn",
-      "zh": "Tiếng Trung"
-    }
-  },
-  "chef": {
-    "follow": "Theo dõi",
-    "following": "Đã theo dõi",
-    "sections": {
-      "top_trending": "Top 5 Xu hướng",
-      "favorites": "Đầu bếp được yêu thích",
-      "new_faces": "Gương mặt mới"
-    }
-  },
-  "search1": {
-    "result_title": "Kết quả tìm kiếm",
-    "all_recipes": "Bộ lọc của bạn",
-    "summary": "Tìm thấy {{count}} món cho \"{{keyword}}\"",
-    "no_result": "Không tìm thấy kết quả",
-    "empty_hint": "Thử nhập đúng chính tả hoặc sử dụng từ khóa khác nhé!"
-  },
-  "follow": {
-    "my_list": "Danh sách của tôi",
-    "user_list": "Người dùng",
-    "followers": "Người theo dõi",
-    "unfollow_title": "Bỏ theo dõi",
-    "unfollow_msg": "Bạn có chắc muốn bỏ theo dõi người này?",
-    "remove_follower_title": "Xóa người theo dõi",
-    "remove_follower_msg": "Người này sẽ không thấy bài viết của bạn nữa."
+  "collection_modal": {
+    "title": "Lưu vào bộ sưu tập",
+    "create_new": "Tạo bộ sưu tập mới",
+    "placeholder_name": "Tên bộ sưu tập...",
+    "save_here": "Lưu vào đây",
+    "permission_title": "Cần quyền",
+    "permission_desc": "Vui lòng cho phép truy cập ảnh.",
+    "upload_error": "Lỗi Upload",
+    "network_error": "Vui lòng kiểm tra lại kết nối mạng.",
+    "create_error": "Không thể tạo bộ sưu tập",
+    "save_error": "Không thể lưu món ăn"
   }
 }
-
-  

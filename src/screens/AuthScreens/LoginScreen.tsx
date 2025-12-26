@@ -14,10 +14,13 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
+// --- IMPORT I18N ---
+import { useTranslation } from "react-i18next"; // <-- THÊM DÒNG NÀY
+
 // --- IMPORT THƯ VIỆN & SCHEMA ---
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { loginSchema } from "../../utils/validationSchema"; 
+import { getLoginSchema } from "../../utils/validationSchema"; 
 
 // --- STORE & COMPONENTS ---
 import { useAuthStore } from "../../store/useAuthStore";
@@ -32,54 +35,48 @@ import AppLogo from "../../components/AppLogo";
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
+  const { t } = useTranslation(); // <-- KHỞI TẠO HOOK DỊCH
 
-  // Lấy hàm login và trạng thái loading từ Zustand (Store Supabase mới)
+  // Lấy hàm login và trạng thái loading từ Zustand
   const login = useAuthStore((state) => state.login);
   const isLoading = useAuthStore((state) => state.isLoading);
 
-  // --- SETUP FORM (Giữ nguyên) ---
+  // --- SETUP FORM ---
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(getLoginSchema(t)),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  // --- HÀM XỬ LÝ LOGIN (ĐÃ SỬA LOGIC CHO SUPABASE) ---
+  // --- HÀM XỬ LÝ LOGIN ---
   const onSubmit = async (data: any) => {
     try {
-      // Gọi hàm login từ Store
       await login(data.email, data.password);
-
       console.log("Đăng nhập thành công");
-      // QUAN TRỌNG: Tui đã bỏ dòng navigation.navigate("HomeScreen")
-      // Lý do: App.tsx đang lắng nghe biến 'user', nó sẽ tự chuyển màn hình ngay lập tức.
-      // Nếu navigate thủ công ở đây sẽ dễ bị lỗi hoặc warning.
-
+      // App.tsx sẽ tự động chuyển màn hình khi biến 'user' thay đổi
     } catch (error: any) {
-      // --- XỬ LÝ LỖI SUPABASE ---
-      // Supabase trả về error.message chứ không trả code như Firebase
-      let msg = error.message || "Có lỗi xảy ra, vui lòng thử lại.";
+      // --- XỬ LÝ LỖI SUPABASE & DỊCH ---
+      let msg = error.message || t("common.error_occurred");
+      const errTitle = t("auth.errors.login_title");
 
-      // Map lỗi tiếng Anh của Supabase sang tiếng Việt
       if (msg.includes("Invalid login credentials")) {
-        msg = "Email hoặc mật khẩu không chính xác.";
+        msg = t("auth.errors.invalid_credentials");
       } else if (msg.includes("Email not confirmed")) {
-        msg = "Vui lòng xác thực email trước khi đăng nhập.";
+        msg = t("auth.errors.email_not_confirmed");
       } else if (msg.includes("Too many requests")) {
-         msg = "Bạn đã thử quá nhiều lần. Vui lòng thử lại sau ít phút.";
+         msg = t("auth.errors.too_many_requests");
       }
 
-      Alert.alert("Lỗi đăng nhập", msg);
+      Alert.alert(errTitle, msg);
     }
   };
 
-  // Component hiển thị lỗi (Giữ nguyên)
   const ErrorMsg = ({ name }: { name: string }) => {
     // @ts-ignore
     const error = errors[name];
@@ -103,14 +100,14 @@ const LoginScreen = () => {
             <AppLogo width={224} height={221} />
 
             <AppText variant="bold" style={styles.headerTitle}>
-              ĐĂNG NHẬP
+              {t("auth.login_title")}
             </AppText>
 
             <View style={styles.formContainer}>
               {/* --- EMAIL --- */}
               <View style={styles.inputWrapper}>
                 <AppText variant="medium" style={styles.inputLabel}>
-                  Email
+                  {t("auth.email_label")}
                 </AppText>
                 <Controller
                   control={control}
@@ -118,7 +115,7 @@ const LoginScreen = () => {
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppTextInput
                       style={styles.inputValue}
-                      placeholder="example@gmail.com"
+                      placeholder={t("auth.email_placeholder")}
                       keyboardType="email-address"
                       autoCapitalize="none"
                       onBlur={onBlur}
@@ -141,7 +138,7 @@ const LoginScreen = () => {
               {/* --- MẬT KHẨU --- */}
               <View style={styles.inputWrapper}>
                 <AppText style={[styles.inputLabel, { marginTop: 22 }]}>
-                  Mật khẩu
+                  {t("auth.password_label")}
                 </AppText>
                 <Controller
                   control={control}
@@ -149,7 +146,7 @@ const LoginScreen = () => {
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppPasswordInput
                       style={styles.inputValue}
-                      placeholder="Vd: 12345"
+                      placeholder={t("auth.password_placeholder")}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -168,12 +165,14 @@ const LoginScreen = () => {
 
                 <TouchableOpacity
                   onPress={() => {
-                    /* Xử lý quên mật khẩu */
-                    Alert.alert("Thông báo", "Chức năng đang phát triển");
+                    Alert.alert(
+                      t("common.notification"),
+                      t("common.feature_developing")
+                    );
                   }}
                 >
                   <AppText style={styles.forgotPassword}>
-                    Quên mật khẩu?
+                    {t("auth.forgot_password")}
                   </AppText>
                 </TouchableOpacity>
               </View>
@@ -186,7 +185,7 @@ const LoginScreen = () => {
               </View>
             ) : (
               <AppButton
-                butName="Đăng nhập"
+                butName={t("auth.login_button")}
                 style={styles.loginButton}
                 style1={styles.loginButtonText}
                 onPress={handleSubmit(onSubmit)}
@@ -195,18 +194,17 @@ const LoginScreen = () => {
 
             <View style={styles.footerContainer}>
               <AppText variant="light" style={styles.footerText}>
-                Chưa có tài khoản?
+                {t("auth.no_account")}
                 <Text
                   style={styles.signupLink}
                   onPress={() => navigation.navigate("SigninScreen")}
                 >
-                  {" "}
-                  Đăng ký
+                  {t("auth.signup_link")}
                 </Text>
               </AppText>
 
               <AppText variant="light" style={styles.orText}>
-                Hoặc đăng ký với
+                {t("auth.or_social")}
               </AppText>
 
               <View style={styles.socialContainer}>
@@ -234,7 +232,7 @@ const LoginScreen = () => {
 
 export default LoginScreen;
 
-// --- GIỮ NGUYÊN TOÀN BỘ STYLES CỦA BẠN (KHÔNG SỬA GÌ) ---
+// --- STYLES GIỮ NGUYÊN ---
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: AppLightColor.background },
   keyboardContainer: { flex: 1 },

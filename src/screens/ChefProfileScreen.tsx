@@ -10,22 +10,25 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next"; // Import i18n
 
 // --- COMPONENTS & CONFIG ---
 import { supabase } from "../config/supabaseClient";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import { useAuthStore } from "../store/useAuthStore";
+import AppRecipeCard from "../components/AppRecipeCard"; // Component thẻ món ăn
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = (width - 48) / 2;
+const CARD_WIDTH = (width - 48) / 2; // (Width - PaddingHorizontal * 3) / 2
 const PRIMARY_COLOR = "#F06560";
 
 const ChefProfileScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { user: currentUser } = useAuthStore();
+  const { t } = useTranslation(); // Khởi tạo hook dịch
 
   // Lấy ID đầu bếp từ params
   const { chefId, chefName, chefAvatar } = route.params || {};
@@ -34,7 +37,7 @@ const ChefProfileScreen = () => {
   const [chefRecipes, setChefRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // --- STATES MỚI CHO FOLLOW ---
+  // --- STATES CHO FOLLOW ---
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -45,7 +48,7 @@ const ChefProfileScreen = () => {
       try {
         setLoading(true);
 
-        // A. Lấy thông tin user
+        // A. Lấy thông tin user (đầu bếp)
         const { data: userData, error: userError } = await supabase
           .from("users")
           .select("*")
@@ -54,7 +57,7 @@ const ChefProfileScreen = () => {
 
         if (!userError) setChefProfile(userData);
 
-        // B. Lấy danh sách món ăn
+        // B. Lấy danh sách món ăn của đầu bếp
         const { data: recipeData } = await supabase
           .from("recipes")
           .select("*")
@@ -63,7 +66,7 @@ const ChefProfileScreen = () => {
 
         setChefRecipes(recipeData || []);
 
-        // C. Đếm số lượng Follower / Following THỰC TẾ
+        // C. Đếm số lượng Follow
         const { count: followers } = await supabase
           .from("follows")
           .select("*", { count: "exact", head: true })
@@ -77,7 +80,7 @@ const ChefProfileScreen = () => {
         setFollowerCount(followers || 0);
         setFollowingCount(following || 0);
 
-        // D. Kiểm tra xem MÌNH có đang follow HỌ không
+        // D. Kiểm tra mình đã follow chưa
         if (currentUser) {
           const { data: followCheck } = await supabase
             .from("follows")
@@ -98,27 +101,28 @@ const ChefProfileScreen = () => {
     if (chefId) fetchData();
   }, [chefId, currentUser]);
 
-  // --- 2. XỬ LÝ FOLLOW / UNFOLLOW ---
+  // --- 2. XỬ LÝ FOLLOW ---
   const handleToggleFollow = async () => {
+    // Yêu cầu đăng nhập
     if (!currentUser) {
-      Alert.alert("Thông báo", "Bạn cần đăng nhập để theo dõi.");
+      Alert.alert(t("common.notification"), t("common.require_login"));
       return;
     }
 
-    // Optimistic Update (Cập nhật giao diện ngay lập tức cho mượt)
+    // Optimistic Update (Cập nhật UI trước khi gọi API)
     const newStatus = !isFollowing;
     setIsFollowing(newStatus);
     setFollowerCount((prev) => (newStatus ? prev + 1 : prev - 1));
 
     try {
       if (newStatus) {
-        // Hành động: Follow
+        // Follow
         const { error } = await supabase
           .from("follows")
           .insert({ follower_id: currentUser.id, following_id: chefId });
         if (error) throw error;
       } else {
-        // Hành động: Unfollow
+        // Unfollow
         const { error } = await supabase
           .from("follows")
           .delete()
@@ -128,13 +132,14 @@ const ChefProfileScreen = () => {
       }
     } catch (err) {
       console.log("Lỗi follow:", err);
-      // Nếu lỗi thì revert lại
+      // Revert lại nếu lỗi
       setIsFollowing(!newStatus);
       setFollowerCount((prev) => (!newStatus ? prev + 1 : prev - 1));
-      Alert.alert("Lỗi", "Không thể cập nhật trạng thái theo dõi.");
+      Alert.alert(t("common.error"), t("common.error_occurred"));
     }
   };
 
+  // --- HEADER COMPONENT ---
   const renderHeader = () => (
     <View style={styles.headerContainer}>
       {/* Top Nav */}
@@ -173,19 +178,18 @@ const ChefProfileScreen = () => {
 
         <View style={styles.infoCol}>
           <AppText variant="bold" style={styles.nameText}>
-            {chefProfile?.full_name || chefName || "Đầu bếp"}
+            {chefProfile?.full_name || chefName || t("chef.anonymous")}
           </AppText>
           <AppText variant="medium" style={styles.handleText}>
             @{chefProfile?.username || "chef"}
           </AppText>
           <AppText style={styles.bioText} numberOfLines={3}>
-            {chefProfile?.bio ||
-              "Đam mê nấu nướng và chia sẻ công thức ngon mỗi ngày. 🍳"}
+            {chefProfile?.bio || t("chef.default_bio")}
           </AppText>
         </View>
       </View>
 
-      {/* Nút Action (Chỉ hiện nếu không phải là chính mình) */}
+      {/* Nút Action (Follow/Message) */}
       {currentUser?.id !== chefId && (
         <View style={styles.buttonRow}>
           <Pressable
@@ -202,7 +206,7 @@ const ChefProfileScreen = () => {
                 isFollowing ? { color: PRIMARY_COLOR } : { color: "#fff" },
               ]}
             >
-              {isFollowing ? "Đang theo dõi" : "Theo dõi"}
+              {isFollowing ? t("chef.following") : t("chef.follow")}
             </AppText>
           </Pressable>
 
@@ -211,19 +215,19 @@ const ChefProfileScreen = () => {
               variant="bold"
               style={[styles.actionBtnText, { color: "#333" }]}
             >
-              Nhắn tin
+              {t("chef.message")}
             </AppText>
           </Pressable>
         </View>
       )}
 
-      {/* Stats Row (Có thể bấm để xem chi tiết) */}
+      {/* Stats */}
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <AppText variant="bold" style={styles.statNumber}>
             {chefRecipes.length}
           </AppText>
-          <AppText style={styles.statLabel}>Công thức</AppText>
+          <AppText style={styles.statLabel}>{t("profile.recipes")}</AppText>
         </View>
         <View style={styles.verticalDivider} />
 
@@ -239,7 +243,7 @@ const ChefProfileScreen = () => {
           <AppText variant="bold" style={styles.statNumber}>
             {followingCount}
           </AppText>
-          <AppText style={styles.statLabel}>Đang theo dõi</AppText>
+          <AppText style={styles.statLabel}>{t("profile.following")}</AppText>
         </Pressable>
         <View style={styles.verticalDivider} />
 
@@ -255,45 +259,27 @@ const ChefProfileScreen = () => {
           <AppText variant="bold" style={styles.statNumber}>
             {followerCount}
           </AppText>
-          <AppText style={styles.statLabel}>Người theo dõi</AppText>
+          <AppText style={styles.statLabel}>{t("profile.followers")}</AppText>
         </Pressable>
       </View>
 
       <View style={styles.sectionHeader}>
         <AppText variant="bold" style={styles.sectionTitle}>
-          Danh sách món ăn
+          {t("chef.recipe_list")}
         </AppText>
         <Ionicons name="restaurant-outline" size={18} color={PRIMARY_COLOR} />
       </View>
     </View>
   );
 
+  // --- RENDER RECIPE CARD ---
   const renderItem = ({ item }: { item: any }) => (
-    <Pressable
-      style={styles.card}
+    <AppRecipeCard
+      item={item}
       onPress={() => navigation.push("RecipeDetailScreen", { item })}
-    >
-      <Image
-        source={{ uri: item.thumbnail || "https://via.placeholder.com/150" }}
-        style={styles.cardImage}
-        resizeMode="cover"
-      />
-      <View style={styles.cardBody}>
-        <AppText variant="bold" style={styles.cardTitle} numberOfLines={1}>
-          {item.title}
-        </AppText>
-        <View style={styles.cardFooter}>
-          <View style={styles.metaRow}>
-            <Ionicons name="star" size={12} color={PRIMARY_COLOR} />
-            <AppText style={styles.metaText}>{item.rating || 5}</AppText>
-          </View>
-          <View style={styles.metaRow}>
-            <Feather name="clock" size={12} color={PRIMARY_COLOR} />
-            <AppText style={styles.metaText}>{item.time || "30p"}</AppText>
-          </View>
-        </View>
-      </View>
-    </Pressable>
+      // Truyền style để đè chiều rộng cho khớp với layout 2 cột
+      style={{ width: CARD_WIDTH, marginBottom: 12 }} 
+    />
   );
 
   return (
@@ -314,7 +300,7 @@ const ChefProfileScreen = () => {
           ListEmptyComponent={
             <View style={{ alignItems: "center", marginTop: 40 }}>
               <AppText style={{ color: "#999" }}>
-                Đầu bếp này chưa đăng món nào.
+                {t("chef.no_recipes")}
               </AppText>
             </View>
           }
@@ -432,26 +418,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
   },
-  card: {
-    width: CARD_WIDTH,
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    marginBottom: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  cardImage: {
-    width: "100%",
-    height: CARD_WIDTH,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-  cardBody: { padding: 10 },
-  cardTitle: { fontSize: 15, color: "#333", marginBottom: 8 },
-  cardFooter: { flexDirection: "row", justifyContent: "space-between" },
-  metaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  metaText: { fontSize: 11, color: PRIMARY_COLOR },
 });

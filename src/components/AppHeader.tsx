@@ -1,20 +1,25 @@
-import React, { useState } from "react"; // Thêm useState
+import React, { useState } from "react";
 import { View, StyleSheet, Platform, Pressable } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native"; // Thêm navigation hook
+import { useNavigation } from "@react-navigation/native";
 import AppText from "./AppText";
 import { AppLightColor } from "../styles/color";
-import AppSearchModal from "./AppSearchModal"; // Import Modal vào đây luôn
+import AppSearchModal from "./AppSearchModal";
+
+// 👇 1. Import Store
+import { useNotificationStore } from "../store/useNotificationStore";
 
 interface AppHeaderProps {
   title?: string;
   userName?: string;
   showSearch?: boolean;
   showNotifications?: boolean;
-  unreadCount?: number;
+  // unreadCount?: number; // 👈 2. Xóa prop này, không cần truyền thủ công nữa
   onBackPress?: () => void;
   showBack?: boolean;
+  // Thêm prop tùy chọn nếu muốn custom hành động bấm noti (không bắt buộc)
+  onNotificationPress?: () => void; 
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
@@ -22,22 +27,30 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   userName,
   showSearch = true,
   showNotifications = true,
-  unreadCount = 0,
   onBackPress,
   showBack = false,
+  onNotificationPress,
 }) => {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
-  const onNotificationPress = () => {
-    navigation.navigate("NotificationScreen")
-  }
+
+  // 👇 3. Lấy số lượng tin chưa đọc trực tiếp từ Store
+  // Bất kỳ khi nào store thay đổi, component này sẽ tự render lại số mới
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+
+  // Xử lý mặc định nếu không truyền prop onNotificationPress
+  const handleNotificationPress = () => {
+    if (onNotificationPress) {
+      onNotificationPress();
+    } else {
+      navigation.navigate("NotificationScreen");
+    }
+  };
   
-  // Quản lý trạng thái Search Modal ngay tại Header
   const [searchVisible, setSearchVisible] = useState(false);
 
   const handleSearchSubmit = (filters: any) => {
     setSearchVisible(false);
-    // Khi tìm kiếm xong, tự động nhảy sang màn hình kết quả
     navigation.navigate("SearchResultScreen", { filters });
   };
 
@@ -67,15 +80,16 @@ const AppHeader: React.FC<AppHeaderProps> = ({
           {showSearch && (
             <Pressable 
               style={styles.headerIconCircle} 
-              onPress={() => setSearchVisible(true)} // Mở modal tại đây
+              onPress={() => setSearchVisible(true)}
             >
               <Ionicons name="search-outline" size={20} color="#fff" />
             </Pressable>
           )}
 
           {showNotifications && (
-            <Pressable style={styles.headerIconCircle} onPress={onNotificationPress}>
+            <Pressable style={styles.headerIconCircle} onPress={handleNotificationPress}>
               <Ionicons name="notifications-outline" size={20} color="#fff" />
+              {/* 👇 4. Hiển thị badge dựa trên biến unreadCount từ store */}
               {unreadCount > 0 && (
                 <View style={styles.badgeContainer}>
                   <AppText style={styles.badgeText}>{unreadCount > 99 ? "99+" : unreadCount}</AppText>
@@ -86,7 +100,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         </View>
       </View>
 
-      {/* MODAL NẰM TRONG HEADER: Sẽ xuất hiện ở mọi màn hình có dùng Header này */}
       {showSearch && (
         <AppSearchModal
           visible={searchVisible}
@@ -100,6 +113,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
 export default AppHeader;
 
+// ... Styles giữ nguyên như cũ
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,

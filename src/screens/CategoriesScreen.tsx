@@ -23,60 +23,44 @@ import AppBottomSpace from "../components/AppBottomSpace";
 import AppSearchModal, { SearchFilters } from "../components/AppSearchModal";
 import { useAuthStore } from "../store/useAuthStore";
 import { AppLightColor } from "../styles/color";
-import { useTranslation } from "react-i18next";
 import AppHeader from "../components/AppHeader";
 
-const { width } = Dimensions.get("window");
+// --- IMPORT I18N ---
+import { useTranslation } from "react-i18next";
 
+const { width } = Dimensions.get("window");
 
 // --- TYPES ---
 type CategoryItem = {
   id: string;
-  name: string;
-  dbValue: string;
+  name: string;      // Tên hiển thị (đã dịch)
+  dbValue: string;   // Giá trị trong Database (để query)
+  key: string;       // Key trong file i18n JSON
   image: any;
   recipe_count: number;
 };
 
 // --- DATA ---
+// Thêm trường 'key' để map với file JSON (vi.json/en.json)
 const staticCategories = [
-  { id: "1", dbValue: "Món mặn", image: require("../assets/images/c1m3.jpg") },
-  {
-    id: "2",
-    dbValue: "Món canh",
-    image: require("../assets/images/c2m3.webp"),
-  },
-  {
-    id: "3",
-    dbValue: "Tráng miệng",
-    image: require("../assets/images/c3m4.jpeg"),
-  },
-  {
-    id: "4",
-    dbValue: "Bánh ngọt",
-    image: require("../assets/images/c3m2.jpg"),
-  },
-  {
-    id: "5",
-    dbValue: "Nước uống",
-    image: require("../assets/images/c4m1.jpg"),
-  },
-  { id: "6", dbValue: "Ăn vặt", image: require("../assets/images/c5m1.jpg") },
+  { id: "1", dbValue: "Món mặn", key: "savory", image: require("../assets/images/c1m3.jpg") },
+  { id: "2", dbValue: "Món canh", key: "soup", image: require("../assets/images/c2m3.webp") },
+  { id: "3", dbValue: "Tráng miệng", key: "dessert", image: require("../assets/images/c3m4.jpeg") },
+  { id: "4", dbValue: "Bánh ngọt", key: "cake", image: require("../assets/images/c3m2.jpg") },
+  { id: "5", dbValue: "Nước uống", key: "drink", image: require("../assets/images/c4m1.jpg") },
+  { id: "6", dbValue: "Ăn vặt", key: "snack", image: require("../assets/images/c5m1.jpg") },
 ];
 
 const CategoriesScreen = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // Khởi tạo hook dịch
 
-  const [displayCategories, setDisplayCategories] = useState<CategoryItem[]>(
-    []
-  );
+  const [displayCategories, setDisplayCategories] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [activeTab, setActiveTab] = useState<MainTabKey>("category");
 
   // Layout Grid
@@ -88,28 +72,13 @@ const CategoriesScreen = () => {
     if (isFocused) setActiveTab("category");
   }, [isFocused]);
 
-  const fetchUnreadCount = useCallback(async () => {
-    try {
-      if (!user) return;
-      const { count } = await supabase
-        .from("notifications")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("is_read", false);
-      if (count !== null) setUnreadCount(count);
-    } catch (err) {
-      console.log(err);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (isFocused) fetchUnreadCount();
-  }, [isFocused, fetchUnreadCount]);
-
+  // --- HÀM TẢI DỮ LIỆU ---
   const loadData = async () => {
     try {
       if (!refreshing) setLoading(true);
+      
       const promises = staticCategories.map(async (cat) => {
+        // Query đếm số lượng dựa trên dbValue (giá trị gốc trong DB)
         const { count } = await supabase
           .from("recipes")
           .select("*", { count: "exact", head: true })
@@ -117,23 +86,26 @@ const CategoriesScreen = () => {
 
         return {
           ...cat,
-          name: t(`data_map.category.${cat.dbValue}`),
+          // Dịch tên danh mục dựa trên key
+          name: t(`category.${cat.key}`), 
           recipe_count: count || 0,
         };
       });
+
       const updatedCategories = await Promise.all(promises);
       setDisplayCategories(updatedCategories);
     } catch (error) {
-      console.error("Lỗi:", error);
+      console.error("Lỗi tải danh mục:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
+  // Reload khi ngôn ngữ thay đổi hoặc focus lại
   useEffect(() => {
     loadData();
-  }, [t]);
+  }, [t, isFocused]); 
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -145,28 +117,28 @@ const CategoriesScreen = () => {
     navigation.navigate("SearchResultScreen", { filters });
   };
 
-  // --- RENDER CARD (Style giống AppRecipeCard của Home) ---
+  // --- RENDER ITEM ---
   const renderItem = ({ item }: { item: CategoryItem }) => (
     <Pressable
       style={({ pressed }) => [
         styles.card,
         { width: itemWidth },
-        pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }, // Hiệu ứng nhấn nhẹ
+        pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
       ]}
       onPress={() =>
         navigation.navigate("CategoryDetailScreen", {
           categoryId: item.id,
-          categoryTitle: item.name,
-          categoryDbValue: item.dbValue,
+          categoryTitle: item.name, // Truyền tên đã dịch sang màn hình chi tiết
+          categoryDbValue: item.dbValue, // Truyền giá trị gốc để query DB
         })
       }
     >
-      {/* Ảnh ở trên */}
+      {/* Ảnh */}
       <View style={styles.imageWrap}>
         <Image source={item.image} style={styles.image} resizeMode="cover" />
       </View>
 
-      {/* Thông tin ở dưới (Nền trắng) */}
+      {/* Thông tin */}
       <View style={styles.infoWrap}>
         <AppText variant="bold" style={styles.title} numberOfLines={1}>
           {item.name}
@@ -180,7 +152,7 @@ const CategoriesScreen = () => {
           />
           <AppText style={styles.countText}>
             {item.recipe_count > 0
-              ? `${item.recipe_count} ${t("recipe_detail.items")}`
+              ? `${item.recipe_count} ${t("recipe.items_count")}`
               : t("profile.no_recipes")}
           </AppText>
         </View>
@@ -191,12 +163,12 @@ const CategoriesScreen = () => {
   return (
     <AppSafeView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* HEADER (Copy style từ Home) */}
+        {/* HEADER */}
         <AppHeader
-          title= {t("category.screen_title")}
+          title={t("category.screen_title")} // Dịch tiêu đề
           showSearch={true}
-          showNotifications={true} // Màn hình này không cần hiện chuông
-          showBack={true}
+          showNotifications={true}
+          showBack={false}
           onBackPress={() => navigation.goBack()}
         />
 
@@ -234,16 +206,23 @@ const CategoriesScreen = () => {
           />
         )}
 
+        {/* MODAL SEARCH */}
         <AppSearchModal
           visible={searchVisible}
           onClose={() => setSearchVisible(false)}
           onSubmit={handleSearchSubmit}
         />
 
+        {/* BOTTOM TAB */}
         <AppMainNavBar
           activeTab={activeTab}
           onTabPress={(tab) => {
             setActiveTab(tab);
+            // Logic chuyển tab nếu cần (thường AppMainNavBar tự xử lý navigate)
+             if (tab !== "category") {
+                // Ví dụ: navigation.navigate(...)
+                // Tùy logic điều hướng của bạn
+             }
           }}
         />
       </View>
@@ -258,65 +237,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  // --- HEADER (Giống hệt Home) ---
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 8 : 12,
-    paddingBottom: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  headerGreeting: { flex: 1 },
-  headerSub: { fontSize: 14, color: "#666", marginBottom: 2 },
-  headerTitle: { fontSize: 24, color: AppLightColor.primary_text },
-
-  headerIcons: { flexDirection: "row", alignItems: "center", gap: 12 },
-  headerIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: AppLightColor.primary_color,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: AppLightColor.primary_color,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 5,
-    position: "relative",
-  },
-  badgeContainer: {
-    position: "absolute",
-    top: -4,
-    right: -4,
-    backgroundColor: "#ff3b30",
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: "#fff",
-    paddingHorizontal: 3,
-  },
-  badgeText: {
-    color: "#fff",
-    fontSize: 9,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 1,
-  },
-
-  // --- CARD STYLES (Clean & Giống AppRecipeCard) ---
   card: {
     backgroundColor: "#fff",
-    borderRadius: 16, // Bo góc giống card home
+    borderRadius: 16,
     marginBottom: 4,
-    // Shadow nhẹ
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -326,7 +250,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0,0,0,0.05)",
   },
   imageWrap: {
-    height: 130, // Chiều cao ảnh
+    height: 130,
     width: "100%",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,

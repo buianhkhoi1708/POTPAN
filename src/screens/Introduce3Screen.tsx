@@ -1,48 +1,55 @@
-// src/screens/Introduce1.tsx
-import { ImageBackground, StyleSheet, View, Image } from "react-native";
-import React, { useEffect } from "react";
+// src/screens/Introduce3.tsx
+import { ImageBackground, StyleSheet, View } from "react-native";
+import React from "react";
+import { useTranslation } from "react-i18next"; // 👈 Import i18n
+
 import AppText from "../components/AppText";
 import AppSafeView from "../components/AppSafeView";
-import { RootStackParamList } from "../type/types";
 import { AppLightColor } from "../styles/color";
 import { AppFonts } from "../styles/fonts";
 import AppIntroduceNavBar from "../components/AppIntroduceNavBar";
-import Flag from "../assets/icons/flag.svg";
 
 const Introduce3Screen = () => {
+  const { t } = useTranslation(); // 👈 Khởi tạo hook
+
   return (
-    <AppSafeView style = {styles.safe}>
+    <AppSafeView style={styles.safe}>
       <ImageBackground
         source={require("../assets/images/intro3Bg.png")}
         style={styles.container}
       >
         <View style={styles.textContainer}>
           <View style={styles.text1Container}>
+            {/* Tiêu đề */}
             <AppText variant="bold" style={styles.text}>
-              Các tính năng chính
+              {t("intro.step3.title")}
             </AppText>
           </View>
+          {/* Phụ đề */}
           <AppText variant="light" style={styles.text1}>
-            Cung cấp cho người dùng trải nghiệm tuyệt vời
+            {t("intro.step3.subtitle")}
           </AppText>
+
+          {/* Danh sách tính năng */}
           <View style={styles.text2Container}>
             <View style={styles.textDisCon}>
               <AppText variant="bold" style={styles.textDis}>
-                Tìm kiếm công thức
+                {t("intro.step3.features.search")}
               </AppText>
             </View>
             <View style={styles.textDisCon}>
               <AppText variant="bold" style={styles.textDis}>
-                Gợi ý món ăn
+                {t("intro.step3.features.suggest")}
               </AppText>
             </View>
             <View style={styles.textDisCon}>
               <AppText variant="bold" style={styles.textDis}>
-                Mạng xã hội
+                {t("intro.step3.features.social")}
               </AppText>
             </View>
           </View>
         </View>
+
         <AppIntroduceNavBar
           NavScreen="Introduce4Screen"
           style={styles.navBar}

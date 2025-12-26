@@ -11,20 +11,18 @@ import {
 } from "react-native";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-// 👇 1. Import Hook dịch
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next"; // 👈 Import i18n
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import MainBottomNav, { type MainTabKey } from "../components/AppMainNavBar";
-import AppHeader from "../components/AppHeader"; // Sử dụng Header chung
+import AppHeader from "../components/AppHeader";
 import BottomNavSpacer from "../components/AppBottomSpace";
 
 import { AppLightColor } from "../styles/color";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
 
-// --- TYPES ---
 type Chef = {
   id: string;
   full_name: string;
@@ -40,12 +38,9 @@ const FamousChefsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const { user } = useAuthStore();
-
-  // 👇 2. Khởi tạo hàm t()
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // 👈 Init Hook
 
   const [activeTab, setActiveTab] = useState<MainTabKey>("home");
-
   const [topChefs, setTopChefs] = useState<Chef[]>([]);
   const [favoriteChefs, setFavoriteChefs] = useState<Chef[]>([]);
   const [newChefs, setNewChefs] = useState<Chef[]>([]);
@@ -120,7 +115,8 @@ const FamousChefsScreen: React.FC = () => {
 
   const toggleFollow = async (chefId: string) => {
     if (!user) {
-      alert(t("common.error")); // Hoặc t("auth.login_required")
+      // Thông báo cần đăng nhập
+      alert(t("common.require_login")); 
       return;
     }
     const isFollowing = followMap[chefId];
@@ -144,12 +140,30 @@ const FamousChefsScreen: React.FC = () => {
 
   const renderChefCard = (chef: Chef) => {
     const isFollowing = followMap[chef.id] ?? false;
+    
+    // 👇 Logic: Kiểm tra xem có phải chính mình không
+    const isMe = user?.id === chef.id;
+
     return (
-      <Pressable key={chef.id} style={styles.card}>
+      <Pressable
+        key={chef.id}
+        style={styles.card}
+        onPress={() => {
+          if (isMe) {
+            navigation.navigate("ProfileScreen");
+          } else {
+            navigation.navigate("ChefProfileScreen", {
+              chefId: chef.id,
+              chefName: chef.full_name,
+              chefAvatar: chef.avatar_url,
+            });
+          }
+        }}
+      >
         <View style={styles.cardImageWrap}>
           <Image
             source={{
-              uri: chef.avatar_url || "https://via.placeholder.com/150",
+              uri: chef.avatar_url || "https://i.pravatar.cc/150",
             }}
             style={styles.cardImage}
             resizeMode="cover"
@@ -159,9 +173,11 @@ const FamousChefsScreen: React.FC = () => {
         <View style={styles.cardInfo}>
           <AppText variant="bold" style={styles.chefName} numberOfLines={1}>
             {chef.full_name || t("community.anonymous_chef")}
+            {/* 👇 Hiển thị (Bạn) nếu là chính mình */}
+            {isMe ? ` (${t("common.you")})` : ""}
           </AppText>
           <AppText variant="light" style={styles.chefHandle} numberOfLines={1}>
-            @{chef.username || "chef" + chef.id.slice(0, 4)}
+            @{chef.username || "user"}
           </AppText>
 
           <View style={styles.cardBottomRow}>
@@ -169,23 +185,25 @@ const FamousChefsScreen: React.FC = () => {
               <AppText variant="medium" style={styles.followersText}>
                 {chef.followers || 0}
               </AppText>
-              <Ionicons name="star" size={12} color="#FFC107" />
+              <Ionicons name="person" size={12} color="#00000077" />
             </View>
 
-            <Pressable
-              style={isFollowing ? styles.followBtnActive : styles.followBtn}
-              onPress={() => toggleFollow(chef.id)}
-            >
-              <AppText
-                variant="medium"
-                style={
-                  isFollowing ? styles.followTextActive : styles.followText
-                }
+            {/* 👇 Chỉ hiện nút Follow nếu KHÔNG phải là mình */}
+            {!isMe && (
+              <Pressable
+                style={isFollowing ? styles.followBtnActive : styles.followBtn}
+                onPress={() => toggleFollow(chef.id)}
               >
-                {/* 👇 3. Dịch trạng thái follow */}
-                {isFollowing ? t("chef.following") : t("chef.follow")}
-              </AppText>
-            </Pressable>
+                <AppText
+                  variant="medium"
+                  style={
+                    isFollowing ? styles.followTextActive : styles.followText
+                  }
+                >
+                  {isFollowing ? t("chef.following") : t("chef.follow")}
+                </AppText>
+              </Pressable>
+            )}
           </View>
         </View>
       </Pressable>
@@ -195,12 +213,10 @@ const FamousChefsScreen: React.FC = () => {
   return (
     <AppSafeView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* 👇 4. Sử dụng AppHeader đã có logic Search tích hợp */}
         <AppHeader
           title={t("home.famous_chefs")}
           showBack={true}
           onBackPress={() => navigation.goBack()}
-          unreadCount={0} // Có thể lấy unreadCount từ store nếu cần
         />
 
         {loading && !refreshing ? (
@@ -285,6 +301,8 @@ const FamousChefsScreen: React.FC = () => {
           activeTab={activeTab}
           onTabPress={(tab) => {
             setActiveTab(tab);
+            if (tab === "home") navigation.navigate("HomeScreen");
+            if (tab === "profile") navigation.navigate("ProfileScreen");
           }}
         />
       </View>
@@ -295,7 +313,6 @@ const FamousChefsScreen: React.FC = () => {
 export default FamousChefsScreen;
 
 const styles = StyleSheet.create({
-  // Giữ nguyên Styles gốc của bạn...
   safeArea: { backgroundColor: "#fff" },
   container: { flex: 1, backgroundColor: "#fff" },
   centerLoading: { flex: 1, justifyContent: "center", alignItems: "center" },

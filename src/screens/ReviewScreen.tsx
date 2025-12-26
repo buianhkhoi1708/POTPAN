@@ -60,7 +60,12 @@ const ReviewScreen = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setReviews(data || []);
+      const formattedData: ReviewItem[] = (data || []).map((item: any) => ({
+        ...item,
+        // Nếu user là mảng (do TS suy luận sai hoặc Supabase trả về mảng), lấy phần tử đầu tiên
+        user: Array.isArray(item.user) ? item.user[0] : item.user
+      }));
+      setReviews(formattedData);
     } catch (err) {
       console.log("Lỗi tải đánh giá:", err);
     } finally {

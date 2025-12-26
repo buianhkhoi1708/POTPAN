@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next"; // 👈 Import i18n
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppBottomSpace from "../components/AppBottomSpace";
 import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
+import AppHeader from "../components/AppHeader"; // 👈 Header chung
 import { AppLightColor } from "../styles/color";
 
-import BackArrowIcon from "../assets/images/backarrow.svg";
+// Giữ lại icon Toggle
 import ToggleOnIcon from "../assets/images/button-active.svg";
 import ToggleOffIcon from "../assets/images/button-off.svg";
 
@@ -18,9 +20,11 @@ const LABEL_FONT_SIZE = 20;
 const NotificationSettingsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
+  const { t } = useTranslation(); // 👈 Init hook
 
   const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
 
+  // State giả lập (Trong thực tế nên lưu vào Async Storage hoặc Database)
   const [general, setGeneral] = useState(true);
   const [sound, setSound] = useState(true);
   const [sfx, setSfx] = useState(true);
@@ -56,47 +60,55 @@ const NotificationSettingsScreen: React.FC = () => {
   return (
     <AppSafeView style={styles.safeArea}>
       <View style={styles.container}>
+        {/* HEADER CHUNG */}
+        <AppHeader
+          title={t("settings.notifications")} // "Thông báo"
+          showBack={true}
+          onBackPress={() => navigation.goBack()}
+          showSearch={false}
+          showNotifications={false}
+        />
+
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
-            <Pressable style={styles.headerIconCircle} onPress={() => navigation.goBack()}>
-              <BackArrowIcon width={18} height={18} />
-            </Pressable>
-
-            <View style={styles.headerTitleWrap} pointerEvents="none">
-              <AppText variant="bold" style={styles.headerTitle}>
-                Thông báo
-              </AppText>
-            </View>
-
-            <View style={styles.headerRightStub} />
-          </View>
-
           <View style={styles.rowsWrap}>
             <Row
-              label="Thông báo chung"
+              label={t("notification_settings.general")}
               value={general}
               onToggle={() => setGeneral((v) => !v)}
             />
-            <Row label="Âm thanh" value={sound} onToggle={() => setSound((v) => !v)} />
-            <Row label="SFX" value={sfx} onToggle={() => setSfx((v) => !v)} />
-            <Row label="Rung" value={vibrate} onToggle={() => setVibrate((v) => !v)} />
+            <Row
+              label={t("notification_settings.sound")}
+              value={sound}
+              onToggle={() => setSound((v) => !v)}
+            />
+            <Row
+              label={t("notification_settings.sfx")}
+              value={sfx}
+              onToggle={() => setSfx((v) => !v)}
+            />
+            <Row
+              label={t("notification_settings.vibrate")}
+              value={vibrate}
+              onToggle={() => setVibrate((v) => !v)}
+            />
           </View>
 
           <AppBottomSpace height={90} />
         </ScrollView>
 
+        {/* BOTTOM NAV */}
         <AppMainNavBar
           activeTab={activeTab}
           onTabPress={(tab) => {
             setActiveTab(tab);
-            if (tab === "home") navigation.navigate("Home");
-            if (tab === "world") navigation.navigate("FamousChefs");
-            if (tab === "profile") navigation.navigate("Profile");
-            if (tab === "category") navigation.navigate("Page2");
+            if (tab === "home") navigation.navigate("HomeScreen");
+            if (tab === "world") navigation.navigate("CommunityScreen");
+            if (tab === "profile") navigation.navigate("ProfileScreen");
+            if (tab === "category") navigation.navigate("CategoriesScreen");
           }}
         />
       </View>
@@ -111,36 +123,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 10 },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },
 
-  header: {
-    height: 44,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  headerTitleWrap: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: "900",
-    color: AppLightColor.primary_color,
-    fontFamily: ROBOTO_SLAB_BOLD,
-  },
-  headerIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: AppLightColor.primary_color,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerRightStub: { width: 32, height: 32 },
+  // Đã xóa các style header cũ (header, headerTitle...) vì dùng AppHeader
 
   rowsWrap: { marginTop: 6, rowGap: 22 },
 

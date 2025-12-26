@@ -6,11 +6,14 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
-  Dimensions
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { formatDistanceToNow } from "date-fns";
-import { vi } from "date-fns/locale";
+// 👇 1. Import các locale của date-fns
+import { vi, enUS } from "date-fns/locale";
+
+// 👇 2. Import i18n
+import { useTranslation } from "react-i18next";
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
@@ -18,7 +21,7 @@ import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
 import BottomNavSpacer from "../components/AppBottomSpace";
 import { AppLightColor } from "../styles/color";
 
-// --- GIỮ NGUYÊN IMPORT SVG CỦA BẠN ---
+// --- IMPORT SVG (GIỮ NGUYÊN) ---
 import BackArrow from "../assets/images/backarrow.svg";
 import UpdateIcon from "../assets/images/update.svg";
 import WarnIcon from "../assets/images/warn.svg";
@@ -46,8 +49,11 @@ interface GroupedOldDay {
 const NotificationScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<MainTabKey>("home");
+  
+  // 👇 3. Khởi tạo hook dịch
+  const { t, i18n } = useTranslation();
 
+  const [activeTab, setActiveTab] = useState<MainTabKey>("home");
   const [todayList, setTodayList] = useState<NotiItem[]>([]);
   const [yesterdayList, setYesterdayList] = useState<NotiItem[]>([]);
   const [otherDays, setOtherDays] = useState<GroupedOldDay[]>([]);
@@ -55,15 +61,18 @@ const NotificationScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Hàm tính thời gian (Vd: 5 phút trước)
+  // --- HÀM TÍNH THỜI GIAN (ĐA NGÔN NGỮ) ---
   const getTimeAgo = (dateString: string) => {
     try {
+      // Chọn locale cho date-fns dựa trên ngôn ngữ hiện tại của i18n
+      const currentLocale = i18n.language === 'en' ? enUS : vi;
+      
       return formatDistanceToNow(new Date(dateString), {
         addSuffix: true,
-        locale: vi,
+        locale: currentLocale,
       });
     } catch (e) {
-      return "Vừa xong";
+      return t("common.just_now"); // "Vừa xong"
     }
   };
 
@@ -83,7 +92,7 @@ const NotificationScreen: React.FC = () => {
       const newItem: NotiItem = {
         ...item,
         timeLabel: getTimeAgo(item.created_at),
-        // Nếu DB trả về type null, mặc định là 'update' để không lỗi icon
+        // Nếu DB trả về type null, mặc định là 'update'
         type: item.type || 'update', 
       };
       
@@ -133,7 +142,7 @@ const NotificationScreen: React.FC = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user, refreshing]);
+  }, [user, refreshing, i18n.language]); // Thêm i18n.language để khi đổi ngôn ngữ nó load lại timeLabel
 
   // Tự động tải và đánh dấu đã đọc khi vào màn hình
   useFocusEffect(
@@ -158,7 +167,6 @@ const NotificationScreen: React.FC = () => {
     fetchNotifications();
   };
 
-  // Render Icon dựa trên Type (Giữ nguyên logic của bạn)
   const renderIcon = (type: NotiType) => {
     switch (type) {
       case "update":
@@ -204,7 +212,7 @@ const NotificationScreen: React.FC = () => {
             <BackArrow width={18} height={18} />
           </Pressable>
           <AppText variant="title" style={styles.headerTitle}>
-            Thông báo
+            {t("settings.notifications")}
           </AppText>
           <View style={styles.headerSpacer} />
         </View>
@@ -232,7 +240,7 @@ const NotificationScreen: React.FC = () => {
             {todayList.length > 0 && (
               <>
                 <AppText variant="medium" style={styles.sectionLabel}>
-                  Hôm nay
+                  {t("common.today")}
                 </AppText>
                 {todayList.map(renderItem)}
               </>
@@ -240,7 +248,7 @@ const NotificationScreen: React.FC = () => {
             {yesterdayList.length > 0 && (
               <>
                 <AppText variant="medium" style={styles.sectionLabel}>
-                  Hôm qua
+                  {t("common.yesterday")}
                 </AppText>
                 {yesterdayList.map(renderItem)}
               </>
@@ -258,7 +266,7 @@ const NotificationScreen: React.FC = () => {
               otherDays.length === 0 && (
                 <View style={styles.emptyContainer}>
                   <AppText style={styles.emptyText}>
-                    Chưa có thông báo nào
+                    {t("common.empty_notifications")}
                   </AppText>
                 </View>
               )}

@@ -11,18 +11,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
-  Animated, // 👇 1. Import Animated
+  Animated,
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { decode } from "base64-arraybuffer";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next"; // 👈 Import i18n
+
 import AppText from "./AppText";
 import { AppLightColor } from "../styles/color";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import * as ImagePicker from "expo-image-picker";
-import { decode } from "base64-arraybuffer";
 
 interface Collection {
   id: number;
@@ -47,6 +48,7 @@ const AppCollectionModal: React.FC<Props> = ({
 }) => {
   const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation(); // 👈 Init hook
 
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,33 +58,30 @@ const AppCollectionModal: React.FC<Props> = ({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
 
-  // 👇 2. Tạo biến Animation (Vị trí Y của modal content)
-  // Khởi tạo ở vị trí SCREEN_HEIGHT (nằm ngoài màn hình bên dưới)
+  // Animation Refs
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
     if (visible && user) {
       fetchCollections();
-      // 👇 3. Khi mở: Nền đen hiện ngay (do Modal visible), Content trượt lên
+      // Slide Up Animation
       Animated.spring(translateY, {
-        toValue: 0, // Về vị trí gốc
+        toValue: 0,
         useNativeDriver: true,
-        damping: 15, // Độ nảy (càng nhỏ càng nảy)
-        stiffness: 100, // Độ cứng
+        damping: 15,
+        stiffness: 100,
       }).start();
     }
   }, [visible, user]);
 
-  // 👇 4. Hàm đóng custom: Trượt xuống trước -> rồi mới tắt Modal
   const handleClose = () => {
+    // Slide Down Animation
     Animated.timing(translateY, {
-      toValue: SCREEN_HEIGHT, // Trượt xuống dưới cùng
-      duration: 250, // Thời gian trượt (ms)
+      toValue: SCREEN_HEIGHT,
+      duration: 250,
       useNativeDriver: true,
     }).start(() => {
-      // Sau khi chạy xong animation thì mới gọi hàm tắt của cha
       onClose();
-      // Reset lại vị trí cho lần mở sau (đề phòng)
       translateY.setValue(SCREEN_HEIGHT);
     });
   };
@@ -105,7 +104,7 @@ const AppCollectionModal: React.FC<Props> = ({
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert("Cần quyền", "Vui lòng cho phép truy cập ảnh.");
+        Alert.alert(t("collection_modal.permission_title"), t("collection_modal.permission_desc"));
         return;
       }
 
@@ -130,7 +129,7 @@ const AppCollectionModal: React.FC<Props> = ({
   const uploadImageToSupabase = async (base64Data: string) => {
     try {
       const fileName = `${user?.id}/${Date.now()}.jpg`;
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from("collection-images") 
         .upload(fileName, decode(base64Data), {
           contentType: "image/jpeg",
@@ -144,7 +143,7 @@ const AppCollectionModal: React.FC<Props> = ({
       return publicData.publicUrl;
     } catch (error: any) {
       console.log("Upload lỗi:", error.message || error);
-      Alert.alert("Lỗi Upload", "Vui lòng kiểm tra lại kết nối mạng.");
+      Alert.alert(t("collection_modal.upload_error"), t("collection_modal.network_error"));
       return null;
     }
   };
@@ -176,7 +175,7 @@ const AppCollectionModal: React.FC<Props> = ({
       }
     } catch (error) {
       console.log(error);
-      Alert.alert("Lỗi", "Không thể tạo bộ sưu tập");
+      Alert.alert(t("common.error"), t("collection_modal.create_error"));
     } finally {
       setCreating(false);
     }
@@ -184,6 +183,7 @@ const AppCollectionModal: React.FC<Props> = ({
 
   const handleSaveToCollection = async (collectionId: number | null) => {
     try {
+      // Xóa nếu đã lưu trước đó (để tránh trùng lặp hoặc chuyển collection)
       await supabase
         .from("saved_recipes")
         .delete()
@@ -198,11 +198,10 @@ const AppCollectionModal: React.FC<Props> = ({
 
       if (error) throw error;
       onSaved();
-      // Gọi handleClose để có animation đóng
       handleClose();
     } catch (error) {
       console.log("Lỗi lưu:", error);
-      Alert.alert("Lỗi", "Không thể lưu món ăn");
+      Alert.alert(t("common.error"), t("collection_modal.save_error"));
     }
   };
 
@@ -226,7 +225,7 @@ const AppCollectionModal: React.FC<Props> = ({
         <AppText variant="bold" style={styles.collectionName}>
           {item.name}
         </AppText>
-        <AppText style={styles.subText}>Lưu vào đây</AppText>
+        <AppText style={styles.subText}>{t("collection_modal.save_here")}</AppText>
       </View>
       <Ionicons name="add-circle-outline" size={24} color="#ccc" />
     </Pressable>
@@ -236,42 +235,33 @@ const AppCollectionModal: React.FC<Props> = ({
     <Modal
       visible={visible}
       transparent
-      // 👇 5. Quan trọng: Tắt animation mặc định của Modal
-      animationType="none" 
+      animationType="none" // Tắt animation mặc định để dùng Animated của ta
       statusBarTranslucent
-      onRequestClose={handleClose} // Xử lý nút back Android
+      onRequestClose={handleClose}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        {/* 👇 6. Backdrop: View thường -> Hiện ngay lập tức */}
         <Pressable style={styles.backdrop} onPress={handleClose}>
-          
-          {/* 👇 7. Content: Animated.View -> Trượt từ dưới lên */}
           <Animated.View
             style={[
               styles.modalContent,
               { 
                 paddingBottom: insets.bottom + 20,
-                // Gán giá trị animation vào transform
                 transform: [{ translateY: translateY }] 
               },
             ]}
-            // Chặn sự kiện nổi bọt để không đóng khi bấm vào content
             onStartShouldSetResponder={() => true} 
           >
             <View style={styles.header}>
               <AppText variant="bold" style={styles.title}>
-                Lưu vào bộ sưu tập
+                {t("collection_modal.title")}
               </AppText>
               <Pressable onPress={handleClose} style={{ padding: 4 }}>
                 <Ionicons name="close" size={24} color="#333" />
               </Pressable>
             </View>
-
-
-    
 
             {loading ? (
               <ActivityIndicator
@@ -289,7 +279,9 @@ const AppCollectionModal: React.FC<Props> = ({
             )}
 
             <View style={styles.createArea}>
-                <AppText variant="bold" style={{ marginBottom: 8, fontSize: 14 }}>Tạo bộ sưu tập mới</AppText>
+                <AppText variant="bold" style={{ marginBottom: 8, fontSize: 14 }}>
+                    {t("collection_modal.create_new")}
+                </AppText>
                 
                 {selectedImage && (
                     <View style={styles.imagePreviewContainer}>
@@ -310,7 +302,7 @@ const AppCollectionModal: React.FC<Props> = ({
 
                     <TextInput
                         style={styles.input}
-                        placeholder="Tên bộ sưu tập..."
+                        placeholder={t("collection_modal.placeholder_name")}
                         value={newCollectionName}
                         onChangeText={setNewCollectionName}
                         placeholderTextColor="#999"
@@ -341,7 +333,7 @@ export default AppCollectionModal;
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)", // Màu đen mờ
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
   },
   modalContent: {
@@ -350,7 +342,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     padding: 20,
     maxHeight: "85%", 
-    width: '100%', // Đảm bảo full width
+    width: '100%',
   },
   header: {
     flexDirection: "row",
@@ -377,9 +369,6 @@ const styles = StyleSheet.create({
   },
   collectionName: { fontSize: 16, color: "#333" },
   subText: { fontSize: 12, color: "#888" },
-
-  divider: { height: 1, backgroundColor: "#eee", marginVertical: 12 },
-
   createArea: {
       marginTop: 12,
       paddingTop: 12,

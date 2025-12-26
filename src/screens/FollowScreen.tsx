@@ -80,9 +80,9 @@ const FollowScreen = () => {
 
   const handleUnfollow = async (userIdToUnfollow: string) => {
     Alert.alert(t("follow.unfollow_title"), t("follow.unfollow_msg"), [
-      { text: t("common.back"), style: "cancel" },
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: t("follow.yes"), // Hoặc thêm key "common.confirm"
+        text: t("follow.yes"),
         style: "destructive",
         onPress: async () => {
           const { error } = await supabase
@@ -104,9 +104,9 @@ const FollowScreen = () => {
       t("follow.remove_follower_title"),
       t("follow.remove_follower_msg"),
       [
-        { text: t("common.back"), style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: t("common.error"), // Hoặc key xóa chuyên biệt
+          text: t("follow.remove"),
           style: "destructive",
           onPress: async () => {
             const { error } = await supabase
@@ -145,6 +145,8 @@ const FollowScreen = () => {
             @{item.username || "user"}
           </AppText>
         </View>
+        
+        {/* Nút hành động chỉ hiện khi xem danh sách của chính mình */}
         {isMe && (
           <TouchableOpacity
             style={[
@@ -166,8 +168,8 @@ const FollowScreen = () => {
               ]}
             >
               {activeTab === "following"
-                ? t("chef.following")
-                : t("search.reset")}
+                ? t("chef.following") 
+                : t("follow.remove")}  
             </AppText>
           </TouchableOpacity>
         )}
@@ -183,7 +185,7 @@ const FollowScreen = () => {
 
   return (
     <AppSafeView style={styles.container}>
-      {/* SỬ DỤNG HEADER CHUNG */}
+      {/* HEADER CHUNG */}
       <AppHeader
         title={
           currentUser?.id === targetUserId
@@ -195,7 +197,7 @@ const FollowScreen = () => {
         showSearch={false}
       />
 
-      {/* TABS DỊCH */}
+      {/* TABS */}
       <View style={styles.tabs}>
         <TouchableOpacity
           style={[
@@ -260,7 +262,7 @@ const FollowScreen = () => {
           ListEmptyComponent={
             <View style={styles.emptyBox}>
               <AppText style={{ color: "#999" }}>
-                {t("community.empty_list")}
+                {t("common.empty_list")}
               </AppText>
             </View>
           }

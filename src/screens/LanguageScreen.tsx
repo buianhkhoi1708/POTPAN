@@ -1,68 +1,76 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { 
   View, 
-  Pressable, 
   ScrollView, 
   StyleSheet, 
   Platform,
   Animated,
-  StatusBar,
   TouchableOpacity,
-  Dimensions 
+  ActivityIndicator,
 } from "react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next"; // 👈 Import i18n
 import * as Haptics from "expo-haptics";
+import { Ionicons } from "@expo/vector-icons";
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppBottomSpace from "../components/AppBottomSpace";
 import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
-import AppHeader from "../components/AppHeader"; // Sử dụng AppHeader chung
+import AppHeader from "../components/AppHeader"; 
 import { AppLightColor } from "../styles/color";
-import { Ionicons } from "@expo/vector-icons";
 
 const LanguageScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(); // 👈 Khởi tạo hook
 
   const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
   const [selectedLang, setSelectedLang] = useState(i18n.language);
   const [isChanging, setIsChanging] = useState(false);
 
+  // Animation values
   const fadeAnim = useState(new Animated.Value(0))[0];
   const slideAnim = useState(new Animated.Value(20))[0];
 
   useEffect(() => {
     if (isFocused) setActiveTab("profile");
     
+    // Chạy animation khi vào màn hình
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
     ]).start();
   }, [isFocused]);
 
-  // Danh sách ngôn ngữ sử dụng useMemo để dịch nhãn label theo t()
+  // Danh sách ngôn ngữ (Dùng useMemo để cập nhật khi đổi ngôn ngữ)
   const languages = useMemo(() => [
     { id: "vi", label: t("language.names.vi"), nativeName: "Tiếng Việt", flag: "🇻🇳" },
     { id: "en", label: t("language.names.en"), nativeName: "English", flag: "🇺🇸" },
     { id: "zh", label: t("language.names.zh"), nativeName: "中文", flag: "🇨🇳" },
   ], [t]);
 
+  // Hàm đổi ngôn ngữ
   const changeLanguage = useCallback(async (langId: string) => {
     if (isChanging || langId === i18n.language) return;
     
     try {
       setIsChanging(true);
       setSelectedLang(langId);
-      if (Platform.OS === 'ios') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       
+      // Rung nhẹ phản hồi (chỉ hoạt động trên thiết bị thật)
+      if (Platform.OS !== 'web') {
+         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      
+      // Gọi i18n đổi ngôn ngữ
       await i18n.changeLanguage(langId);
       
-      if (Platform.OS === 'ios') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      if (Platform.OS !== 'web') {
+         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
     } catch (error) {
-      setSelectedLang(i18n.language);
+      setSelectedLang(i18n.language); // Revert nếu lỗi
     } finally {
       setIsChanging(false);
     }
@@ -110,6 +118,7 @@ const LanguageScreen: React.FC = () => {
       />
       
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        {/* Phần Ngôn ngữ hiện tại */}
         <View style={styles.currentLanguageSection}>
           <AppText style={styles.sectionTitle}>{t("language.current_language")}</AppText>
           <View style={styles.currentLanguageCard}>
@@ -127,6 +136,7 @@ const LanguageScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Danh sách ngôn ngữ khả dụng */}
         <View style={styles.languagesSection}>
           <AppText style={styles.sectionTitle}>{t("language.available_languages")}</AppText>
           {languages
@@ -134,6 +144,7 @@ const LanguageScreen: React.FC = () => {
             .map((lang) => renderLanguageCard(lang))}
         </View>
 
+        {/* Thẻ thông tin */}
         <View style={styles.infoCard}>
           <Ionicons name="information-circle" size={20} color={AppLightColor.primary_color} />
           <AppText style={styles.infoText}>{t("language.info")}</AppText>

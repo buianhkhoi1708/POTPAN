@@ -1,122 +1,112 @@
-// src/utils/validationSchema.ts
 import * as yup from "yup";
 
-// Schema đăng ký
-export const registerSchema = yup.object().shape({
-  fullName: yup
-    .string()
-    .required("Họ tên không được để trống")
-    .min(3, "Họ tên quá ngắn"),
-  email: yup
-    .string()
-    .required("Email không được để trống")
-    .email("Email không đúng định dạng"),
-  phone: yup
-    .string()
-    .required("SĐT không được để trống")
-    .matches(/^(0[3|5|7|8|9])+([0-9]{8})$/, "Số điện thoại không hợp lệ"),
-  password: yup
-    .string()
-    .required("Mật khẩu không được để trống")
-    .min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
-  confirmPassword: yup
-    .string()
-    .required("Vui lòng xác nhận mật khẩu")
-    .oneOf([yup.ref('password')], 'Mật khẩu xác nhận không khớp')
-});
+// --- 1. Schema Đăng ký ---
+export const getRegisterSchema = (t: any) =>
+  yup.object().shape({
+    fullName: yup
+      .string()
+      .required(t("validation.required"))
+      .min(3, t("validation.min_length", { min: 3 })),
+    email: yup
+      .string()
+      .required(t("validation.required"))
+      .email(t("validation.email_invalid")),
+    phone: yup
+      .string()
+      .required(t("validation.required"))
+      .matches(/^(0[3|5|7|8|9])+([0-9]{8})$/, t("validation.phone_invalid")),
+    password: yup
+      .string()
+      .required(t("validation.required"))
+      .min(6, t("validation.password_min", { min: 6 })),
+    confirmPassword: yup
+      .string()
+      .required(t("validation.required"))
+      .oneOf([yup.ref("password")], t("validation.password_mismatch")),
+  });
 
-// Schema đăng nhập
-export const loginSchema = yup.object().shape({
-  email: yup
-    .string()
-    .required("Vui lòng nhập Email")
-    .email("Email không đúng định dạng"),
-  password: yup
-    .string()
-    .required("Vui lòng nhập mật khẩu"),
-});
+// --- 2. Schema Đăng nhập ---
+export const getLoginSchema = (t: any) =>
+  yup.object().shape({
+    email: yup
+      .string()
+      .required(t("validation.required"))
+      .email(t("validation.email_invalid")),
+    password: yup.string().required(t("validation.required")),
+  });
 
-// Schema cho công thức nấu ăn
-export const recipeSchema = yup.object().shape({
-  title: yup
-    .string()
-    .required("Tên món không được để trống")
-    .min(3, "Tên món phải có ít nhất 3 ký tự")
-    .max(100, "Tên món quá dài"),
-  description: yup
-    .string()
-    .required("Mô tả không được để trống")
-    .min(10, "Mô tả phải có ít nhất 10 ký tự")
-    .max(500, "Mô tả quá dài"),
-  time: yup
-    .string()
-    .required("Thời gian không được để trống")
-    .matches(/^\d+\s*(phút|giờ|ngày)?$/, "Định dạng thời gian không hợp lệ (VD: 30 phút)"),
-  difficulty: yup
-    .string()
-    .required("Độ khó không được để trống"),
-  category: yup
-    .string()
-    .required("Danh mục không được để trống"),
-  thumbnail: yup
-    .string()
-    .required("Vui lòng chọn ảnh cho món ăn"),
-  ingredients: yup
-    .array()
-    .of(
-      yup.object().shape({
-        quantity: yup
-          .string()
-          .required("Số lượng không được để trống"),
-        name: yup
-          .string()
-          .required("Tên nguyên liệu không được để trống")
-          .min(2, "Tên nguyên liệu quá ngắn"),
-      })
-    )
-    .min(1, "Cần ít nhất 1 nguyên liệu")
-    .required("Nguyên liệu không được để trống"),
-  steps: yup
-    .array()
-    .of(
-      yup.object().shape({
-        title: yup
-          .string()
-          .required("Tiêu đề bước không được để trống"),
-        content: yup
-          .string()
-          .required("Nội dung bước không được để trống")
-          .min(10, "Nội dung bước quá ngắn"),
-      })
-    )
-    .min(1, "Cần ít nhất 1 bước thực hiện")
-    .required("Các bước thực hiện không được để trống"),
-});
+// --- 3. Schema Tạo công thức ---
+export const getRecipeSchema = (t: any) =>
+  yup.object().shape({
+    title: yup
+      .string()
+      .required(t("validation.required"))
+      .min(3, t("validation.min_length", { min: 3 }))
+      .max(100, t("validation.max_length", { max: 100 })),
+    description: yup
+      .string()
+      .required(t("validation.required"))
+      .min(10, t("validation.min_length", { min: 10 }))
+      .max(500, t("validation.max_length", { max: 500 })),
+    time: yup
+      .string()
+      .required(t("validation.required"))
+      // Cập nhật regex để chấp nhận cả tiếng Anh lẫn tiếng Việt
+      .matches(/^\d+\s*(phút|giờ|ngày|mins|hours|days)?$/, t("validation.time_format")),
+    difficulty: yup.string().required(t("validation.required")),
+    category: yup.string().required(t("validation.required")),
+    thumbnail: yup.string().required(t("validation.image_required")),
+    ingredients: yup
+      .array()
+      .of(
+        yup.object().shape({
+          id: yup.string(),
+          quantity: yup.string().required(t("validation.required")),
+          name: yup
+            .string()
+            .required(t("validation.required"))
+            .min(2, t("validation.min_length", { min: 2 })),
+        })
+      )
+      .min(1, t("validation.min_ingredients"))
+      .required(t("validation.required")),
+    steps: yup
+      .array()
+      .of(
+        yup.object().shape({
+          title: yup.string().required(t("validation.required")),
+          content: yup
+            .string()
+            .required(t("validation.required"))
+            .min(10, t("validation.min_length", { min: 10 })),
+        })
+      )
+      .min(1, t("validation.min_steps"))
+      .required(t("validation.required")),
+  });
 
-// Schema cho chỉnh sửa hồ sơ
-export const profileSchema = yup.object().shape({
-  fullName: yup
-    .string()
-    .required("Họ tên không được để trống")
-    .min(3, "Họ tên quá ngắn"),
-  username: yup
-    .string()
-    .min(3, "Username phải có ít nhất 3 ký tự")
-    .max(20, "Username quá dài"),
-  bio: yup
-    .string()
-    .max(200, "Bio không được quá 200 ký tự"),
-  phone: yup
-    .string()
-    .matches(/^(0[3|5|7|8|9])+([0-9]{8})$/, "Số điện thoại không hợp lệ"),
-});
+// --- 4. Schema Chỉnh sửa hồ sơ ---
+export const getProfileSchema = (t: any) =>
+  yup.object().shape({
+    fullName: yup
+      .string()
+      .required(t("validation.required"))
+      .min(3, t("validation.min_length", { min: 3 })),
+    username: yup
+      .string()
+      .min(3, t("validation.min_length", { min: 3 }))
+      .max(20, t("validation.max_length", { max: 20 })),
+    bio: yup.string().max(200, t("validation.max_length", { max: 200 })),
+    phone: yup
+      .string()
+      .matches(/^(0[3|5|7|8|9])+([0-9]{8})$/, t("validation.phone_invalid")),
+  });
 
-// Schema cho tìm kiếm
-export const searchSchema = yup.object().shape({
-  query: yup
-    .string()
-    .min(2, "Từ khóa tìm kiếm phải có ít nhất 2 ký tự"),
-  category: yup.string(),
-  difficulty: yup.string(),
-  time: yup.string(),
-});
+// --- 5. Schema Tìm kiếm ---
+export const getSearchSchema = (t: any) =>
+  yup.object().shape({
+    query: yup.string().min(2, t("validation.min_length", { min: 2 })),
+    category: yup.string(),
+    difficulty: yup.string(),
+    time: yup.string(),
+  });

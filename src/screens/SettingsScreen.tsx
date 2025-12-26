@@ -1,20 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, ScrollView, StyleSheet, Pressable, Alert } from "react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next"; // 👈 Import i18n
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppBottomSpace from "../components/AppBottomSpace";
 import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
 import AppHeader from "../components/AppHeader";
-import AppConfirmModal from "../components/AppConfirmModal"; // Component modal đã tách
+import AppConfirmModal from "../components/AppConfirmModal"; 
 import AppSettingItem from "../components/AppSettingItem";
 
 import { useAuthStore } from "../store/useAuthStore";
 import { AppLightColor } from "../styles/color";
 
-// Icons
+// Icons (Giữ nguyên)
 import Setting1Icon from "../assets/images/setting-1.svg";
 import Setting2Icon from "../assets/images/setting-2.svg";
 import Setting3Icon from "../assets/images/setting-3.svg";
@@ -25,7 +25,7 @@ import Setting6Icon from "../assets/images/setting-6.svg";
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // 👈 Init Hook
 
   const { logout, deleteAccount, isLoading } = useAuthStore();
 
@@ -36,6 +36,7 @@ const SettingsScreen: React.FC = () => {
     if (isFocused) setActiveTab("profile");
   }, [isFocused]);
 
+  // Sử dụng useMemo để cập nhật danh sách khi ngôn ngữ thay đổi
   const settingsRows = useMemo(() => [
     {
       key: "noti",
@@ -77,6 +78,7 @@ const SettingsScreen: React.FC = () => {
     try {
       if (modalType === "logout") {
         await logout();
+        // App.tsx sẽ tự điều hướng về Login khi user null
       } else if (modalType === "delete") {
         await deleteAccount();
         Alert.alert(t("common.success"), t("settings.delete_success"));
@@ -84,6 +86,7 @@ const SettingsScreen: React.FC = () => {
       setModalType(null);
     } catch (error: any) {
       Alert.alert(t("common.error"), error.message || t("common.try_again"));
+      setModalType(null);
     }
   };
 
@@ -121,6 +124,7 @@ const SettingsScreen: React.FC = () => {
         <AppBottomSpace height={100} />
       </ScrollView>
 
+      {/* Modal Xác nhận dùng chung cho Logout và Delete */}
       <AppConfirmModal
         visible={modalType !== null}
         title={modalType === "logout" ? t("settings.logout") : t("settings.delete_account")}
@@ -128,9 +132,16 @@ const SettingsScreen: React.FC = () => {
         loading={isLoading}
         onClose={() => setModalType(null)}
         onConfirm={handleConfirm}
+        confirmText={modalType === "delete" ? t("common.delete") : t("common.confirm")}
+        confirmColor={modalType === "delete" ? "#FF3B30" : AppLightColor.primary_color}
       />
 
-      <AppMainNavBar activeTab={activeTab} onTabPress={setActiveTab} />
+      <AppMainNavBar activeTab={activeTab} onTabPress={(tab) => {
+          setActiveTab(tab);
+          if (tab === "home") navigation.navigate("HomeScreen");
+          if (tab === "world") navigation.navigate("CommunityScreen");
+          if (tab === "category") navigation.navigate("CategoriesScreen");
+      }} />
     </AppSafeView>
   );
 };

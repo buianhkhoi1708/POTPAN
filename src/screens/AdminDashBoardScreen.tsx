@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next"; // <-- IMPORT I18N
+
 import { supabase } from "../config/supabaseClient";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
@@ -23,6 +25,7 @@ const PRIMARY_COLOR = AppLightColor.primary_color;
 
 const AdminDashboardScreen = () => {
   const navigation = useNavigation<any>();
+  const { t } = useTranslation(); // <-- KHỞI TẠO HOOK
 
   const [activeTab, setActiveTab] = useState<"pending" | "approved" | "users">(
     "pending"
@@ -59,7 +62,7 @@ const AdminDashboardScreen = () => {
       setDataList(data || []);
     } catch (err) {
       console.log("Admin Fetch Error:", err);
-      Alert.alert("Lỗi", "Không thể tải dữ liệu.");
+      Alert.alert(t("common.error"), t("admin.alerts.fetch_error"));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -81,7 +84,7 @@ const AdminDashboardScreen = () => {
     fetchData(true);
   };
 
-  // --- HÀM GỬI THÔNG BÁO (Mới) ---
+  // --- HÀM GỬI THÔNG BÁO ---
   const sendNotification = async (
     userId: string,
     title: string,
@@ -94,7 +97,7 @@ const AdminDashboardScreen = () => {
         user_id: userId,
         title: title,
         message: message,
-        type: type, // Lưu loại thông báo để hiển thị icon tương ứng
+        type: type,
         is_read: false,
       });
       console.log("Đã gửi thông báo cho user:", userId);
@@ -105,7 +108,6 @@ const AdminDashboardScreen = () => {
 
   // --- HÀM DUYỆT BÀI ---
   const handleApprove = async (item: any) => {
-    // Nhận cả item để lấy thông tin gửi noti
     try {
       const { data, error } = await supabase
         .from("recipes")
@@ -115,70 +117,66 @@ const AdminDashboardScreen = () => {
 
       if (error) throw error;
 
-      // Kiểm tra RLS
       if (!data || data.length === 0) {
-        Alert.alert(
-          "Lỗi RLS",
-          "Không thể cập nhật DB. Vui lòng kiểm tra Policy."
-        );
+        Alert.alert("Lỗi RLS", t("admin.alerts.rls_error"));
         return;
       }
 
-      // 👇 GỬI THÔNG BÁO: TYPE 'UPDATE'
-      await sendNotification(
-        item.user_id,
-        "Bài viết đã được duyệt ✅",
-        `Món "${item.title}" của bạn đã được Admin duyệt và hiển thị công khai.`,
-        "update"
-      );
+      // 👇 GỬI THÔNG BÁO (Sử dụng t() để dịch nội dung)
+      const notiTitle = t("admin.notifications.approve_title");
+      const notiMsg = t("admin.notifications.approve_msg", {
+        title: item.title,
+      }); // Truyền biến title vào chuỗi dịch
 
-      Alert.alert("Thành công", "Đã duyệt và gửi thông báo!");
+      await sendNotification(item.user_id, notiTitle, notiMsg, "update");
+
+      Alert.alert(t("common.success"), t("admin.alerts.approve_success"));
       setDataList((prev) => prev.filter((i) => i.id !== item.id));
     } catch (error: any) {
       console.log(error);
-      Alert.alert("Lỗi", "Không thể duyệt bài.");
+      Alert.alert(t("common.error"), t("common.error_occurred"));
     }
   };
 
   // --- HÀM XÓA ---
   const handleDelete = (item: any) => {
-    // Nhận cả item
-    Alert.alert(
-      "Xác nhận",
-      activeTab === "users" ? "Xóa người dùng này?" : "Xóa bài viết này?",
-      [
-        { text: "Hủy", style: "cancel" },
-        {
-          text: "Xóa",
-          style: "destructive",
-          onPress: async () => {
-            const table = activeTab === "users" ? "users" : "recipes";
-            const { error } = await supabase
-              .from(table)
-              .delete()
-              .eq("id", item.id);
+    const confirmMsg =
+      activeTab === "users"
+        ? t("admin.alerts.confirm_delete_user")
+        : t("admin.alerts.confirm_delete_post");
 
-            if (!error) {
-              setDataList((prev) => prev.filter((i) => i.id !== item.id));
+    Alert.alert(t("common.confirm"), confirmMsg, [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("common.delete"),
+        style: "destructive",
+        onPress: async () => {
+          const table = activeTab === "users" ? "users" : "recipes";
+          const { error } = await supabase
+            .from(table)
+            .delete()
+            .eq("id", item.id);
 
-              // 👇 GỬI THÔNG BÁO: TYPE 'WARN' (Chỉ gửi khi xóa bài viết, không phải xóa user)
-              if (activeTab !== "users") {
-                await sendNotification(
-                  item.user_id,
-                  "Bài viết bị xóa ❌",
-                  `Món "${item.title}" của bạn đã bị xóa do vi phạm quy định hoặc bị từ chối.`,
-                  "warn"
-                );
-              }
+          if (!error) {
+            setDataList((prev) => prev.filter((i) => i.id !== item.id));
 
-              Alert.alert("Thành công", "Đã xóa dữ liệu.");
-            } else {
-              Alert.alert("Lỗi", "Không thể xóa.");
+            // 👇 GỬI THÔNG BÁO XÓA (Trừ khi xóa user)
+            if (activeTab !== "users") {
+              const notiTitle = t("admin.notifications.reject_title");
+              const notiMsg = t("admin.notifications.reject_msg", {
+                title: item.title,
+              });
+
+              await sendNotification(item.user_id, notiTitle, notiMsg, "warn");
             }
-          },
+
+            Alert.alert(t("common.success"), t("admin.alerts.delete_success"));
+          } else {
+            Alert.alert(t("common.error"), t("admin.alerts.delete_error"));
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const renderItem = ({ item }: { item: any }) => {
@@ -191,7 +189,9 @@ const AdminDashboardScreen = () => {
             style={styles.avatar}
           />
           <View style={styles.content}>
-            <AppText variant="bold">{item.full_name || "No Name"}</AppText>
+            <AppText variant="bold">
+              {item.full_name || t("admin.no_name")}
+            </AppText>
             <AppText style={styles.subText}>{item.email}</AppText>
             <AppText
               style={[
@@ -199,7 +199,7 @@ const AdminDashboardScreen = () => {
                 { color: item.role === "admin" ? PRIMARY_COLOR : "#666" },
               ]}
             >
-              Role: {item.role || "user"}
+              {t("admin.role")}: {item.role || "user"}
             </AppText>
           </View>
           <Pressable
@@ -212,10 +212,9 @@ const AdminDashboardScreen = () => {
       );
     }
 
-    // 2. GIAO DIỆN BÀI VIẾT (Pending / Approved)
+    // 2. GIAO DIỆN BÀI VIẾT
     return (
       <View style={styles.card}>
-        {/* Chỉ bọc Pressable ở Ảnh để tránh xung đột nút bấm */}
         <Pressable
           onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
           style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
@@ -231,7 +230,7 @@ const AdminDashboardScreen = () => {
             {item.title}
           </AppText>
           <AppText style={styles.subText}>
-            Bởi: {item.users?.full_name || "Ẩn danh"}
+            {t("admin.by")}: {item.users?.full_name || t("admin.anonymous")}
           </AppText>
           <AppText style={styles.dateText}>
             {new Date(item.created_at).toLocaleDateString()}
@@ -244,7 +243,9 @@ const AdminDashboardScreen = () => {
               onPress={() => handleDelete(item)}
             >
               <Ionicons name="trash-outline" size={16} color="#fff" />
-              <AppText style={styles.btnText}>Xóa</AppText>
+              <AppText style={styles.btnText}>
+                {t("admin.actions.delete")}
+              </AppText>
             </Pressable>
 
             {/* Nút Duyệt */}
@@ -258,7 +259,9 @@ const AdminDashboardScreen = () => {
                   size={16}
                   color="#fff"
                 />
-                <AppText style={styles.btnText}>Duyệt</AppText>
+                <AppText style={styles.btnText}>
+                  {t("admin.actions.approve")}
+                </AppText>
               </Pressable>
             )}
 
@@ -274,7 +277,7 @@ const AdminDashboardScreen = () => {
                     marginLeft: 4,
                   }}
                 >
-                  Đã duyệt
+                  {t("admin.tabs.approved")}
                 </AppText>
               </View>
             )}
@@ -287,7 +290,7 @@ const AdminDashboardScreen = () => {
   return (
     <AppSafeView style={{ flex: 1, backgroundColor: "#fff" }}>
       <AppHeader
-        title="Admin Dashboard"
+        title={t("admin.dashboard")}
         showBack
         onBackPress={() => navigation.goBack()}
         showSearch={false}
@@ -305,7 +308,7 @@ const AdminDashboardScreen = () => {
               activeTab === "pending" && styles.activeText,
             ]}
           >
-            Chờ duyệt
+            {t("admin.tabs.pending")}
           </AppText>
         </Pressable>
         <Pressable
@@ -318,7 +321,7 @@ const AdminDashboardScreen = () => {
               activeTab === "approved" && styles.activeText,
             ]}
           >
-            Đã duyệt
+            {t("admin.tabs.approved")}
           </AppText>
         </Pressable>
         <Pressable
@@ -328,7 +331,7 @@ const AdminDashboardScreen = () => {
           <AppText
             style={[styles.tabText, activeTab === "users" && styles.activeText]}
           >
-            Users
+            {t("admin.tabs.users")}
           </AppText>
         </Pressable>
       </View>
@@ -352,7 +355,7 @@ const AdminDashboardScreen = () => {
               <AppText
                 style={{ textAlign: "center", marginTop: 10, color: "#999" }}
               >
-                Danh sách trống
+                {t("common.empty_list")}
               </AppText>
             </View>
           }

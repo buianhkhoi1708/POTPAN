@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useIsFocused } from "@react-navigation/native";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next"; // 1. Import i18n
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
@@ -48,7 +48,7 @@ type Recipe = {
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const isFocused = useIsFocused();
   const { user, profile } = useAuthStore();
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // 2. Hook dịch
 
   const [unreadCount, setUnreadCount] = useState(0);
   const featuredScrollRef = useRef<ScrollView>(null);
@@ -66,7 +66,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [recentList, setRecentList] = useState<Recipe[]>([]);
   const [chefList, setChefList] = useState<Chef[]>([]);
 
-  // Dữ liệu danh mục (Đã dịch)
+  // 3. Dịch Danh mục (Sử dụng useMemo để cập nhật khi ngôn ngữ thay đổi)
   const homeCategories = useMemo(() => [
     { id: "1", label: t("data_map.category.Món mặn"), dbValue: "Món mặn" },
     { id: "2", label: t("data_map.category.Món canh"), dbValue: "Món canh" },
@@ -173,8 +173,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <AppHeader 
           userName={profile?.full_name || t("home.greeting")}
           unreadCount={unreadCount}
-          onSearchPress={() => setSearchVisible(true)}
-          onNotificationPress={() => navigation.navigate("NotificationScreen")}
         />
 
         {loading && !refreshing ? (
@@ -195,7 +193,17 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <AppCategoryList
               categories={homeCategories}
               selectedId={selectedCategory}
-              onSelect={(id) => setSelectedCategory(id)}
+              onSelect={(id) => {
+                const cat = homeCategories.find(c => c.id === id);
+                if (cat) {
+                  // Điều hướng sang CategoriesScreen thay vì lọc tại chỗ
+                  navigation.navigate("CategoriesScreen", { 
+                    categoryId: cat.id,
+                    initialDbValue: cat.dbValue 
+                  });
+                }
+                setSelectedCategory(id);
+              }}
             />
 
             {/* SECTION: NỔI BẬT */}
@@ -297,7 +305,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <AppMainNavBar activeTab={activeTab} onTabPress={(tab) => {
             setActiveTab(tab);
             if(tab === 'profile') navigation.navigate("ProfileScreen");
-            if(tab === 'world') navigation.navigate("FamousChefsScreen");
+            if(tab === 'world') navigation.navigate("CommunityScreen");
+            if(tab === 'category') navigation.navigate("CategoriesScreen");
           }} 
         />
       </View>
@@ -307,13 +316,11 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
 export default HomeScreen;
 
-// --- STYLES ĐÃ DỌN DẸP ---
+// --- STYLES ---
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: "#fff" },
   container: { flex: 1, backgroundColor: "#fff" },
   
-  // Đã xóa các style header cũ (header, headerGreeting, hello, icons...) vì dùng AppHeader
-
   loadingContainer: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 60 },
   loadingText: { marginTop: 12, color: "#666", fontSize: 14 },
   
