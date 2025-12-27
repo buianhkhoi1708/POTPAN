@@ -11,7 +11,7 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next"; // 1. Import
+import { useTranslation } from "react-i18next"; 
 import AppText from "./AppText";
 import { AppLightColor } from "../styles/color";
 import { AppFonts } from "../styles/fonts";
@@ -35,7 +35,7 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const { t } = useTranslation(); // 2. Khởi tạo hook dịch
+  const { t } = useTranslation();
 
   const [keyword, setKeyword] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -43,30 +43,34 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
 
-  // 3. Chuyển Data sang useMemo để dịch tiêu đề (Label) nhưng giữ nguyên ID để query DB
+  // 1. Danh mục (Lấy key từ data_map.category)
   const filterCategories = useMemo(() => [
     { id: "Món mặn", label: t("data_map.category.Món mặn") },
     { id: "Món canh", label: t("data_map.category.Món canh") },
     { id: "Tráng miệng", label: t("data_map.category.Tráng miệng") },
     { id: "Bánh ngọt", label: t("data_map.category.Bánh ngọt") },
     { id: "Đồ uống", label: t("data_map.category.Đồ uống") },
+    { id: "Ăn vặt", label: t("data_map.category.Ăn vặt") },
   ], [t]);
 
-  const filterDifficulty = useMemo(() => [
-    { id: "Dễ", label: t("common1.difficulty.easy") },
-    { id: "Trung bình", label: t("common1.difficulty.medium") },
-    { id: "Khó", label: t("common1.difficulty.hard") },
-  ], [t]);
-
+  // 2. Xuất xứ (Lấy từ search.filters)
   const filterCuisine = useMemo(() => [
-    { id: "Vietnam", label: t("search.cuisine.vietnam") },
-    { id: "International", label: t("search.cuisine.international") },
+    { id: "Vietnam", label: t("search.filters.cuisine_vn") },
+    { id: "International", label: t("search.filters.cuisine_int") },
   ], [t]);
 
+  // 3. Độ khó (Lấy từ data_map.difficulty)
+  const filterDifficulty = useMemo(() => [
+    { id: "Dễ", label: t("data_map.difficulty.easy") },
+    { id: "Trung bình", label: t("data_map.difficulty.medium") },
+    { id: "Khó", label: t("data_map.difficulty.hard") },
+  ], [t]);
+
+  // 4. Thời gian (Lấy từ search.time) - ĐÃ FIX LỖI over_60
   const filterTime = useMemo(() => [
-    { id: "under_30", label: t("search.time.under_30") },
-    { id: "30_60", label: t("search.time.30_60") },
-    { id: "over_60", label: t("search.time.over_60") },
+    { id: "under_30", label: t("time.under_30") },
+    { id: "30_60", label: t("time.30_60") },
+    { id: "over_60", label: t("time.over_60") },
   ], [t]);
 
   const handleReset = () => {
@@ -133,7 +137,7 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
               <TextInput
                 value={keyword}
                 onChangeText={setKeyword}
-                placeholder={t("search.placeholder")} // Dịch placeholder
+                placeholder={t("search.placeholder")} 
                 placeholderTextColor="#ffb6b3"
                 style={styles.searchInput}
                 returnKeyType="search"
@@ -172,13 +176,10 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
 
 export default AppSearchModal;
 
-// ... (Styles giữ nguyên)
-
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    justifyContent: "flex-start",
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    justifyContent: "center",
     alignItems: "center",
   },
   backdropLayer: {
@@ -187,10 +188,10 @@ const styles = StyleSheet.create({
   },
   sheet: {
     width: "90%",
-    maxHeight: "85%",
+    maxHeight: "80%",
     borderRadius: 24,
     backgroundColor: "#ffffff",
-    padding: 20,
+    padding: 24,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
@@ -214,8 +215,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
     fontFamily: AppFonts.RobotoMedium,
-    height: "100%",
-    paddingVertical: 0,
+    height: 40,
   },
   scrollContent: { marginBottom: 10 },
   sectionContainer: { marginBottom: 20 },

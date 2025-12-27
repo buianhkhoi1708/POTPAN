@@ -298,7 +298,7 @@ export default SigninScreen;
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: AppLightColor.background },
   keyboardContainer: { flex: 1 },
-  scrollContainer: { flexGrow: 1 },
+  scrollContainer: { flexGrow: 1, alignItems: 'center' },
   mainContent: {
     flex: 1,
     backgroundColor: "white",
@@ -335,8 +335,8 @@ const styles = StyleSheet.create({
     backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
-    width: "100%",
-    maxWidth: 400,
+    width: 343,
+    maxWidth: 600,
   },
   registerButtonText: { color: "#ffffff", fontSize: 20, fontWeight: "800" },
   footerContainer: { marginTop: 24, alignItems: "center" },

@@ -299,7 +299,7 @@ const RecipeDetailScreen = () => {
 
           <View style={styles.authorCard}>
             <View style={styles.authorLeft}>
-              <Image source={{ uri: author?.avatar_url || "https://i.pravatar.cc/300" }} style={styles.authorAvatar} />
+              <Image source={{ uri: author?.avatar_url || "" }} style={styles.authorAvatar} />
               <View style={styles.authorInfo}>
                 <AppText style={styles.authorLabel}>{t("recipe_detail.cooked_by")}</AppText>
                 <AppText variant="bold" style={styles.authorName}>{author?.full_name || t("recipe_detail.chef_default")}</AppText>

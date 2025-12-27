@@ -166,13 +166,35 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     navigation.navigate("SearchResultScreen", { filters });
   };
 
+  const renderFridgeBanner = () => (
+    <Pressable 
+      style={styles.fridgeBanner} 
+      onPress={() => navigation.navigate("FridgeScreen")}
+    >
+      <View style={styles.fridgeContent}>
+        <View style={styles.fridgeTextWrap}>
+          <AppText variant="bold" style={styles.fridgeTitle}>
+            {t("home.fridge_title") || "Trong tủ lạnh có gì?"}
+          </AppText>
+          <AppText style={styles.fridgeSub}>
+            {t("home.fridge_sub") || "Chọn nguyên liệu, tìm món ăn ngay!"}
+          </AppText>
+        </View>
+        <View style={styles.fridgeIconCircle}>
+            <Ionicons name="restaurant" size={24} color={AppLightColor.primary_color} />
+        </View>
+      </View>
+      {/* Icon trang trí ẩn nhẹ ở nền */}
+      <Ionicons name="basket" size={80} color="rgba(255,255,255,0.15)" style={styles.fridgeBgIcon} />
+    </Pressable>
+  );
+
   return (
     <AppSafeView style={styles.safeArea}>
       <View style={styles.container}>
         {/* HEADER */}
         <AppHeader 
           userName={profile?.full_name || t("home.greeting")}
-          unreadCount={unreadCount}
         />
 
         {loading && !refreshing ? (
@@ -205,6 +227,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 setSelectedCategory(id);
               }}
             />
+
+            {renderFridgeBanner()}
 
             {/* SECTION: NỔI BẬT */}
             <View style={styles.sectionHeader}>
@@ -349,4 +373,51 @@ const styles = StyleSheet.create({
   sectionPillWrap: { alignItems: "center" },
   sectionPill: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20, backgroundColor: "#fff" },
   sectionPillText: { color: AppLightColor.primary_color, fontSize: 16 },
+  fridgeBanner: {
+    marginHorizontal: 20,
+    marginTop: 15,
+    backgroundColor: AppLightColor.primary_color,
+    borderRadius: 20,
+    padding: 20,
+    position: 'relative',
+    overflow: 'hidden',
+    shadowColor: AppLightColor.primary_color,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  fridgeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    zIndex: 2,
+  },
+  fridgeTextWrap: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  fridgeTitle: {
+    color: '#fff',
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  fridgeSub: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 13,
+  },
+  fridgeIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fridgeBgIcon: {
+    position: 'absolute',
+    right: -10,
+    bottom: -15,
+    zIndex: 1,
+  },
 });

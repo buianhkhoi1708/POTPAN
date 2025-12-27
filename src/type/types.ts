@@ -28,6 +28,7 @@ export type RootStackParamList = {
   CommunityScreen: undefined;
   FamousChefsScreen: undefined;
   AdminDashboardScreen: undefined;
+  FridgeScreen: undefined;
 };
 
 export type Recipe = {

@@ -19,6 +19,9 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "just_now": "Just now",
+        "alert": "Alert",
+    "no_results": "No results",
+    "clear_all": "Clear all",
     "empty_notifications": "No notifications yet.",
     "difficulty": {
       "easy": "Easy",
@@ -65,7 +68,9 @@
     "greeting": "Hello",
     "featured_recipes": "Featured Recipes",
     "recent_recipes": "Recent Recipes",
-    "famous_chefs": "Famous Chefs"
+    "famous_chefs": "Famous Chefs",
+        "fridge_title": "What's in your fridge?",
+        "fridge_sub": "Select what you have, and I'll suggest delicious recipes!"
   },
   "category": {
   "screen_title": "Categories",
@@ -75,6 +80,11 @@
   "cake": "Pastry",
   "drink": "Drinks",
   "snack": "Snacks"
+},
+"time": {
+  "under_30": "< 30 mins",
+  "30_60": "30 - 60 mins",
+  "over_60": "> 60 mins"
 },
   "search": {
     "placeholder": "Search recipes, description...",
@@ -466,5 +476,19 @@
     "network_error": "Please check your network connection.",
     "create_error": "Cannot create collection",
     "save_error": "Cannot save recipe"
+  },
+  "fridge": {
+    "screen_title": "What's in your fridge?",
+    "intro_text": "Select what you have, and I'll suggest delicious recipes!",
+    "group_meat": "Meat & Eggs",
+    "group_veg": "Vegetables",
+    "group_seafood": "Seafood",
+    "group_spice": "Spices & Others",
+    "selected_label": "Selected",
+    "selected_short": "Selected",
+    "btn_find": "Find Recipes",
+    "select_at_least_one": "Please select at least 1 ingredient!",
+    "no_recipes": "No recipes match your ingredients.",
+    "suggested_title": "Fridge Suggestions"
   }
 }

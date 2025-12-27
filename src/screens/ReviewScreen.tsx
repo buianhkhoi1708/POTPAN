@@ -120,7 +120,7 @@ const ReviewScreen = () => {
   const renderItem = ({ item }: { item: ReviewItem }) => (
     <View style={styles.reviewItem}>
       <Image
-        source={{ uri: item.user?.avatar_url || "https://i.pravatar.cc/100" }}
+        source={{ uri: item.user?.avatar_url || "" }}
         style={styles.avatar}
       />
       <View style={styles.reviewContent}>

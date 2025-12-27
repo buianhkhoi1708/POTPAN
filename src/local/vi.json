@@ -20,6 +20,9 @@
     "yesterday": "Hôm qua",
     "just_now": "Vừa xong",
     "empty_notifications": "Bạn chưa có thông báo nào.",
+     "alert": "Thông báo",
+    "no_results": "Không tìm thấy",
+    "clear_all": "Xóa hết",
     "difficulty": {
       "easy": "Dễ",
       "medium": "Tr.bình",
@@ -65,7 +68,10 @@
     "greeting": "Xin chào",
     "featured_recipes": "Công thức nổi bật",
     "recent_recipes": "Công thức gần đây",
-    "famous_chefs": "Đầu bếp nổi tiếng"
+    "famous_chefs": "Đầu bếp nổi tiếng",
+    "fridge_title": "Trong tủ lạnh có gì?",
+    "fridge_sub": "Chọn những gì bạn có, tôi sẽ gợi ý món ngon cho bạn!"
+
   },
   "category": {
   "screen_title": "Danh mục",
@@ -76,10 +82,16 @@
   "drink": "Đồ uống",
   "snack": "Ăn vặt"
 },
+ "time": {
+      "under_30": "< 30 phút",
+      "30_60": "30 - 60 phút",
+      "over_60": "> 60 phút"
+    },
   "search": {
+   
     "placeholder": "Tìm tên món, mô tả...",
     "reset": "Thiết lập lại",
-    "apply": "Áp dụng",
+    "apply": "Tìm kiếm",
     "sections": {
       "category": "Danh mục",
       "cuisine": "Xuất xứ",
@@ -88,10 +100,7 @@
     },
     "filters": {
       "cuisine_vn": "Việt Nam",
-      "cuisine_int": "Quốc tế",
-      "time_under_30": "< 30 phút",
-      "time_30_60": "30 - 60 phút",
-      "time_over_60": "> 60 phút"
+      "cuisine_int": "Quốc tế"
     },
     "results": {
       "title": "Kết quả tìm kiếm",
@@ -467,5 +476,19 @@
     "network_error": "Vui lòng kiểm tra lại kết nối mạng.",
     "create_error": "Không thể tạo bộ sưu tập",
     "save_error": "Không thể lưu món ăn"
+  },
+  "fridge": {
+    "screen_title": "Trong tủ lạnh có gì?",
+    "intro_text": "Chọn những gì bạn có, tôi sẽ gợi ý món ngon cho bạn!",
+    "group_meat": "Thịt & Trứng",
+    "group_veg": "Rau củ",
+    "group_seafood": "Hải sản",
+    "group_spice": "Gia vị & Khác",
+    "selected_label": "Đã chọn",
+    "selected_short": "Chọn",
+    "btn_find": "Tìm món ngay",
+    "select_at_least_one": "Vui lòng chọn ít nhất 1 nguyên liệu!",
+    "no_recipes": "Chưa có món nào khớp với tủ lạnh của bạn.",
+    "suggested_title": "Gợi ý từ tủ lạnh"
   }
 }

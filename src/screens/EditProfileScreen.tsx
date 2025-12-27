@@ -155,7 +155,7 @@ const EditProfileScreen = () => {
             <Pressable onPress={pickImage} disabled={isUploading}>
               <View style={styles.avatarWrapper}>
                 <Image 
-                  source={{ uri: avatarUrl || "https://i.pravatar.cc/300" }} 
+                  source={{ uri: avatarUrl || "" }} 
                   style={styles.avatar} 
                 />
                 

@@ -33,6 +33,7 @@ import CategoryDetailScreen from "../screens/CategoryDetailScreen";
 import CommunityScreen from "../screens/CommunityScreen";
 import FamousChefsScreen from "../screens/FamousChefsScreen";
 import AdminDashboardScreen from "../screens/AdminDashBoardScreen";
+import FridgeScreen from "../screens/FridgeScreen";
 
 // --- IMPORT TYPES & STORE ---
 import { RootStackParamList } from "../type/types";
@@ -79,6 +80,7 @@ function MainStack() {
       <Stack.Screen name="CommunityScreen" component={CommunityScreen} />
       <Stack.Screen name="FamousChefsScreen" component={FamousChefsScreen} />
       <Stack.Screen name="AdminDashboardScreen" component={AdminDashboardScreen} />
+      <Stack.Screen name="FridgeScreen" component={FridgeScreen} />
 
 
 
