@@ -150,7 +150,7 @@ const ProfileScreen = () => {
       <View style={styles.profileRow}>
         <View style={styles.avatarWrapper}>
           <Image
-            source={{ uri: profile?.avatar_url || "" }}
+            source={{ uri: profile?.avatar_url || "https://vfqnjeoqxxapqqurdkoi.supabase.co/storage/v1/object/public/avatars/users/default.jpg" }}
             style={styles.avatar}
           />
         </View>
@@ -302,6 +302,8 @@ const ProfileScreen = () => {
     </View>
   );
 
+// IE307.Q12_Nhom9
+
   const renderRecipeItem = ({ item }: { item: any }) => (
     <View style={{ width: CARD_WIDTH, marginBottom: 16 }}>
       <AppRecipeCard
@@ -323,6 +325,7 @@ const ProfileScreen = () => {
       )}
     </View>
   );
+// IE307.Q12_Nhom9
 
   const renderCollectionItem = ({ item }: { item: any }) => (
     <Pressable

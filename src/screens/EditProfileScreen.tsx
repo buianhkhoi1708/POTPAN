@@ -155,7 +155,7 @@ const EditProfileScreen = () => {
             <Pressable onPress={pickImage} disabled={isUploading}>
               <View style={styles.avatarWrapper}>
                 <Image 
-                  source={{ uri: avatarUrl || "" }} 
+                  source={{ uri: avatarUrl || "https://vfqnjeoqxxapqqurdkoi.supabase.co/storage/v1/object/public/avatars/users/default.jpg" }} 
                   style={styles.avatar} 
                 />
                 

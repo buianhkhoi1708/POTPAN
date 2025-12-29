@@ -7,18 +7,20 @@ import AppText from "./AppText";
 import { AppLightColor } from "../styles/color";
 import AppSearchModal from "./AppSearchModal";
 
-// 👇 1. Import Store
+// 👇 Import component Badge độc lập
+import NotificationBadge from "./AppNotificationBadge";
+
+// 👇 1. Import các Store cần thiết cho logic "Đã đọc"
 import { useNotificationStore } from "../store/useNotificationStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 interface AppHeaderProps {
   title?: string;
   userName?: string;
   showSearch?: boolean;
   showNotifications?: boolean;
-  // unreadCount?: number; // 👈 2. Xóa prop này, không cần truyền thủ công nữa
   onBackPress?: () => void;
   showBack?: boolean;
-  // Thêm prop tùy chọn nếu muốn custom hành động bấm noti (không bắt buộc)
   onNotificationPress?: () => void; 
 }
 
@@ -33,13 +35,19 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
+  const [searchVisible, setSearchVisible] = useState(false);
 
-  // 👇 3. Lấy số lượng tin chưa đọc trực tiếp từ Store
-  // Bất kỳ khi nào store thay đổi, component này sẽ tự render lại số mới
-  const unreadCount = useNotificationStore((state) => state.unreadCount);
+  // 👇 2. Lấy User ID và hàm đánh dấu đã đọc
+  const user = useAuthStore((state) => state.user);
+  const markAllAsRead = useNotificationStore((state) => state.markAllAsRead);
 
-  // Xử lý mặc định nếu không truyền prop onNotificationPress
   const handleNotificationPress = () => {
+    // 👇 3. Logic: Bấm vào là reset số về 0 ngay lập tức
+    if (user?.id) {
+      markAllAsRead(user.id);
+    }
+
+    // Sau đó mới chuyển màn hình
     if (onNotificationPress) {
       onNotificationPress();
     } else {
@@ -47,8 +55,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     }
   };
   
-  const [searchVisible, setSearchVisible] = useState(false);
-
   const handleSearchSubmit = (filters: any) => {
     setSearchVisible(false);
     navigation.navigate("SearchResultScreen", { filters });
@@ -86,17 +92,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             </Pressable>
           )}
 
-          {showNotifications && (
-            <Pressable style={styles.headerIconCircle} onPress={handleNotificationPress}>
-              <Ionicons name="notifications-outline" size={20} color="#fff" />
-              {/* 👇 4. Hiển thị badge dựa trên biến unreadCount từ store */}
-              {unreadCount > 0 && (
-                <View style={styles.badgeContainer}>
-                  <AppText style={styles.badgeText}>{unreadCount > 99 ? "99+" : unreadCount}</AppText>
-                </View>
-              )}
-            </Pressable>
-          )}
+         {showNotifications && (
+          <Pressable style={styles.headerIconCircle} onPress={handleNotificationPress}>
+            <Ionicons name="notifications-outline" size={20} color="#fff" />
+            
+            {/* Component độc lập hiển thị số (sẽ tự biến mất khi hàm markAllAsRead chạy) */}
+            <NotificationBadge 
+               style={{ position: "absolute", top: -4, right: -4 }} 
+            />
+            
+          </Pressable>
+        )}
         </View>
       </View>
 
@@ -113,7 +119,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
 export default AppHeader;
 
-// ... Styles giữ nguyên như cũ
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
@@ -152,23 +157,5 @@ const styles = StyleSheet.create({
     backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
-  },
-  badgeContainer: {
-    position: "absolute",
-    top: -4,
-    right: -4,
-    backgroundColor: "#ff3b30",
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: "#fff",
-  },
-  badgeText: {
-    color: "#fff",
-    fontSize: 9,
-    fontWeight: "bold",
   },
 });

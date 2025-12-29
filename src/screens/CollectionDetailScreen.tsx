@@ -19,6 +19,7 @@ import { AppLightColor } from "../styles/color";
 import { useAuthStore } from "../store/useAuthStore";
 
 const { width } = Dimensions.get("window");
+// IE307.Q12_Nhom9
 
 const CollectionDetailScreen = () => {
   const navigation = useNavigation<any>();

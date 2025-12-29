@@ -40,6 +40,9 @@ interface Props {
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
+// IE307.Q12_Nhom9
+
+
 const AppCollectionModal: React.FC<Props> = ({
   visible,
   onClose,

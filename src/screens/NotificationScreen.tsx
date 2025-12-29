@@ -29,6 +29,7 @@ import StarNotiIcon from "../assets/images/star-noti.svg";
 
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
+import AppHeader from "../components/AppHeader";
 
 type NotiType = "update" | "warn" | "star";
 
@@ -204,18 +205,7 @@ const NotificationScreen: React.FC = () => {
   return (
     <AppSafeView style={styles.safeArea}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <BackArrow width={18} height={18} />
-          </Pressable>
-          <AppText variant="title" style={styles.headerTitle}>
-            {t("settings.notifications")}
-          </AppText>
-          <View style={styles.headerSpacer} />
-        </View>
+        <AppHeader title=  {t("settings.notifications")} showBack={true} onBackPress={navigation.goBack} showNotifications={false}/>
 
         {loading && !refreshing ? (
           <View style={styles.centerLoading}>

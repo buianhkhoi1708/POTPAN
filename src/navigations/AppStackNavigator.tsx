@@ -39,6 +39,11 @@ import FridgeScreen from "../screens/FridgeScreen";
 import { RootStackParamList } from "../type/types";
 import { useAuthStore } from "../store/useAuthStore";
 
+// --- MỚI: IMPORT NOTIFICATION & REF ---
+import GlobalNotification from "../components/AppGlobalNotification";
+import { navigationRef } from "../utils/RootNavigation";
+import NotificationManager from "../components/AppNotificationManager";
+
 const Stack = createStackNavigator<RootStackParamList>();
 
 // --- 1. AUTH STACK ---
@@ -81,16 +86,6 @@ function MainStack() {
       <Stack.Screen name="FamousChefsScreen" component={FamousChefsScreen} />
       <Stack.Screen name="AdminDashboardScreen" component={AdminDashboardScreen} />
       <Stack.Screen name="FridgeScreen" component={FridgeScreen} />
-
-
-
-
-
-
-
-
-
-
     </Stack.Navigator>
   );
 }
@@ -98,7 +93,6 @@ function MainStack() {
 // --- 3. ROOT NAVIGATOR ---
 export function AppNavigator() {
   const { user, checkSession } = useAuthStore();
-  
   const [isShowSplash, setIsShowSplash] = useState(true);
 
   useEffect(() => {
@@ -106,7 +100,6 @@ export function AppNavigator() {
       await checkSession();
     };
     check();
-
 
     const timer = setTimeout(() => {
       setIsShowSplash(false);
@@ -120,8 +113,23 @@ export function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      {user ? <MainStack /> : <AuthStack />}
+    // MỚI: Thêm ref={navigationRef} để GlobalNotification có thể điều hướng
+    <NavigationContainer ref={navigationRef}>
+      
+      {/* Logic hiển thị màn hình chính */}
+      {user ? (
+        <>
+          {/* Khi đã login, kích hoạt Manager chạy ngầm để đếm số badge */}
+          <NotificationManager /> 
+          <MainStack />
+        </>
+      ) : (
+        <AuthStack />
+      )}
+
+      {/* MỚI: Đặt GlobalNotification ở đây để nó nằm đè lên tất cả */}
+      <GlobalNotification />
+      
     </NavigationContainer>
   );
 }

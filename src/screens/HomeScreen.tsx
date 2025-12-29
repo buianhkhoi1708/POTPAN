@@ -289,7 +289,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             {/* SECTION: ĐẦU BẾP */}
             <View style={styles.sectionHeader}>
               <Pressable style={styles.sectionTitleRow} onPress={() => navigation.navigate("FamousChefsScreen")}>
-                  <AppText variant="title" style={styles.sectionTitle}>👨‍🍳 {t("home.famous_chefs")}</AppText>
+                  <AppText variant="title" style={styles.sectionTitle}>{t("home.famous_chefs")}</AppText>
                   <Ionicons name="chevron-forward" size={20} color={AppLightColor.primary_color} />
               </Pressable>
             </View>
@@ -301,7 +301,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             {/* SECTION: GẦN ĐÂY */}
             <View style={styles.sectionHeader}>
-              <AppText variant="bold" style={styles.sectionTitle}>⏰ {t("home.recent_recipes")}</AppText>
+              <AppText variant="bold" style={styles.sectionTitle}>{t("home.recent_recipes")}</AppText>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListBottom}>
               {recentList.map((item) => (

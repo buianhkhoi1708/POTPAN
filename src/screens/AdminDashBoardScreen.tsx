@@ -23,6 +23,9 @@ import { AppLightColor } from "../styles/color";
 const { width } = Dimensions.get("window");
 const PRIMARY_COLOR = AppLightColor.primary_color;
 
+// IE307.Q12_Nhom9
+
+
 const AdminDashboardScreen = () => {
   const navigation = useNavigation<any>();
   const { t } = useTranslation(); // <-- KHỞI TẠO HOOK
@@ -185,7 +188,7 @@ const AdminDashboardScreen = () => {
       return (
         <View style={styles.card}>
           <Image
-            source={{ uri: item.avatar_url || "https://i.pravatar.cc/150" }}
+            source={{ uri: item.avatar_url || "https://vfqnjeoqxxapqqurdkoi.supabase.co/storage/v1/object/public/avatars/users/default.jpg" }}
             style={styles.avatar}
           />
           <View style={styles.content}>

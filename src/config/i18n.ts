@@ -5,10 +5,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Import các file ngôn ngữ
 import vi from "../local/vi.json";
 import en from "../local/en.json";
+import zh from "../local/zh.json"
 
 const RESOURCES = {
   vi: { translation: vi },
   en: { translation: en },
+  zh: { translation: zh },
+
   // Thêm các ngôn ngữ khác ở đây nếu có file json tương ứng
 };
 
@@ -39,7 +42,6 @@ i18n
   .use(LANGUAGE_DETECTOR as any) // Tự động phát hiện và lưu ngôn ngữ
   .use(initReactI18next)
   .init({
-    compatibilityJSON: "v3",
     resources: RESOURCES,
     fallbackLng: "en", // Nếu không tìm thấy ngôn ngữ thì dùng tiếng Anh
     interpolation: {

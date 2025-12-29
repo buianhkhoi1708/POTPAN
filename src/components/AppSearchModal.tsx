@@ -1,3 +1,4 @@
+// IE307.Q12_Nhom9
 import React, { useState, useMemo } from "react";
 import {
   Modal,
@@ -43,7 +44,7 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
 
-  // 1. Danh mục (Lấy key từ data_map.category)
+
   const filterCategories = useMemo(() => [
     { id: "Món mặn", label: t("data_map.category.Món mặn") },
     { id: "Món canh", label: t("data_map.category.Món canh") },
@@ -53,25 +54,25 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
     { id: "Ăn vặt", label: t("data_map.category.Ăn vặt") },
   ], [t]);
 
-  // 2. Xuất xứ (Lấy từ search.filters)
   const filterCuisine = useMemo(() => [
     { id: "Vietnam", label: t("search.filters.cuisine_vn") },
     { id: "International", label: t("search.filters.cuisine_int") },
   ], [t]);
 
-  // 3. Độ khó (Lấy từ data_map.difficulty)
+
   const filterDifficulty = useMemo(() => [
     { id: "Dễ", label: t("data_map.difficulty.easy") },
     { id: "Trung bình", label: t("data_map.difficulty.medium") },
     { id: "Khó", label: t("data_map.difficulty.hard") },
   ], [t]);
 
-  // 4. Thời gian (Lấy từ search.time) - ĐÃ FIX LỖI over_60
+ 
   const filterTime = useMemo(() => [
     { id: "under_30", label: t("time.under_30") },
     { id: "30_60", label: t("time.30_60") },
     { id: "over_60", label: t("time.over_60") },
   ], [t]);
+// IE307.Q12_Nhom9
 
   const handleReset = () => {
     setKeyword("");

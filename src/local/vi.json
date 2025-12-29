@@ -20,7 +20,7 @@
     "yesterday": "Hôm qua",
     "just_now": "Vừa xong",
     "empty_notifications": "Bạn chưa có thông báo nào.",
-     "alert": "Thông báo",
+    "alert": "Thông báo",
     "no_results": "Không tìm thấy",
     "clear_all": "Xóa hết",
     "difficulty": {
@@ -30,40 +30,40 @@
     }
   },
   "auth": {
-  "login_title": "ĐĂNG NHẬP",
-  "register_title": "ĐĂNG KÝ",
-  "login_button": "Đăng nhập",
-  "register_button": "Đăng ký",
-  "email_label": "Email",
-  "email_placeholder": "example@gmail.com",
-  "password_label": "Mật khẩu",
-  "password_placeholder": "Vd: 12345",
-  "confirm_password_label": "Xác nhận mật khẩu",
-  "fullname_label": "Họ tên",
-  "fullname_placeholder": "Nguyễn Văn A",
-  "phone_label": "Số điện thoại",
-  "phone_placeholder": "09xx...",
-  "forgot_password": "Quên mật khẩu?",
-  "no_account": "Chưa có tài khoản?",
-  "has_account": "Đã có tài khoản?",
-  "signup_link": " Đăng ký",
-  "login_link": " Đăng nhập",
-  "or_social": "Hoặc tiếp tục với",
-  "logout_confirm": "Bạn xác nhận đăng xuất?",
-  "delete_account_confirm": "Hành động này không thể hoàn tác, mọi dữ liệu sẽ bị xoá vĩnh viễn.",
-  "register_success_title": "Thành công",
-  "register_success_msg": "Tạo tài khoản thành công! Vui lòng kiểm tra email để xác thực.",
-  "errors": {
-    "login_title": "Lỗi đăng nhập",
-    "register_title": "Lỗi đăng ký",
-    "invalid_credentials": "Email hoặc mật khẩu không chính xác.",
-    "email_not_confirmed": "Vui lòng xác thực email trước khi đăng nhập.",
-    "user_already_exists": "Email này đã được đăng ký.",
-    "too_many_requests": "Bạn đã thử quá nhiều lần. Vui lòng thử lại sau ít phút.",
-    "weak_password": "Mật khẩu quá yếu (cần ít nhất 6 ký tự).",
-    "unknown": "Có lỗi xảy ra, vui lòng thử lại."
-  }
-},
+    "login_title": "ĐĂNG NHẬP",
+    "register_title": "ĐĂNG KÝ",
+    "login_button": "Đăng nhập",
+    "register_button": "Đăng ký",
+    "email_label": "Email",
+    "email_placeholder": "example@gmail.com",
+    "password_label": "Mật khẩu",
+    "password_placeholder": "Vd: 12345",
+    "confirm_password_label": "Xác nhận mật khẩu",
+    "fullname_label": "Họ tên",
+    "fullname_placeholder": "Nguyễn Văn A",
+    "phone_label": "Số điện thoại",
+    "phone_placeholder": "09xx...",
+    "forgot_password": "Quên mật khẩu?",
+    "no_account": "Chưa có tài khoản?",
+    "has_account": "Đã có tài khoản?",
+    "signup_link": " Đăng ký",
+    "login_link": " Đăng nhập",
+    "or_social": "Hoặc tiếp tục với",
+    "logout_confirm": "Bạn xác nhận đăng xuất?",
+    "delete_account_confirm": "Hành động này không thể hoàn tác, mọi dữ liệu sẽ bị xoá vĩnh viễn.",
+    "register_success_title": "Thành công",
+    "register_success_msg": "Tạo tài khoản thành công! Vui lòng kiểm tra email để xác thực.",
+    "errors": {
+      "login_title": "Lỗi đăng nhập",
+      "register_title": "Lỗi đăng ký",
+      "invalid_credentials": "Email hoặc mật khẩu không chính xác.",
+      "email_not_confirmed": "Vui lòng xác thực email trước khi đăng nhập.",
+      "user_already_exists": "Email này đã được đăng ký.",
+      "too_many_requests": "Bạn đã thử quá nhiều lần. Vui lòng thử lại sau ít phút.",
+      "weak_password": "Mật khẩu quá yếu (cần ít nhất 6 ký tự).",
+      "unknown": "Có lỗi xảy ra, vui lòng thử lại."
+    }
+  },
   "home": {
     "greeting": "Xin chào",
     "featured_recipes": "Công thức nổi bật",
@@ -71,24 +71,22 @@
     "famous_chefs": "Đầu bếp nổi tiếng",
     "fridge_title": "Trong tủ lạnh có gì?",
     "fridge_sub": "Chọn những gì bạn có, tôi sẽ gợi ý món ngon cho bạn!"
-
   },
   "category": {
-  "screen_title": "Danh mục",
-  "savory": "Món mặn",
-  "soup": "Món canh",
-  "dessert": "Tráng miệng",
-  "cake": "Bánh ngọt",
-  "drink": "Đồ uống",
-  "snack": "Ăn vặt"
-},
- "time": {
-      "under_30": "< 30 phút",
-      "30_60": "30 - 60 phút",
-      "over_60": "> 60 phút"
-    },
+    "screen_title": "Danh mục",
+    "savory": "Món mặn",
+    "soup": "Món canh",
+    "dessert": "Tráng miệng",
+    "cake": "Bánh ngọt",
+    "drink": "Đồ uống",
+    "snack": "Ăn vặt"
+  },
+  "time": {
+    "under_30": "< 30 phút",
+    "30_60": "30 - 60 phút",
+    "over_60": "> 60 phút"
+  },
   "search": {
-   
     "placeholder": "Tìm tên món, mô tả...",
     "reset": "Thiết lập lại",
     "apply": "Tìm kiếm",
@@ -109,6 +107,17 @@
       "not_found": "Không tìm thấy kết quả",
       "empty_hint": "Thử nhập đúng chính tả hoặc sử dụng từ khóa khác nhé!"
     }
+  },
+  "header_title": "Kết quả tìm kiếm",
+  "summary_text": "Tìm thấy {{count}} công thức cho \"{{keyword}}\"",
+  "default_filter_name": "bộ lọc của bạn",
+  "not_found_title": "Không tìm thấy kết quả",
+  "not_found_desc": "Hãy thử tìm với từ khóa khác hoặc điều chỉnh bộ lọc.",
+  "sort": {
+    "match": "Phù hợp nhất",
+    "rating": "Đánh giá cao",
+    "newest": "Mới nhất",
+    "time": "Nấu nhanh"
   },
   "recipe": {
     "view": "Xem",
@@ -144,6 +153,8 @@
     "add_ingredient": "Thêm nguyên liệu",
     "add_step": "Thêm bước",
     "step_label": "Bước",
+    "step": "Bước",
+
     "form": {
       "thumbnail": "Ảnh món ăn",
       "name": "Tên món",
@@ -189,9 +200,9 @@
   "community": {
     "screen_title": "Cộng đồng",
     "tabs": {
-      "hot": "Nổi bật 🔥",
-      "new": "Mới nhất ✨",
-      "old": "Cũ nhất ⏳"
+      "hot": "Nổi bật",
+      "new": "Mới nhất",
+      "old": "Cũ nhất"
     },
     "by": "Bởi",
     "default_desc": "Món ngon hấp dẫn đang chờ bạn khám phá...",
@@ -243,7 +254,10 @@
         "ko": "Tiếng Hàn",
         "zh": "Tiếng Trung"
       }
-    }
+    },
+    "group_general": "Cài đặt chung",
+    "group_support": "Hỗ trợ & Pháp lý",
+    "group_account": "Tài khoản"
   },
   "alert": {
     "title_error": "Lỗi",
@@ -314,8 +328,8 @@
       "Đồ uống": "Đồ uống",
       "Ăn vặt": "Ăn vặt"
     }
-},
-"edit_profile": {
+  },
+  "edit_profile": {
     "title": "Chỉnh sửa hồ sơ",
     "change_avatar_hint": "Chạm để đổi ảnh đại diện",
     "save": "Lưu",
@@ -420,7 +434,21 @@
     "alert_duplicate": "Bạn đã đánh giá món này rồi!",
     "alert_success": "Cảm ơn đánh giá của bạn!",
     "alert_error": "Không thể gửi đánh giá.",
-    "empty_list": "Chưa có đánh giá nào."
+    "header_title": "Đánh giá & Bình luận",
+    "me": "Tôi",
+    "someone": "Ai đó",
+    "req_title": "Yêu cầu",
+    "req_login": "Vui lòng đăng nhập.",
+    "missing_title": "Thiếu thông tin",
+    "missing_rating": "Vui lòng chọn sao.",
+    "success_title": "Thành công",
+    "success_msg": "Cảm ơn đánh giá của bạn!",
+    "error_title": "Lỗi",
+    "error_msg": "Không thể gửi đánh giá.",
+    "toast_sent": "Đã gửi đánh giá!",
+    "noti_title": "Đánh giá mới!",
+    "noti_msg_1": "vừa đánh giá",
+    "noti_msg_2": "sao cho bài viết của bạn."
   },
   "support": {
     "title": "Trung Tâm Hỗ Trợ",
@@ -489,6 +517,7 @@
     "btn_find": "Tìm món ngay",
     "select_at_least_one": "Vui lòng chọn ít nhất 1 nguyên liệu!",
     "no_recipes": "Chưa có món nào khớp với tủ lạnh của bạn.",
-    "suggested_title": "Gợi ý từ tủ lạnh"
+    "suggested_title": "Gợi ý từ tủ lạnh",
+    "ingredients": "Nguyên liệu"
   }
 }

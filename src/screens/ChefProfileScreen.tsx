@@ -24,6 +24,8 @@ const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2; // (Width - PaddingHorizontal * 3) / 2
 const PRIMARY_COLOR = "#F06560";
 
+// IE307.Q12_Nhom9
+
 const ChefProfileScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();

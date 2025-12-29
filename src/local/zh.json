@@ -1,0 +1,530 @@
+{
+  "common": {
+    "loading": "正在加载数据...",
+    "error": "发生错误",
+    "success": "成功",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "back": "返回",
+    "save": "保存",
+    "saving": "保存中...",
+    "try_again": "请稍后再试。",
+    "empty_list": "未找到数据",
+    "require_login": "您需要登录才能执行此操作。",
+    "notification": "通知",
+    "feature_developing": "此功能正在开发中",
+    "error_occurred": "发生错误，请重试。",
+    "you": "您",
+    "today": "今天",
+    "yesterday": "昨天",
+    "just_now": "刚刚",
+    "alert": "提示",
+    "no_results": "无结果",
+    "clear_all": "清除全部",
+    "empty_notifications": "暂无通知。",
+    "difficulty": {
+      "easy": "简单",
+      "medium": "中等",
+      "hard": "困难"
+    },
+    "exit": "确认"
+  },
+  "auth": {
+    "login_title": "登录",
+    "register_title": "注册",
+    "login_button": "登录",
+    "register_button": "注册",
+    "email_label": "电子邮箱",
+    "email_placeholder": "example@gmail.com",
+    "password_label": "密码",
+    "password_placeholder": "例如：12345",
+    "confirm_password_label": "确认密码",
+    "fullname_label": "全名",
+    "fullname_placeholder": "张三",
+    "phone_label": "电话号码",
+    "phone_placeholder": "09xx...",
+    "forgot_password": "忘记密码？",
+    "no_account": "还没有账号？",
+    "has_account": "已经有账号？",
+    "signup_link": " 注册",
+    "login_link": " 登录",
+    "or_social": "或通过以下方式继续",
+    "logout_confirm": "您确定要退出应用吗？",
+    "delete_account_confirm": "此操作无法撤销。您的所有数据将被永久删除。",
+    "register_success_title": "成功",
+    "register_success_msg": "账号创建成功！请检查邮件进行验证。",
+    "errors": {
+      "login_title": "登录错误",
+      "register_title": "注册错误",
+      "invalid_credentials": "邮箱或密码无效。",
+      "email_not_confirmed": "登录前请先验证您的邮箱。",
+      "user_already_exists": "用户已注册。",
+      "too_many_requests": "尝试次数过多。请稍后再试。",
+      "weak_password": "密码太弱（最少 6 个字符）。",
+      "unknown": "发生错误，请重试。"
+    }
+  },
+  "home": {
+    "greeting": "你好",
+    "featured_recipes": "精选食谱",
+    "recent_recipes": "最近食谱",
+    "famous_chefs": "知名大厨",
+    "fridge_title": "冰箱里有什么？",
+    "fridge_sub": "选择您拥有的食材，我会为您推荐美味食谱！"
+  },
+  "category": {
+    "screen_title": "分类",
+    "savory": "咸味菜肴",
+    "soup": "汤类",
+    "dessert": "甜点",
+    "cake": "糕点",
+    "drink": "饮品",
+    "snack": "零食小吃"
+  },
+  "time": {
+    "under_30": "< 30 分钟",
+    "30_60": "30 - 60 分钟",
+    "over_60": "> 60 分钟"
+  },
+  "search": {
+    "placeholder": "搜索食谱、描述...",
+    "reset": "重置",
+    "apply": "搜索",
+    "sections": {
+      "category": "类别",
+      "cuisine": "菜系",
+      "difficulty": "难度",
+      "time": "烹饪时间"
+    },
+    "header_title": "搜索结果",
+    "summary_text": "找到 {{count}} 个关于 \"{{keyword}}\" 的食谱",
+    "default_filter_name": "您的筛选",
+    "not_found_title": "未找到结果",
+    "not_found_desc": "尝试使用不同的关键词搜索或调整筛选条件。",
+    "filters": {
+      "cuisine_vn": "越南",
+      "cuisine_int": "国际",
+      "time_under_30": "30 分钟以内",
+      "time_30_60": "30 - 60 分钟",
+      "time_over_60": "60 分钟以上"
+    },
+    "results": {
+      "title": "搜索结果",
+      "my_filter": "您的筛选",
+      "summary": "找到 {{count}} 个关于 \"{{keyword}}\" 的食谱",
+      "not_found": "未找到结果",
+      "empty_hint": "尝试检查拼写或使用不同的关键词！"
+    },
+    "sort": {
+      "match": "最佳匹配",
+      "rating": "最高评分",
+      "newest": "最新发布",
+      "time": "最快完成"
+    }
+  },
+  "recipe": {
+    "view": "查看",
+    "cooked_by": "食谱作者",
+    "chef_default": "大厨",
+    "description": "描述",
+    "no_description": "暂无描述。",
+    "ingredients": "食材",
+    "items_count": "项",
+    "steps": "步骤",
+    "steps_count": "步",
+    "start_cooking": "开始烹饪",
+    "time_format": "{{count}} 分钟",
+    "options": {
+      "title": "选项",
+      "already_saved": "此食谱已保存。您想做什么？",
+      "remove_save": "取消保存",
+      "change_collection": "更改收藏集",
+      "remove_success": "食谱已从保存列表中移除。",
+      "save_success": "已保存到收藏集！",
+      "share_suffix": "在 Cooking App 上查看",
+      "share_error": "无法分享此内容"
+    }
+  },
+  "create_recipe": {
+    "new_title": "创建新食谱",
+    "edit_title": "编辑食谱",
+    "post": "发布",
+    "uploading_image": "正在上传图片...",
+    "section_basic": "基本信息",
+    "section_ingredients": "食材",
+    "section_steps": "步骤",
+    "add_ingredient": "添加食材",
+    "add_step": "添加步骤",
+    "step_label": "步骤",
+    "step": "步骤",
+    "saving": "发布中",
+
+    "form": {
+      "thumbnail": "缩略图",
+      "name": "食谱名称",
+      "description": "描述",
+      "time": "时间",
+      "difficulty": "难度",
+      "category": "分类"
+    },
+    "placeholder": {
+      "thumbnail": "点击选择图片",
+      "name": "输入食谱名称",
+      "description": "描述您的食谱...",
+      "time": "例如：30 分钟",
+      "ing_amount": "数量",
+      "ing_name": "食材名称",
+      "step_title": "步骤标题",
+      "step_desc": "描述该步骤..."
+    }
+  },
+  "profile": {
+    "new_user": "新用户",
+    "no_username": "无用户名",
+    "no_bio": "暂无简介",
+    "edit_profile": "编辑",
+    "share_profile": "分享",
+    "recipes_saved": "食谱",
+    "following": "关注中",
+    "followers": "粉丝",
+    "my_recipes": "我的食谱",
+    "my_collections": "收藏集",
+    "create_collect": "新建收藏集",
+    "view_detail": "查看详情",
+    "no_recipes": "未找到食谱。",
+    "no_collections": "未找到收藏集。",
+    "share_msg": "查看此个人资料：",
+    "share_title": "分享个人资料",
+    "pending": "待处理",
+    "delete_collection_title": "删除收藏集",
+    "delete_collection_msg": "您确定要删除 \"{{name}}\" 吗？",
+    "delete_collection_success": "收藏集已删除。",
+    "delete_collection_error": "无法删除收藏集。"
+  },
+  "community": {
+    "screen_title": "社区",
+    "tabs": {
+      "hot": "热门食谱",
+      "new": "最新食谱",
+      "old": "早期食谱"
+    },
+    "by": "作者",
+    "default_desc": "美味食谱等您发现...",
+    "anonymous_chef": "大厨",
+    "empty_list": "未找到帖子。"
+  },
+  "chef": {
+    "follow": "关注",
+    "following": "已关注",
+    "message": "私信",
+    "default_bio": "暂无简介。",
+    "recipe_list": "食谱列表",
+    "no_recipes": "这位大厨暂无食谱。",
+    "anonymous": "匿名大厨",
+    "sections": {
+      "top_trending": "热门前 5",
+      "favorites": "最喜爱的大厨",
+      "new_faces": "新面孔"
+    },
+    "modal": {
+      "my_list": "我的关注",
+      "unfollow_title": "取消关注",
+      "unfollow_msg": "您确定要取消关注此人吗？",
+      "remove_follower_title": "移除粉丝",
+      "remove_follower_msg": "此人将不再看到您的帖子。"
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "notifications": "通知",
+    "support": "帮助中心",
+    "privacy": "隐私政策",
+    "language": "语言",
+    "logout": "退出登录",
+    "logout_confirm": "您确定要退出登录吗？",
+    "delete_confirm": "此操作无法撤销。您的所有数据将被永久删除。",
+    "delete_success": "账号删除成功。",
+    "delete_account": "删除账号",
+    "language_screen": {
+      "title": "语言设置",
+      "current": "当前语言",
+      "available": "所有语言",
+      "info": "选择新语言将立即更新应用界面。",
+      "names": {
+        "vi": "越南语",
+        "en": "英语",
+        "fr": "法语",
+        "ja": "日语",
+        "ko": "韩语",
+        "zh": "中文"
+      }
+    },
+    "group_general": "常规",
+    "group_support": "支持与法律",
+    "group_account": "账号"
+  },
+  "alert": {
+    "title_error": "错误",
+    "title_success": "成功",
+    "permission_required": "需要权限",
+    "permission_desc_photo": "应用需要照片库权限以上传食谱。",
+    "pick_image_error": "无法选择图片，请重试。",
+    "login_required": "请登录以创建食谱。",
+    "recipe_submitted": "食谱已提交，等待管理员批准！",
+    "save_error": "无法保存食谱。",
+    "confirm_exit_title": "退出？",
+    "confirm_exit_desc": "更改尚未保存。您确定要退出吗？",
+    "delete_recipe_title": "删除食谱",
+    "delete_recipe_msg": "您确定要删除此食谱吗？此操作无法撤销。",
+    "delete_recipe_success": "食谱已删除。",
+    "delete_recipe_error": "无法删除食谱。",
+    "confirm_delete": "删除",
+    "success_title": "成功"
+  },
+  "admin": {
+    "dashboard": "管理面板",
+    "tabs": {
+      "pending": "待审核",
+      "approved": "已批准",
+      "users": "用户"
+    },
+    "role": "角色",
+    "actions": {
+      "approve": "批准",
+      "delete": "删除"
+    },
+    "alerts": {
+      "fetch_error": "无法获取数据。",
+      "rls_error": "RLS 权限错误。请检查策略。",
+      "approve_success": "食谱已批准并发送通知！",
+      "delete_success": "数据已删除。",
+      "delete_error": "无法删除。",
+      "confirm_delete_user": "删除此用户？",
+      "confirm_delete_post": "删除此帖子？",
+      "name_required": "全名不能为空。",
+      "update_success": "个人资料更新成功！",
+      "update_error": "无法更新个人资料。",
+      "upload_error": "上传图片错误。"
+    },
+    "notifications": {
+      "approve_title": "食谱已批准 ✅",
+      "approve_msg": "您的食谱 \"{{title}}\" 已通过管理员批准并公开。",
+      "reject_title": "食谱已拒绝 ❌",
+      "reject_msg": "您的食谱 \"{{title}}\" 因违规或被拒绝而被删除。"
+    }
+  },
+  "collection": {
+    "count_suffix": "食谱",
+    "empty_msg": "此收藏集中没有食谱。",
+    "explore": "立即探索"
+  },
+  "data_map": {
+    "difficulty": {
+      "easy": "简单",
+      "medium": "中等",
+      "hard": "困难"
+    },
+    "category": {
+      "Món mặn": "咸味菜肴",
+      "Món canh": "汤类",
+      "Tráng miệng": "甜点",
+      "Bánh ngọt": "糕点",
+      "Đồ uống": "饮品",
+      "Ăn vặt": "零食小吃"
+    }
+  },
+  "edit_profile": {
+    "title": "编辑个人资料",
+    "change_avatar_hint": "点击更改头像",
+    "save": "保存",
+    "label": {
+      "name": "全名",
+      "username": "用户名",
+      "bio": "简介",
+      "website": "网站"
+    },
+    "placeholder": {
+      "name": "输入全名",
+      "username": "@昵称",
+      "bio": "描述您自己...",
+      "website": "https://..."
+    }
+  },
+  "follow": {
+    "my_list": "我的关注",
+    "user_list": "用户",
+    "followers": "粉丝",
+    "unfollow_title": "取消关注",
+    "unfollow_msg": "您确定要取消关注此用户吗？",
+    "remove_follower_title": "移除粉丝",
+    "remove_follower_msg": "此用户将不再看到您的帖子。",
+    "yes": "是",
+    "remove": "移除"
+  },
+  "intro": {
+    "step1": {
+      "title": "越南美食",
+      "subtitle": "正宗的越南菜肴"
+    },
+    "step2": {
+      "title": "欧洲美食",
+      "subtitle": "西方文化的精髓"
+    },
+    "step3": {
+      "title": "主要功能",
+      "subtitle": "为用户提供极佳体验",
+      "features": {
+        "search": "食谱搜索",
+        "suggest": "推荐",
+        "social": "社交网络"
+      }
+    },
+    "step4": {
+      "title": "欢迎",
+      "subtitle": "寻找世界知名大厨的最佳食谱",
+      "btn_new": "我是新用户",
+      "btn_old": "我有账号"
+    }
+  },
+  "welcome": {
+    "slogan": "用 POTPAN 让烹饪变得简单",
+    "get_started": "开始使用"
+  },
+  "language": {
+    "title": "语言设置",
+    "current_language": "当前语言",
+    "available_languages": "所有语言",
+    "info": "选择新语言将立即更新应用界面。",
+    "names": {
+      "vi": "越南语",
+      "en": "英语",
+      "zh": "中文"
+    }
+  },
+  "notification_settings": {
+    "general": "常规通知",
+    "sound": "声音",
+    "sfx": "音效",
+    "vibrate": "振动"
+  },
+  "recipe_detail": {
+    "view": "查看",
+    "cooked_by": "食谱作者",
+    "chef_default": "大厨",
+    "description": "描述",
+    "no_description": "暂无描述。",
+    "ingredients": "食材",
+    "items": "项",
+    "steps": "步骤",
+    "steps_count": "步",
+    "start_cooking": "开始烹饪",
+    "options_title": "选项",
+    "already_saved_msg": "此食谱已保存。您想做什么？",
+    "remove_save": "取消保存",
+    "change_collection": "更改收藏集",
+    "remove_success": "食谱已从保存列表中移除。",
+    "save_success": "已保存到收藏集！",
+    "share_suffix": "在 Cooking App 上查看",
+    "share_error": "无法分享此内容"
+  },
+  "review": {
+    "title": "评论",
+    "write_review": "撰写评论",
+    "placeholder": "分享您的想法...",
+    "submit": "提交评论",
+    "anonymous": "匿名用户",
+    "alert_login": "请登录以进行评论。",
+    "alert_rating": "请选择评分。",
+    "alert_duplicate": "您已经评论过此食谱！",
+    "alert_success": "感谢您的评论！",
+    "alert_error": "无法提交评论。",
+    "empty_list": "暂无评论。",
+    "header_title": "评论与留言",
+    "me": "我",
+    "someone": "某人",
+    "req_title": "必填",
+    "req_login": "请先登录。",
+    "missing_title": "缺失信息",
+    "missing_rating": "请选择星级评分。",
+    "success_title": "成功",
+    "success_msg": "感谢您的评论！",
+    "error_title": "错误",
+    "error_msg": "无法提交评论。",
+    "toast_sent": "评论已提交！",
+    "noti_title": "新评论！",
+    "noti_msg_1": "给您的食谱评了",
+    "noti_msg_2": "星。",
+    "submit_btn": "提交"
+  },
+  "support": {
+    "title": "帮助中心",
+    "faq_general": {
+      "q1": "我在帮助中心可以做什么？",
+      "q2": "如何更新账户信息？",
+      "q3": "我没有收到 OTP，该怎么办？"
+    },
+    "faq_account": {
+      "q1": "如何重置密码？",
+      "q2": "如何更改邮箱/电话号码？"
+    },
+    "faq_service": {
+      "q1": "书签功能是如何工作的？",
+      "q2": "如何创建和管理收藏集？"
+    },
+    "tabs": {
+      "faq": "常见问题",
+      "contact": "联系我们",
+      "general": "常规",
+      "account": "账号",
+      "service": "服务"
+    },
+    "search_placeholder": "搜索帮助...",
+    "contact": {
+      "web": "网站",
+      "fb": "Facebook",
+      "wa": "Whatsapp",
+      "ig": "Instagram"
+    }
+  },
+  "validation": {
+    "required": "此字段为必填项",
+    "email_invalid": "邮箱格式无效",
+    "phone_invalid": "电话号码无效",
+    "password_min": "密码必须至少包含 {{min}} 个字符",
+    "password_mismatch": "密码必须匹配",
+    "min_length": "长度必须至少为 {{min}} 个字符",
+    "max_length": "长度必须最多为 {{max}} 个字符",
+    "time_format": "格式无效（例如：30 分钟）",
+    "image_required": "请选择一张图片",
+    "min_ingredients": "至少需要 1 种食材",
+    "min_steps": "至少需要 1 个步骤"
+  },
+  "collection_modal": {
+    "title": "保存到收藏集",
+    "create_new": "创建新收藏集",
+    "placeholder_name": "收藏集名称...",
+    "save_here": "保存到此处",
+    "permission_title": "需要权限",
+    "permission_desc": "请允许访问相册。",
+    "upload_error": "上传错误",
+    "network_error": "请检查您的网络连接。",
+    "create_error": "无法创建收藏集",
+    "save_error": "无法保存食谱"
+  },
+  "fridge": {
+    "screen_title": "冰箱里有什么？",
+    "intro_text": "选择您拥有的食材，我会为您推荐美味食谱！",
+    "group_meat": "肉类与蛋类",
+    "group_veg": "蔬菜",
+    "group_seafood": "海鲜",
+    "group_spice": "调料与其他",
+    "selected_label": "已选",
+    "selected_short": "已选",
+    "btn_find": "查找食谱",
+    "select_at_least_one": "请至少选择 1 种食材！",
+    "no_recipes": "没有符合您食材的食谱。",
+    "suggested_title": "冰箱推荐",
+    "ingredients": "食材"
+  }
+}
