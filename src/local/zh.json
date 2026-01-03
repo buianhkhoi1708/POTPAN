@@ -284,6 +284,7 @@
   },
   "admin": {
     "dashboard": "管理面板",
+    "by": "由",
     "tabs": {
       "pending": "待审核",
       "approved": "已批准",
@@ -525,6 +526,6 @@
     "select_at_least_one": "请至少选择 1 种食材！",
     "no_recipes": "没有符合您食材的食谱。",
     "suggested_title": "冰箱推荐",
-    "ingredients": "食材"
+    "ingredients_labels": "食材"
   }
 }

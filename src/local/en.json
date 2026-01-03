@@ -200,7 +200,9 @@
     "delete_collection_title": "Delete Collection",
     "delete_collection_msg": "Are you sure you want to delete \"{{name}}\"?",
     "delete_collection_success": "Collection deleted.",
-    "delete_collection_error": "Cannot delete collection."
+    "delete_collection_error": "Cannot delete collection.",
+    "recipes": "Recipes"
+
   },
   "community": {
     "screen_title": "Community",
@@ -284,6 +286,8 @@
   },
   "admin": {
     "dashboard": "Admin Dashboard",
+    "by": "By",
+
     "tabs": {
       "pending": "Pending",
       "approved": "Approved",
@@ -525,6 +529,6 @@
     "select_at_least_one": "Please select at least 1 ingredient!",
     "no_recipes": "No recipes match your ingredients.",
     "suggested_title": "Fridge Suggestions",
-    "ingredients": "Ingredients"
+    "ingredients_label": "Ingredients"
   }
 }

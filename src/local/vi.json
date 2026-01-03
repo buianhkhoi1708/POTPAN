@@ -96,29 +96,32 @@
       "difficulty": "Độ khó",
       "time": "Thời gian"
     },
+    
     "filters": {
       "cuisine_vn": "Việt Nam",
       "cuisine_int": "Quốc tế"
     },
     "results": {
-      "title": "Kết quả tìm kiếm",
-      "my_filter": "Bộ lọc của bạn",
-      "summary": "Tìm thấy {{count}} món cho \"{{keyword}}\"",
-      "not_found": "Không tìm thấy kết quả",
-      "empty_hint": "Thử nhập đúng chính tả hoặc sử dụng từ khóa khác nhé!"
-    }
-  },
-  "header_title": "Kết quả tìm kiếm",
-  "summary_text": "Tìm thấy {{count}} công thức cho \"{{keyword}}\"",
-  "default_filter_name": "bộ lọc của bạn",
-  "not_found_title": "Không tìm thấy kết quả",
-  "not_found_desc": "Hãy thử tìm với từ khóa khác hoặc điều chỉnh bộ lọc.",
-  "sort": {
+      "header_title": "Kết quả tìm kiếm",
+      "default_filter_name": "Bộ lọc của bạn",
+      "summary_text": "Tìm thấy {{count}} món cho \"{{keyword}}\"",
+      "not_found_title": "Không tìm thấy kết quả",
+      "not_found_desc": "Thử nhập đúng chính tả hoặc sử dụng từ khóa khác nhé!"
+    },
+      "sort": {
     "match": "Phù hợp nhất",
     "rating": "Đánh giá cao",
     "newest": "Mới nhất",
     "time": "Nấu nhanh"
   },
+   "header_title": "Kết quả tìm kiếm",
+  "summary_text": "Tìm thấy {{count}} công thức cho \"{{keyword}}\"",
+  "default_filter_name": "bộ lọc của bạn",
+  "not_found_title": "Không tìm thấy kết quả",
+  "not_found_desc": "Hãy thử tìm với từ khóa khác hoặc điều chỉnh bộ lọc."
+
+  },
+ 
   "recipe": {
     "view": "Xem",
     "cooked_by": "Công thức bởi",
@@ -195,7 +198,8 @@
     "delete_collection_title": "Xóa bộ sưu tập",
     "delete_collection_msg": "Bạn có chắc chắn muốn xóa \"{{name}}\" không?",
     "delete_collection_success": "Đã xóa bộ sưu tập.",
-    "delete_collection_error": "Không thể xóa bộ sưu tập."
+    "delete_collection_error": "Không thể xóa bộ sưu tập.",
+    "recipes": "Công thức"
   },
   "community": {
     "screen_title": "Cộng đồng",
@@ -282,6 +286,7 @@
   },
   "admin": {
     "dashboard": "Bảng điều khiển Admin",
+    "by": "Bởi",
     "tabs": {
       "pending": "Chờ duyệt",
       "approved": "Đã duyệt",
@@ -518,6 +523,6 @@
     "select_at_least_one": "Vui lòng chọn ít nhất 1 nguyên liệu!",
     "no_recipes": "Chưa có món nào khớp với tủ lạnh của bạn.",
     "suggested_title": "Gợi ý từ tủ lạnh",
-    "ingredients": "Nguyên liệu"
+    "ingredients_label": "Nguyên liệu"
   }
 }

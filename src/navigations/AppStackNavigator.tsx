@@ -39,7 +39,7 @@ import FridgeScreen from "../screens/FridgeScreen";
 import { RootStackParamList } from "../type/types";
 import { useAuthStore } from "../store/useAuthStore";
 
-// --- MỚI: IMPORT NOTIFICATION & REF ---
+// --- IMPORT NOTIFICATION & REF ---
 import GlobalNotification from "../components/AppGlobalNotification";
 import { navigationRef } from "../utils/RootNavigation";
 import NotificationManager from "../components/AppNotificationManager";
@@ -92,7 +92,10 @@ function MainStack() {
 
 // --- 3. ROOT NAVIGATOR ---
 export function AppNavigator() {
-  const { user, checkSession } = useAuthStore();
+  // [QUAN TRỌNG] Sử dụng Selector để React nhận biết thay đổi ngay lập tức
+  const user = useAuthStore((state) => state.user);
+  const checkSession = useAuthStore((state) => state.checkSession);
+  
   const [isShowSplash, setIsShowSplash] = useState(true);
 
   useEffect(() => {
@@ -113,13 +116,12 @@ export function AppNavigator() {
   }
 
   return (
-    // MỚI: Thêm ref={navigationRef} để GlobalNotification có thể điều hướng
     <NavigationContainer ref={navigationRef}>
       
-      {/* Logic hiển thị màn hình chính */}
+      {/* Logic hiển thị màn hình chính dựa trên user */}
       {user ? (
         <>
-          {/* Khi đã login, kích hoạt Manager chạy ngầm để đếm số badge */}
+          {/* Khi đã login, kích hoạt Manager chạy ngầm */}
           <NotificationManager /> 
           <MainStack />
         </>
@@ -127,7 +129,7 @@ export function AppNavigator() {
         <AuthStack />
       )}
 
-      {/* MỚI: Đặt GlobalNotification ở đây để nó nằm đè lên tất cả */}
+      {/* Đặt GlobalNotification ở đây để nó nằm đè lên tất cả */}
       <GlobalNotification />
       
     </NavigationContainer>

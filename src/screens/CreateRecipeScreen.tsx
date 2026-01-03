@@ -51,6 +51,7 @@ interface RecipeFormData {
   ingredients: IngredientItem[];
   steps: StepItem[];
 }
+// IE307.Q12_Nhom9
 
 const CreateRecipeScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -75,7 +76,7 @@ const CreateRecipeScreen: React.FC = () => {
   ];
 
   const CATEGORY_OPTIONS = [
-    { value: "savory", labelKey: "Món mặn" },
+    { value: "Món mặn", labelKey: "Món mặn" },
     { value: "soup", labelKey: "Món canh" },
     { value: "dessert", labelKey: "Tráng miệng" },
     { value: "cake", labelKey: "Bánh ngọt" },

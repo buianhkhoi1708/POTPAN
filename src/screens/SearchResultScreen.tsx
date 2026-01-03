@@ -26,28 +26,32 @@ const SearchResultScreen: React.FC<{ navigation: any; route: any }> = ({
   route,
 }) => {
   const { t } = useTranslation();
-  
+
   // Params
-  const { 
-    filters,              
-    recipes: directRecipes, 
-    title: customTitle,   
-    searchQuery,          
-    isFridgeSearch        
+  const {
+    filters,
+    recipes: directRecipes,
+    title: customTitle,
+    searchQuery,
+    isFridgeSearch,
   } = route.params || {};
 
-  const { searchResults, isLoading, searchRecipes, resetSearch } = useRecipeStore();
+  const { searchResults, isLoading, searchRecipes, resetSearch } =
+    useRecipeStore();
   const [displayList, setDisplayList] = useState<any[]>([]);
   const [activeSort, setActiveSort] = useState("match");
 
   // --- 1. ĐỊNH NGHĨA SORT OPTIONS VỚI DỊCH THUẬT ---
   // Phải dùng useMemo để danh sách tự cập nhật khi đổi ngôn ngữ
-  const sortOptions = useMemo(() => [
-    { id: "match", label: t("search.sort.match") },   // "Phù hợp"
-    { id: "rating", label: t("search.sort.rating") }, // "Đánh giá cao"
-    { id: "newest", label: t("search.sort.newest") }, // "Mới nhất"
-    { id: "time", label: t("search.sort.time") },     // "Nấu nhanh"
-  ], [t]);
+  const sortOptions = useMemo(
+    () => [
+      { id: "match", label: t("search.sort.match") }, // "Phù hợp"
+      { id: "rating", label: t("search.sort.rating") }, // "Đánh giá cao"
+      { id: "newest", label: t("search.sort.newest") }, // "Mới nhất"
+      { id: "time", label: t("search.sort.time") }, // "Nấu nhanh"
+    ],
+    [t]
+  );
 
   // --- 2. XỬ LÝ DỮ LIỆU ---
   useEffect(() => {
@@ -74,7 +78,11 @@ const SearchResultScreen: React.FC<{ navigation: any; route: any }> = ({
       case "rating":
         return list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       case "newest":
-        return list.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+        return list.sort(
+          (a, b) =>
+            new Date(b.created_at || 0).getTime() -
+            new Date(a.created_at || 0).getTime()
+        );
       case "time":
         return list.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
       case "match":
@@ -94,9 +102,9 @@ const SearchResultScreen: React.FC<{ navigation: any; route: any }> = ({
       return `${t("fridge.ingredients_label")}: ${searchQuery}`;
     }
     // Sử dụng interpolation của i18next: "Tìm thấy {{count}} kết quả cho {{keyword}}"
-    return t("search.summary_text", { 
-      count: displayList.length, 
-      keyword: filters?.keyword || t("search.default_filter_name") 
+    return t("search.summary_text", {
+      count: displayList.length,
+      keyword: filters?.keyword || t("search.default_filter_name"),
     });
   };
 
@@ -110,11 +118,11 @@ const SearchResultScreen: React.FC<{ navigation: any; route: any }> = ({
 
   return (
     <AppSafeView style={styles.container}>
-      <AppHeader 
-        title={getHeaderTitle()} 
-        showBack={true} 
+      <AppHeader
+        title={getHeaderTitle()}
+        showBack={true}
         onBackPress={() => navigation.goBack()}
-        showSearch={false} 
+        showSearch={false}
       />
 
       {/* FILTER BAR */}
@@ -124,7 +132,7 @@ const SearchResultScreen: React.FC<{ navigation: any; route: any }> = ({
             {getSummaryText()}
           </AppText>
         </View>
-        
+
         {/* Sort Chips */}
         <FlatList
           horizontal
@@ -140,7 +148,9 @@ const SearchResultScreen: React.FC<{ navigation: any; route: any }> = ({
                 style={[styles.sortChip, isActive && styles.sortChipActive]}
                 onPress={() => setActiveSort(item.id)}
               >
-                <AppText style={[styles.sortText, isActive && styles.sortTextActive]}>
+                <AppText
+                  style={[styles.sortText, isActive && styles.sortTextActive]}
+                >
                   {item.label}
                 </AppText>
               </Pressable>
@@ -150,7 +160,7 @@ const SearchResultScreen: React.FC<{ navigation: any; route: any }> = ({
       </View>
 
       {/* LIST CONTENT */}
-      {(isLoading && !isFridgeSearch) ? (
+      {isLoading && !isFridgeSearch ? (
         <View style={styles.centerBox}>
           <ActivityIndicator size="large" color={AppLightColor.primary_color} />
           <AppText style={styles.loadingText}>{t("common.loading")}</AppText>
@@ -172,8 +182,8 @@ const SearchResultScreen: React.FC<{ navigation: any; route: any }> = ({
             {t("search.not_found_title")}
           </AppText>
           <AppText style={styles.emptySub}>
-            {isFridgeSearch 
-              ? t("fridge.not_found_desc") 
+            {isFridgeSearch
+              ? t("fridge.not_found_desc")
               : t("search.not_found_desc")}
           </AppText>
         </View>
@@ -210,8 +220,18 @@ const styles = StyleSheet.create({
   sortTextActive: { color: "#fff", fontWeight: "bold" },
   listContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40 },
   columnWrapper: { justifyContent: "space-between" },
-  centerBox: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 40 },
+  centerBox: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 40,
+  },
   loadingText: { marginTop: 12, color: "#888" },
   emptyTitle: { marginTop: 16, fontSize: 18, color: "#333" },
-  emptySub: { marginTop: 8, textAlign: "center", color: "#888", lineHeight: 20 },
+  emptySub: {
+    marginTop: 8,
+    textAlign: "center",
+    color: "#888",
+    lineHeight: 20,
+  },
 });

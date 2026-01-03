@@ -13,67 +13,92 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
-// --- IMPORT I18N ---
-import { useTranslation } from "react-i18next"; // <-- THÊM DÒNG NÀY
-
-// --- IMPORT THƯ VIỆN & SCHEMA ---
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { getLoginSchema } from "../../utils/validationSchema"; 
+import * as Linking from "expo-linking"; // Import Linking
 
-// --- STORE & COMPONENTS ---
+// Đảm bảo đường dẫn này đúng với dự án của bạn
+import { supabase } from "../../config/supabaseClient"; 
+
 import { useAuthStore } from "../../store/useAuthStore";
+import { useThemeStore } from "../../store/useThemeStore";
+import { AppFonts } from "../../styles/fonts";
 import AppSafeView from "../../components/AppSafeView";
 import AppText from "../../components/AppText";
 import AppTextInput from "../../components/AppTextInput";
 import AppPasswordInput from "../../components/AppPasswordInput";
-import { AppLightColor } from "../../styles/color";
-import { AppFonts } from "../../styles/fonts";
 import AppButton from "../../components/AppButton";
 import AppLogo from "../../components/AppLogo";
+import { getLoginSchema } from "../../utils/validationSchema";
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
-  const { t } = useTranslation(); // <-- KHỞI TẠO HOOK DỊCH
-
-  // Lấy hàm login và trạng thái loading từ Zustand
+  const { t } = useTranslation();
+  const { theme, isDarkMode } = useThemeStore();
   const login = useAuthStore((state) => state.login);
   const isLoading = useAuthStore((state) => state.isLoading);
 
-  // --- SETUP FORM ---
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(getLoginSchema(t)),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
-  // --- HÀM XỬ LÝ LOGIN ---
+  /// --- 1. LOGIN GOOGLE (Sửa lại) ---
+  const handleGoogleLogin = async () => {
+    try {
+      // ÉP CỨNG LUÔN - Không dùng Linking.createURL nữa
+      const redirectUrl = 'potpan://google-auth'; 
+      
+      console.log('🔗 Link Google cứng:', redirectUrl); 
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) await Linking.openURL(data.url);
+
+    } catch (error: any) {
+      Alert.alert("Lỗi Google", error.message);
+    }
+  };
+
+  // --- 2. LOGIN FACEBOOK (Sửa lại) ---
+  const handleFacebookLogin = async () => {
+    try {
+      // ÉP CỨNG LUÔN
+      const redirectUrl = 'potpan://facebook-auth';
+      
+      console.log('🔗 Link FB cứng:', redirectUrl);
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) await Linking.openURL(data.url);
+
+    } catch (error: any) {
+      Alert.alert("Lỗi Facebook", error.message);
+    }
+  };
+
   const onSubmit = async (data: any) => {
     try {
       await login(data.email, data.password);
-      console.log("Đăng nhập thành công");
-      // App.tsx sẽ tự động chuyển màn hình khi biến 'user' thay đổi
     } catch (error: any) {
-      // --- XỬ LÝ LỖI SUPABASE & DỊCH ---
-      let msg = error.message || t("common.error_occurred");
-      const errTitle = t("auth.errors.login_title");
-
-      if (msg.includes("Invalid login credentials")) {
-        msg = t("auth.errors.invalid_credentials");
-      } else if (msg.includes("Email not confirmed")) {
-        msg = t("auth.errors.email_not_confirmed");
-      } else if (msg.includes("Too many requests")) {
-         msg = t("auth.errors.too_many_requests");
-      }
-
-      Alert.alert(errTitle, msg);
+      Alert.alert("Lỗi", error.message);
     }
   };
 
@@ -84,8 +109,15 @@ const LoginScreen = () => {
     return <Text style={styles.errorText}>{error.message}</Text>;
   };
 
+  // Danh sách nút social đã cập nhật hàm xử lý
+  const socialButtons = [
+    { icon: "logo-google", onPress: handleGoogleLogin },
+    { icon: "logo-facebook", onPress: handleFacebookLogin }, // Đã gắn hàm FB
+    { icon: "logo-apple", onPress: () => Alert.alert("Thông báo", "Tính năng đang phát triển") },
+  ];
+
   return (
-    <AppSafeView style={styles.safeArea}>
+    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -96,17 +128,17 @@ const LoginScreen = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.mainContent}>
+          <View style={[styles.mainContent, { backgroundColor: theme.background }]}>
             <AppLogo width={224} height={221} />
 
-            <AppText variant="bold" style={styles.headerTitle}>
+            <AppText variant="bold" style={[styles.headerTitle, { color: theme.primary_text }]}>
               {t("auth.login_title")}
             </AppText>
 
             <View style={styles.formContainer}>
-              {/* --- EMAIL --- */}
+              {/* Email */}
               <View style={styles.inputWrapper}>
-                <AppText variant="medium" style={styles.inputLabel}>
+                <AppText variant="medium" style={[styles.inputLabel, { color: theme.primary_text }]}>
                   {t("auth.email_label")}
                 </AppText>
                 <Controller
@@ -114,8 +146,9 @@ const LoginScreen = () => {
                   name="email"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppTextInput
-                      style={styles.inputValue}
+                      style={[styles.inputValue, { color: theme.primary_text, backgroundColor: theme.background_contrast }]}
                       placeholder={t("auth.email_placeholder")}
+                      placeholderTextColor={theme.placeholder_text} 
                       keyboardType="email-address"
                       autoCapitalize="none"
                       onBlur={onBlur}
@@ -124,7 +157,7 @@ const LoginScreen = () => {
                       children={
                         <Ionicons
                           name="mail-outline"
-                          color="grey"
+                          color={theme.icon}
                           size={25}
                           style={styles.inputIcon}
                         />
@@ -135,9 +168,9 @@ const LoginScreen = () => {
                 <ErrorMsg name="email" />
               </View>
 
-              {/* --- MẬT KHẨU --- */}
+              {/* Password */}
               <View style={styles.inputWrapper}>
-                <AppText style={[styles.inputLabel, { marginTop: 22 }]}>
+                <AppText style={[styles.inputLabel, { marginTop: 22, color: theme.primary_text }]}>
                   {t("auth.password_label")}
                 </AppText>
                 <Controller
@@ -145,15 +178,16 @@ const LoginScreen = () => {
                   name="password"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppPasswordInput
-                      style={styles.inputValue}
+                      style={[styles.inputValue, { color: theme.primary_text, backgroundColor: theme.background_contrast }]}
                       placeholder={t("auth.password_placeholder")}
+                      placeholderTextColor={theme.placeholder_text}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
                       children={
                         <Ionicons
                           name="lock-closed-outline"
-                          color="grey"
+                          color={theme.icon}
                           size={25}
                           style={styles.inputIcon}
                         />
@@ -163,14 +197,7 @@ const LoginScreen = () => {
                 />
                 <ErrorMsg name="password" />
 
-                <TouchableOpacity
-                  onPress={() => {
-                    Alert.alert(
-                      t("common.notification"),
-                      t("common.feature_developing")
-                    );
-                  }}
-                >
+                <TouchableOpacity onPress={() => Alert.alert("Thông báo", "Tính năng đang phát triển")}>
                   <AppText style={styles.forgotPassword}>
                     {t("auth.forgot_password")}
                   </AppText>
@@ -178,7 +205,7 @@ const LoginScreen = () => {
               </View>
             </View>
 
-            {/* --- BUTTON ĐĂNG NHẬP --- */}
+            {/* Button */}
             {isLoading ? (
               <View style={[styles.loginButton, { backgroundColor: "#ccc" }]}>
                 <ActivityIndicator color="#fff" />
@@ -186,41 +213,46 @@ const LoginScreen = () => {
             ) : (
               <AppButton
                 butName={t("auth.login_button")}
-                style={styles.loginButton}
+                style={[styles.loginButton, { backgroundColor: theme.primary_color }]}
                 style1={styles.loginButtonText}
                 onPress={handleSubmit(onSubmit)}
               />
             )}
 
+            {/* Footer */}
             <View style={styles.footerContainer}>
-              <AppText variant="light" style={styles.footerText}>
+              <AppText variant="light" style={[styles.footerText, { color: theme.primary_text }]}>
                 {t("auth.no_account")}
                 <Text
-                  style={styles.signupLink}
+                  style={[styles.signupLink, { color: theme.primary_color }]}
                   onPress={() => navigation.navigate("SigninScreen")}
                 >
                   {t("auth.signup_link")}
                 </Text>
               </AppText>
 
-              <AppText variant="light" style={styles.orText}>
+              <AppText variant="light" style={[styles.orText, { color: theme.placeholder_text }]}>
                 {t("auth.or_social")}
               </AppText>
 
+              {/* Social Buttons */}
               <View style={styles.socialContainer}>
-                <Pressable style={styles.socialButton}>
-                  <Ionicons name="logo-facebook" size={20} color="#111827" />
-                </Pressable>
-                <Pressable style={styles.socialButton}>
-                  <Ionicons name="logo-instagram" size={20} color="#111827" />
-                </Pressable>
-                <Pressable style={styles.socialButton}>
-                  <Ionicons
-                    name="paper-plane-outline"
-                    size={20}
-                    color="#111827"
-                  />
-                </Pressable>
+                {socialButtons.map((btn, index) => (
+                  <Pressable 
+                    key={index} 
+                    onPress={btn.onPress}
+                    style={({ pressed }) => [
+                      styles.socialButton, 
+                      { 
+                        backgroundColor: theme.background, 
+                        borderColor: theme.border,
+                        opacity: pressed ? 0.7 : 1
+                      }
+                    ]}
+                  >
+                    <Ionicons name={btn.icon as any} size={24} color={theme.primary_text} />
+                  </Pressable>
+                ))}
               </View>
             </View>
           </View>
@@ -232,14 +264,12 @@ const LoginScreen = () => {
 
 export default LoginScreen;
 
-// --- STYLES GIỮ NGUYÊN ---
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: AppLightColor.background },
+  safeArea: { flex: 1 },
   keyboardContainer: { flex: 1 },
   scrollContainer: { flexGrow: 1 },
   mainContent: {
     flex: 1,
-    backgroundColor: "white",
     paddingHorizontal: 30,
     alignItems: "center",
     paddingBottom: 40,
@@ -260,7 +290,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 4,
   },
-  inputValue: { fontSize: 16, fontWeight: "400", letterSpacing: 1 },
+  inputValue: { 
+    fontSize: 16, 
+    fontWeight: "400", 
+    letterSpacing: 1,
+    borderRadius: 8,
+    height: 'auto',
+    width: 280,
+    paddingHorizontal: 12
+  },
   inputIcon: { marginRight: 10 },
   forgotPassword: {
     marginTop: 8,
@@ -274,7 +312,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     height: 50,
     borderRadius: 10,
-    backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
@@ -283,8 +320,8 @@ const styles = StyleSheet.create({
   loginButtonText: { color: "#ffffff", fontSize: 20, fontWeight: "800" },
   footerContainer: { marginTop: 24, alignItems: "center" },
   footerText: { fontSize: 16, fontFamily: AppFonts.RobotoMedium },
-  signupLink: { color: AppLightColor.primary_color, fontWeight: "800" },
-  orText: { marginTop: 18, fontSize: 14, color: "#6B7280" },
+  signupLink: { fontWeight: "800" },
+  orText: { marginTop: 18, fontSize: 14 },
   socialContainer: {
     flexDirection: "row",
     marginTop: 12,
@@ -296,10 +333,8 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: AppLightColor.background,
   },
   errorText: {
     color: "red",
