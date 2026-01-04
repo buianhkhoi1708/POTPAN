@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
@@ -16,11 +17,8 @@ import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as Linking from "expo-linking"; // Import Linking
-
-// Đảm bảo đường dẫn này đúng với dự án của bạn
-import { supabase } from "../../config/supabaseClient"; 
-
+import * as Linking from "expo-linking";
+import { supabase } from "../../config/supabaseClient";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useThemeStore } from "../../store/useThemeStore";
 import { AppFonts } from "../../styles/fonts";
@@ -48,16 +46,14 @@ const LoginScreen = () => {
     defaultValues: { email: "", password: "" },
   });
 
-  /// --- 1. LOGIN GOOGLE (Sửa lại) ---
   const handleGoogleLogin = async () => {
     try {
-      // ÉP CỨNG LUÔN - Không dùng Linking.createURL nữa
-      const redirectUrl = 'potpan://google-auth'; 
-      
-      console.log('🔗 Link Google cứng:', redirectUrl); 
+      const redirectUrl = "potpan://google-auth";
+
+      console.log("🔗 Link Google cứng:", redirectUrl);
 
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: redirectUrl,
         },
@@ -65,32 +61,8 @@ const LoginScreen = () => {
 
       if (error) throw error;
       if (data?.url) await Linking.openURL(data.url);
-
     } catch (error: any) {
       Alert.alert("Lỗi Google", error.message);
-    }
-  };
-
-  // --- 2. LOGIN FACEBOOK (Sửa lại) ---
-  const handleFacebookLogin = async () => {
-    try {
-      // ÉP CỨNG LUÔN
-      const redirectUrl = 'potpan://facebook-auth';
-      
-      console.log('🔗 Link FB cứng:', redirectUrl);
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-        options: {
-          redirectTo: redirectUrl,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.url) await Linking.openURL(data.url);
-
-    } catch (error: any) {
-      Alert.alert("Lỗi Facebook", error.message);
     }
   };
 
@@ -109,15 +81,22 @@ const LoginScreen = () => {
     return <Text style={styles.errorText}>{error.message}</Text>;
   };
 
-  // Danh sách nút social đã cập nhật hàm xử lý
   const socialButtons = [
     { icon: "logo-google", onPress: handleGoogleLogin },
-    { icon: "logo-facebook", onPress: handleFacebookLogin }, // Đã gắn hàm FB
-    { icon: "logo-apple", onPress: () => Alert.alert("Thông báo", "Tính năng đang phát triển") },
+    {
+      icon: "logo-facebook",
+      onPress: () => Alert.alert("Thông báo", "Tính năng đang phát triển"),
+    },
+    {
+      icon: "logo-apple",
+      onPress: () => Alert.alert("Thông báo", "Tính năng đang phát triển"),
+    },
   ];
 
   return (
-    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+    <AppSafeView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -128,17 +107,25 @@ const LoginScreen = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={[styles.mainContent, { backgroundColor: theme.background }]}>
+          <View
+            style={[styles.mainContent, { backgroundColor: theme.background }]}
+          >
             <AppLogo width={224} height={221} />
 
-            <AppText variant="bold" style={[styles.headerTitle, { color: theme.primary_text }]}>
+            <AppText
+              variant="bold"
+              style={[styles.headerTitle, { color: theme.primary_text }]}
+            >
               {t("auth.login_title")}
             </AppText>
 
             <View style={styles.formContainer}>
               {/* Email */}
               <View style={styles.inputWrapper}>
-                <AppText variant="medium" style={[styles.inputLabel, { color: theme.primary_text }]}>
+                <AppText
+                  variant="medium"
+                  style={[styles.inputLabel, { color: theme.primary_text }]}
+                >
                   {t("auth.email_label")}
                 </AppText>
                 <Controller
@@ -146,9 +133,15 @@ const LoginScreen = () => {
                   name="email"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppTextInput
-                      style={[styles.inputValue, { color: theme.primary_text, backgroundColor: theme.background_contrast }]}
+                      style={[
+                        styles.inputValue,
+                        {
+                          color: theme.primary_text,
+                          backgroundColor: theme.background_contrast,
+                        },
+                      ]}
                       placeholder={t("auth.email_placeholder")}
-                      placeholderTextColor={theme.placeholder_text} 
+                      placeholderTextColor={theme.placeholder_text}
                       keyboardType="email-address"
                       autoCapitalize="none"
                       onBlur={onBlur}
@@ -168,9 +161,14 @@ const LoginScreen = () => {
                 <ErrorMsg name="email" />
               </View>
 
-              {/* Password */}
+              {/* Mật khẩu */}
               <View style={styles.inputWrapper}>
-                <AppText style={[styles.inputLabel, { marginTop: 22, color: theme.primary_text }]}>
+                <AppText
+                  style={[
+                    styles.inputLabel,
+                    { marginTop: 22, color: theme.primary_text },
+                  ]}
+                >
                   {t("auth.password_label")}
                 </AppText>
                 <Controller
@@ -178,7 +176,13 @@ const LoginScreen = () => {
                   name="password"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppPasswordInput
-                      style={[styles.inputValue, { color: theme.primary_text, backgroundColor: theme.background_contrast }]}
+                      style={[
+                        styles.inputValue,
+                        {
+                          color: theme.primary_text,
+                          backgroundColor: theme.background_contrast,
+                        },
+                      ]}
                       placeholder={t("auth.password_placeholder")}
                       placeholderTextColor={theme.placeholder_text}
                       onBlur={onBlur}
@@ -197,7 +201,11 @@ const LoginScreen = () => {
                 />
                 <ErrorMsg name="password" />
 
-                <TouchableOpacity onPress={() => Alert.alert("Thông báo", "Tính năng đang phát triển")}>
+                <TouchableOpacity
+                  onPress={() =>
+                    Alert.alert("Thông báo", "Tính năng đang phát triển")
+                  }
+                >
                   <AppText style={styles.forgotPassword}>
                     {t("auth.forgot_password")}
                   </AppText>
@@ -213,7 +221,10 @@ const LoginScreen = () => {
             ) : (
               <AppButton
                 butName={t("auth.login_button")}
-                style={[styles.loginButton, { backgroundColor: theme.primary_color }]}
+                style={[
+                  styles.loginButton,
+                  { backgroundColor: theme.primary_color },
+                ]}
                 style1={styles.loginButtonText}
                 onPress={handleSubmit(onSubmit)}
               />
@@ -221,7 +232,10 @@ const LoginScreen = () => {
 
             {/* Footer */}
             <View style={styles.footerContainer}>
-              <AppText variant="light" style={[styles.footerText, { color: theme.primary_text }]}>
+              <AppText
+                variant="light"
+                style={[styles.footerText, { color: theme.primary_text }]}
+              >
                 {t("auth.no_account")}
                 <Text
                   style={[styles.signupLink, { color: theme.primary_color }]}
@@ -231,26 +245,33 @@ const LoginScreen = () => {
                 </Text>
               </AppText>
 
-              <AppText variant="light" style={[styles.orText, { color: theme.placeholder_text }]}>
+              <AppText
+                variant="light"
+                style={[styles.orText, { color: theme.placeholder_text }]}
+              >
                 {t("auth.or_social")}
               </AppText>
 
-              {/* Social Buttons */}
+              {/* Đăng nhập mạng xã hội */}
               <View style={styles.socialContainer}>
                 {socialButtons.map((btn, index) => (
-                  <Pressable 
-                    key={index} 
+                  <Pressable
+                    key={index}
                     onPress={btn.onPress}
                     style={({ pressed }) => [
-                      styles.socialButton, 
-                      { 
-                        backgroundColor: theme.background, 
+                      styles.socialButton,
+                      {
+                        backgroundColor: theme.background,
                         borderColor: theme.border,
-                        opacity: pressed ? 0.7 : 1
-                      }
+                        opacity: pressed ? 0.7 : 1,
+                      },
                     ]}
                   >
-                    <Ionicons name={btn.icon as any} size={24} color={theme.primary_text} />
+                    <Ionicons
+                      name={btn.icon as any}
+                      size={24}
+                      color={theme.primary_text}
+                    />
                   </Pressable>
                 ))}
               </View>
@@ -265,9 +286,15 @@ const LoginScreen = () => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  keyboardContainer: { flex: 1 },
-  scrollContainer: { flexGrow: 1 },
+  safeArea: { 
+    flex: 1 
+  },
+  keyboardContainer: { 
+    flex: 1 
+  },
+  scrollContainer: { 
+    flexGrow: 1 
+  },
   mainContent: {
     flex: 1,
     paddingHorizontal: 30,
@@ -282,24 +309,33 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     fontFamily: AppFonts.RobotoSlabBold,
   },
-  formContainer: { width: "100%", marginBottom: 32 },
-  inputWrapper: { width: "100%", paddingHorizontal: 0 },
+  formContainer: { 
+    width: "100%", 
+    marginBottom: 32 
+  },
+  inputWrapper: { 
+    width: "100%", 
+    paddingHorizontal: 0 
+  },
   inputLabel: {
     fontSize: 17,
     fontFamily: AppFonts.RobotoMedium,
     fontWeight: "600",
     marginBottom: 4,
   },
-  inputValue: { 
-    fontSize: 16, 
-    fontWeight: "400", 
+  inputValue: {
+    fontSize: 16,
+    fontWeight: "400",
     letterSpacing: 1,
     borderRadius: 8,
-    height: 'auto',
+    height: "auto",
     width: 280,
-    paddingHorizontal: 12
+    paddingHorizontal: 12,
   },
-  inputIcon: { marginRight: 10 },
+  inputIcon: { 
+    marginLeft: 6,
+    marginRight: 3, 
+  },
   forgotPassword: {
     marginTop: 8,
     textAlign: "right",
@@ -317,11 +353,26 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
   },
-  loginButtonText: { color: "#ffffff", fontSize: 20, fontWeight: "800" },
-  footerContainer: { marginTop: 24, alignItems: "center" },
-  footerText: { fontSize: 16, fontFamily: AppFonts.RobotoMedium },
-  signupLink: { fontWeight: "800" },
-  orText: { marginTop: 18, fontSize: 14 },
+  loginButtonText: { 
+    color: "#ffffff", 
+    fontSize: 20, 
+    fontWeight: "800" 
+  },
+  footerContainer: { 
+    marginTop: 24, 
+    alignItems: "center" 
+  },
+  footerText: { 
+    fontSize: 16, 
+    fontFamily: AppFonts.RobotoMedium 
+  },
+  signupLink: { 
+    fontWeight: "800" 
+  },
+  orText: { 
+    marginTop: 18, 
+    fontSize: 14 
+  },
   socialContainer: {
     flexDirection: "row",
     marginTop: 12,

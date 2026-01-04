@@ -239,6 +239,7 @@
   },
   "settings": {
     "title": "Settings",
+    "dark_mode": "Dark Mode",
     "notifications": "Notifications",
     "support": "Support Center",
     "privacy": "Policy",

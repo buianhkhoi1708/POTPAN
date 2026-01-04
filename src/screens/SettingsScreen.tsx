@@ -1,16 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   View, 
   ScrollView, 
   StyleSheet, 
-  Pressable, 
   Alert, 
   Switch,
   TouchableOpacity 
 } from "react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next"; 
-import { Ionicons } from "@expo/vector-icons"; // 👈 Import Expo Icons
+import { Ionicons } from "@expo/vector-icons";
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
@@ -22,38 +21,58 @@ import AppConfirmModal from "../components/AppConfirmModal";
 import { useAuthStore } from "../store/useAuthStore";
 import { AppLightColor } from "../styles/color";
 
-// --- COMPONENT CON: ITEM CÀI ĐẶT ---
+// 👇 1. Import Store Theme
+import { useThemeStore } from "../store/useThemeStore";
+
+// --- COMPONENT CON: ITEM CÀI ĐẶT (ĐÃ NÂNG CẤP THEME) ---
 const SettingItem = ({ 
   icon, 
   title, 
   onPress, 
   color = AppLightColor.primary_color, 
   showChevron = true,
-  isDanger = false
+  isDanger = false,
+  // 👇 Nhận thêm props theme
+  theme,
+  isDarkMode,
+  rightComponent // Để nhét cái Switch vào
 }: any) => (
   <TouchableOpacity 
     style={styles.itemContainer} 
     onPress={onPress}
     activeOpacity={0.7}
+    disabled={!!rightComponent} // Nếu có Switch thì không bấm vào row được
   >
     <View style={styles.itemLeft}>
-      {/* Icon nền tròn */}
-      <View style={[styles.iconBox, { backgroundColor: isDanger ? '#FFE5E5' : `${color}15` }]}>
+      {/* Icon Box thay đổi màu nền theo theme */}
+      <View style={[
+        styles.iconBox, 
+        { backgroundColor: isDanger ? (isDarkMode ? '#3A1D1E' : '#FFE5E5') : (isDarkMode ? `${color}20` : `${color}15`) }
+      ]}>
         <Ionicons name={icon} size={22} color={isDanger ? '#FF4444' : color} />
       </View>
-      <AppText style={[styles.itemTitle, isDanger && { color: '#FF4444' }]}>
+      
+      {/* Title thay đổi màu theo theme */}
+      <AppText style={[
+        styles.itemTitle, 
+        { color: isDanger ? '#FF4444' : theme.primary_text }
+      ]}>
         {title}
       </AppText>
     </View>
-    {showChevron && (
-      <Ionicons name="chevron-forward" size={20} color="#CCC" />
+
+    {/* Bên phải: Hoặc là Switch, hoặc là Mũi tên */}
+    {rightComponent ? (
+      rightComponent
+    ) : showChevron && (
+      <Ionicons name="chevron-forward" size={20} color={theme.icon} />
     )}
   </TouchableOpacity>
 );
 
 // --- COMPONENT CON: TIÊU ĐỀ NHÓM ---
-const SectionTitle = ({ title }: { title: string }) => (
-  <AppText style={styles.sectionTitle}>{title}</AppText>
+const SectionTitle = ({ title, color }: { title: string, color: string }) => (
+  <AppText style={[styles.sectionTitle, { color }]}>{title}</AppText>
 );
 
 const SettingsScreen: React.FC = () => {
@@ -61,6 +80,8 @@ const SettingsScreen: React.FC = () => {
   const isFocused = useIsFocused();
   const { t } = useTranslation();
 
+  // 👇 2. Lấy Theme & Hàm Toggle
+  const { theme, isDarkMode, toggleTheme } = useThemeStore();
   const { logout, deleteAccount, isLoading } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
@@ -86,7 +107,8 @@ const SettingsScreen: React.FC = () => {
   };
 
   return (
-    <AppSafeView style={styles.safeArea}>
+    // 👇 3. Áp dụng Background Screen
+    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <AppHeader 
         title={t("settings.title")} 
         showBack 
@@ -96,69 +118,95 @@ const SettingsScreen: React.FC = () => {
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
         {/* --- NHÓM 1: ỨNG DỤNG --- */}
-        <SectionTitle title={t("settings.group_general") || "Chung"} />
-        <View style={styles.sectionCard}>
+        <SectionTitle title={t("settings.group_general") || "Chung"} color={theme.placeholder_text} />
+        
+        {/* 👇 Card nền động */}
+        <View style={[styles.sectionCard, { backgroundColor: theme.background_contrast }]}>
+          
+          {/* 👇 ITEM MỚI: DARK MODE SWITCH */}
+          <SettingItem 
+            icon={isDarkMode ? "moon" : "sunny"} // Đổi icon mặt trăng/mặt trời
+            title={t("settings.dark_mode") || "Chế độ tối"}
+            color={isDarkMode ? "#FFD700" : "#F57C00"} // Màu vàng/cam
+            theme={theme}
+            isDarkMode={isDarkMode}
+            rightComponent={
+              <Switch
+                value={isDarkMode}
+                onValueChange={toggleTheme} // 👈 Kích hoạt toggle
+                trackColor={{ false: "#767577", true: theme.primary_color }}
+                thumbColor={isDarkMode ? "#fff" : "#f4f3f4"}
+              />
+            }
+          />
+
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+          
           <SettingItem 
             icon="notifications-outline"
             title={t("settings.notifications")}
             onPress={() => navigation.navigate("NotificationSettingsScreen")}
+            theme={theme} isDarkMode={isDarkMode}
           />
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
           <SettingItem 
             icon="language-outline"
             title={t("settings.language")}
             onPress={() => navigation.navigate("LanguageScreen")}
-            color="#4CAF50" // Màu riêng cho Language nếu thích
+            color="#4CAF50"
+            theme={theme} isDarkMode={isDarkMode}
           />
         </View>
 
         {/* --- NHÓM 2: HỖ TRỢ & PHÁP LÝ --- */}
-        <SectionTitle title={t("settings.group_support") || "Hỗ trợ"} />
-        <View style={styles.sectionCard}>
+        <SectionTitle title={t("settings.group_support") || "Hỗ trợ"} color={theme.placeholder_text} />
+        <View style={[styles.sectionCard, { backgroundColor: theme.background_contrast }]}>
           <SettingItem 
             icon="help-buoy-outline"
             title={t("settings.support")}
             onPress={() => navigation.navigate("SupportCenterScreen")}
             color="#2196F3"
+            theme={theme} isDarkMode={isDarkMode}
           />
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
           <SettingItem 
             icon="shield-checkmark-outline"
             title={t("settings.privacy")}
-            onPress={() => { /* Navigate to Privacy */ }}
+            onPress={() => { }}
             color="#607D8B"
+            theme={theme} isDarkMode={isDarkMode}
           />
         </View>
 
         {/* --- NHÓM 3: TÀI KHOẢN --- */}
-        <SectionTitle title={t("settings.group_account") || "Tài khoản"} />
-        <View style={styles.sectionCard}>
+        <SectionTitle title={t("settings.group_account") || "Tài khoản"} color={theme.placeholder_text} />
+        <View style={[styles.sectionCard, { backgroundColor: theme.background_contrast }]}>
           <SettingItem 
             icon="log-out-outline"
             title={t("settings.logout")}
             onPress={() => setModalType("logout")}
             color="#FF9800"
+            theme={theme} isDarkMode={isDarkMode}
           />
-          <View style={styles.divider} />
-          {/* Nút Xóa Tài Khoản - Danger Style */}
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
           <SettingItem 
             icon="trash-outline"
             title={t("settings.delete_account")}
             onPress={() => setModalType("delete")}
             isDanger={true}
             showChevron={false}
+            theme={theme} isDarkMode={isDarkMode}
           />
         </View>
 
         {/* VERSION INFO */}
         <View style={styles.versionContainer}>
-          <AppText style={styles.versionText}>Potpan v1.0.0</AppText>
+          <AppText style={[styles.versionText, { color: theme.placeholder_text }]}>Potpan v1.0.0</AppText>
         </View>
 
         <AppBottomSpace height={100} />
       </ScrollView>
 
-      {/* Modal Xác nhận */}
       <AppConfirmModal
         visible={modalType !== null}
         title={modalType === "logout" ? t("settings.logout") : t("settings.delete_account")}
@@ -166,6 +214,7 @@ const SettingsScreen: React.FC = () => {
         loading={isLoading}
         onClose={() => setModalType(null)}
         onConfirm={handleConfirm}
+        isDanger={modalType === "delete"}
       />
 
       <AppMainNavBar activeTab={activeTab} onTabPress={(tab) => {
@@ -180,16 +229,15 @@ const SettingsScreen: React.FC = () => {
 
 export default SettingsScreen;
 
+// Style Tĩnh (Layout không đổi, màu sắc sẽ bị đè bởi style động inline)
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#ffffffff" }, // Nền hơi xám nhẹ để nổi bật Card
+  safeArea: { flex: 1 }, 
   container: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingTop: 16 },
   
-  // Section Styles
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#888',
     marginBottom: 8,
     marginTop: 16,
     marginLeft: 4,
@@ -197,11 +245,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5
   },
   sectionCard: {
-    backgroundColor: '#fff',
     borderRadius: 16,
     paddingVertical: 4,
     paddingHorizontal: 16,
-    // Shadow nhẹ
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -210,7 +256,6 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   
-  // Item Styles
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -231,23 +276,18 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: 16,
-    color: '#333',
     fontWeight: '500'
   },
   divider: {
     height: 1,
-    backgroundColor: '#F0F0F0',
-    marginLeft: 50, // Thụt vào để không cắt icon
+    marginLeft: 50, 
   },
-
-  // Footer Info
   versionContainer: {
     alignItems: 'center',
     marginTop: 24,
     marginBottom: 10
   },
   versionText: {
-    color: '#CCC',
     fontSize: 12
   }
 });

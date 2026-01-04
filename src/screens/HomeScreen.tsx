@@ -8,11 +8,12 @@ import {
   Dimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
-  Pressable
+  Pressable,
+  StatusBar,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useIsFocused } from "@react-navigation/native";
-import { useTranslation } from "react-i18next"; // 1. Import i18n
+import { useTranslation } from "react-i18next";
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
@@ -23,11 +24,13 @@ import AppSearchModal, { SearchFilters } from "../components/AppSearchModal";
 import AppRecipeCard from "../components/AppRecipeCard";
 import AppChefCard, { Chef } from "../components/AppChefCard";
 import AppCategoryList from "../components/AppCategoryList";
-import AppHeader from "../components/AppHeader"; // Header chung
+import AppHeader from "../components/AppHeader";
 
-import { AppLightColor } from "../styles/color";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
+
+// 👇 1. Import Theme Store
+import { useThemeStore } from "../store/useThemeStore";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_MARGIN = 16;
@@ -48,7 +51,10 @@ type Recipe = {
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const isFocused = useIsFocused();
   const { user, profile } = useAuthStore();
-  const { t } = useTranslation(); // 2. Hook dịch
+  const { t } = useTranslation();
+  
+  // 👇 2. Lấy Theme
+  const { theme, isDarkMode } = useThemeStore();
 
   const [unreadCount, setUnreadCount] = useState(0);
   const featuredScrollRef = useRef<ScrollView>(null);
@@ -66,7 +72,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [recentList, setRecentList] = useState<Recipe[]>([]);
   const [chefList, setChefList] = useState<Chef[]>([]);
 
-  // 3. Dịch Danh mục (Sử dụng useMemo để cập nhật khi ngôn ngữ thay đổi)
+  // Category Data
   const homeCategories = useMemo(() => [
     { id: "1", label: t("data_map.category.Món mặn"), dbValue: "Món mặn" },
     { id: "2", label: t("data_map.category.Món canh"), dbValue: "Món canh" },
@@ -84,16 +90,10 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     try {
       if (!user) return;
       const { count, error } = await supabase
-        .from("notifications")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("is_read", false);
-
+        .from("notifications").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false);
       if (error) throw error;
       if (count !== null) setUnreadCount(count);
-    } catch (err) {
-      console.log("Lỗi đếm thông báo:", err);
-    }
+    } catch (err) { console.log("Lỗi đếm thông báo:", err); }
   }, [user]);
 
   useEffect(() => {
@@ -115,19 +115,13 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       if (chefResult.data) setChefList(chefResult.data);
       if (recentResult.data) setRecentList(recentResult.data);
       if (myResult.data) setMyRecipesList(myResult.data);
-    } catch (error) {
-      console.log("Lỗi tải trang chủ:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    } catch (error) { console.log("Lỗi tải trang chủ:", error); } 
+    finally { setLoading(false); setRefreshing(false); }
   }, [user]);
 
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+  useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
-  // Auto scroll logic
+  // Auto Scroll
   useEffect(() => {
     if (featuredList.length === 0) return;
     const startAutoScroll = () => {
@@ -145,9 +139,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       }, 4000);
     };
     startAutoScroll();
-    return () => {
-      if (autoScrollTimer.current) clearInterval(autoScrollTimer.current);
-    };
+    return () => { if (autoScrollTimer.current) clearInterval(autoScrollTimer.current); };
   }, [featuredList]);
 
   const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -156,19 +148,18 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     scrollIndex.current = newIndex;
   };
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchAllData();
-  };
+  const onRefresh = () => { setRefreshing(true); fetchAllData(); };
 
   const handleSearchSubmit = (filters: SearchFilters) => {
     setSearchVisible(false);
     navigation.navigate("SearchResultScreen", { filters });
   };
 
+  // --- RENDER FRIDGE BANNER ---
   const renderFridgeBanner = () => (
     <Pressable 
-      style={styles.fridgeBanner} 
+      // 👇 Giữ nguyên màu Primary cho Banner để nổi bật, nhưng có thể điều chỉnh độ sáng/tối nếu cần
+      style={[styles.fridgeBanner, { backgroundColor: theme.primary_color }]} 
       onPress={() => navigation.navigate("FridgeScreen")}
     >
       <View style={styles.fridgeContent}>
@@ -180,27 +171,33 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             {t("home.fridge_sub") || "Chọn nguyên liệu, tìm món ăn ngay!"}
           </AppText>
         </View>
-        <View style={styles.fridgeIconCircle}>
-            <Ionicons name="restaurant" size={24} color={AppLightColor.primary_color} />
+        <View style={[styles.fridgeIconCircle, { backgroundColor: '#fff' }]}>
+            <Ionicons name="restaurant" size={24} color={theme.primary_color} />
         </View>
       </View>
-      {/* Icon trang trí ẩn nhẹ ở nền */}
       <Ionicons name="basket" size={80} color="rgba(255,255,255,0.15)" style={styles.fridgeBgIcon} />
     </Pressable>
   );
 
   return (
-    <AppSafeView style={styles.safeArea}>
-      <View style={styles.container}>
+    // 👇 3. Background động
+    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+      <StatusBar 
+        barStyle={isDarkMode ? "light-content" : "dark-content"} 
+        backgroundColor={theme.background} 
+      />
+      
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         {/* HEADER */}
         <AppHeader 
           userName={profile?.full_name || t("home.greeting")}
+          // AppHeader đã tự xử lý darkmode bên trong
         />
 
         {loading && !refreshing ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={AppLightColor.primary_color} />
-            <AppText variant="light" style={styles.loadingText}>{t("common.loading")}</AppText>
+            <ActivityIndicator size="large" color={theme.primary_color} />
+            <AppText variant="light" style={[styles.loadingText, { color: theme.placeholder_text }]}>{t("common.loading")}</AppText>
           </View>
         ) : (
           <ScrollView
@@ -208,22 +205,24 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={AppLightColor.primary_color} />
+              <RefreshControl 
+                refreshing={refreshing} 
+                onRefresh={onRefresh} 
+                tintColor={theme.primary_color}
+                colors={[theme.primary_color]}
+                progressBackgroundColor={theme.background_contrast}
+              />
             }
           >
             {/* CATEGORY LIST */}
+            {/* Cần update AppCategoryList để nhận theme props hoặc tự xử lý bên trong. 
+                Ở đây giả sử nó nhận style override */}
             <AppCategoryList
               categories={homeCategories}
               selectedId={selectedCategory}
               onSelect={(id) => {
                 const cat = homeCategories.find(c => c.id === id);
-                if (cat) {
-                  // Điều hướng sang CategoriesScreen thay vì lọc tại chỗ
-                  navigation.navigate("CategoriesScreen", { 
-                    categoryId: cat.id,
-                    initialDbValue: cat.dbValue 
-                  });
-                }
+                if (cat) navigation.navigate("CategoriesScreen", { categoryId: cat.id, initialDbValue: cat.dbValue });
                 setSelectedCategory(id);
               }}
             />
@@ -232,7 +231,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             {/* SECTION: NỔI BẬT */}
             <View style={styles.sectionHeader}>
-              <AppText variant="bold" style={styles.sectionTitle}>{t("home.featured_recipes")}</AppText>
+              <AppText variant="bold" style={[styles.sectionTitle, { color: theme.primary_text }]}>{t("home.featured_recipes")}</AppText>
             </View>
             {featuredList.length > 0 ? (
               <ScrollView
@@ -256,19 +255,19 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </ScrollView>
             ) : (
               <View style={styles.emptyContainer}>
-                <Ionicons name="restaurant-outline" size={48} color="#ccc" />
-                <AppText style={styles.emptyText}>{t("profile.no_recipes")}</AppText>
+                <Ionicons name="restaurant-outline" size={48} color={theme.placeholder_text} />
+                <AppText style={[styles.emptyText, { color: theme.placeholder_text }]}>{t("profile.no_recipes")}</AppText>
               </View>
             )}
 
             {/* SECTION: CÔNG THỨC CỦA TÔI */}
             {myRecipesList.length > 0 && (
-              <View style={styles.mySectionWrapper}>
+              <View style={[styles.mySectionWrapper, { backgroundColor: theme.primary_color }]}>
                 <View style={styles.mySectionHeader}>
                   <View style={styles.sectionPillWrap}>
-                    <View style={styles.sectionPill}>
-                      <Ionicons name="bookmark" size={16} color="#fff" style={{ marginRight: 6 }} />
-                      <AppText variant="bold" style={styles.sectionPillText}>{t("profile.my_recipes")}</AppText>
+                    <View style={[styles.sectionPill, { backgroundColor: theme.background }]}>
+                      <Ionicons name="bookmark" size={16} color={theme.primary_text} style={{ marginRight: 6 }} />
+                      <AppText variant="bold" style={[styles.sectionPillText, { color: theme.primary_text }]}>{t("profile.my_recipes")}</AppText>
                     </View>
                   </View>
                 </View>
@@ -289,8 +288,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             {/* SECTION: ĐẦU BẾP */}
             <View style={styles.sectionHeader}>
               <Pressable style={styles.sectionTitleRow} onPress={() => navigation.navigate("FamousChefsScreen")}>
-                  <AppText variant="title" style={styles.sectionTitle}>{t("home.famous_chefs")}</AppText>
-                  <Ionicons name="chevron-forward" size={20} color={AppLightColor.primary_color} />
+                  <AppText variant="title" style={[styles.sectionTitle, { color: theme.primary_text }]}>{t("home.famous_chefs")}</AppText>
+                  <Ionicons name="chevron-forward" size={20} color={theme.primary_color} />
               </Pressable>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
@@ -301,7 +300,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             {/* SECTION: GẦN ĐÂY */}
             <View style={styles.sectionHeader}>
-              <AppText variant="bold" style={styles.sectionTitle}>{t("home.recent_recipes")}</AppText>
+              <AppText variant="bold" style={[styles.sectionTitle, { color: theme.primary_text }]}>{t("home.recent_recipes")}</AppText>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListBottom}>
               {recentList.map((item) => (
@@ -340,48 +339,47 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
 export default HomeScreen;
 
-// --- STYLES ---
+// Style Tĩnh (Layout)
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: "#fff" },
-  container: { flex: 1, backgroundColor: "#fff" },
+  safeArea: { flex: 1 },
+  container: { flex: 1 },
   
   loadingContainer: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 60 },
-  loadingText: { marginTop: 12, color: "#666", fontSize: 14 },
+  loadingText: { marginTop: 12, fontSize: 14 },
   
   emptyContainer: { alignItems: "center", justifyContent: "center", paddingVertical: 40, paddingHorizontal: 20 },
-  emptyText: { marginTop: 12, color: "#999", fontSize: 14, textAlign: "center" },
+  emptyText: { marginTop: 12, fontSize: 14, textAlign: "center" },
   
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 16 },
   
   sectionHeader: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12 },
   sectionTitleRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  sectionTitle: { fontSize: 20, color: AppLightColor.primary_text, fontWeight: "700" },
+  sectionTitle: { fontSize: 20, fontWeight: "700" },
   
   featuredRow: { paddingHorizontal: 20, paddingBottom: 20 },
   horizontalList: { paddingHorizontal: 20, paddingBottom: 16 },
   horizontalListBottom: { paddingHorizontal: 20, paddingBottom: 24 },
   
   mySectionWrapper: {
-    marginTop: 8, marginHorizontal: 16, backgroundColor: AppLightColor.primary_color,
+    marginTop: 8, marginHorizontal: 16,
     borderRadius: 16, paddingBottom: 20,
-    shadowColor: AppLightColor.primary_color, shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15, shadowRadius: 8, elevation: 5,
   },
   mySectionHeader: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
   mySectionList: { paddingHorizontal: 16 },
   sectionPillWrap: { alignItems: "center" },
-  sectionPill: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20, backgroundColor: "#fff" },
-  sectionPillText: { color: AppLightColor.primary_color, fontSize: 16 },
+  sectionPill: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20 },
+  sectionPillText: { fontSize: 16 },
+  
   fridgeBanner: {
     marginHorizontal: 20,
     marginTop: 15,
-    backgroundColor: AppLightColor.primary_color,
     borderRadius: 20,
     padding: 20,
     position: 'relative',
     overflow: 'hidden',
-    shadowColor: AppLightColor.primary_color,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -398,7 +396,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   fridgeTitle: {
-    color: '#fff',
+    color: '#fff', // Màu chữ trên banner luôn là trắng vì nền banner là màu primary
     fontSize: 18,
     marginBottom: 4,
   },
@@ -410,7 +408,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -9,7 +9,7 @@ import {
   StatusBar,
   Animated,
   Dimensions,
-  Image,
+  Platform,
 } from "react-native";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,11 +21,12 @@ import AppText from "../components/AppText";
 import MainBottomNav, { type MainTabKey } from "../components/AppMainNavBar";
 import AppHeader from "../components/AppHeader";
 import AppSocialCard, { SocialPostType } from "../components/AppSocialCard";
-import BottomNavSpacer from "../components/AppBottomSpace";
 
 // CONFIG
-import { AppLightColor } from "../styles/color";
 import { supabase } from "../config/supabaseClient";
+
+// 👇 1. Import Theme Store
+import { useThemeStore } from "../store/useThemeStore";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -44,6 +45,9 @@ const CommunityScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const { t } = useTranslation();
+
+  // 👇 2. Lấy Theme
+  const { theme, isDarkMode } = useThemeStore();
 
   const [activeBottomTab, setActiveBottomTab] = useState<MainTabKey>("world");
   const [posts, setPosts] = useState<SocialPostType[]>([]);
@@ -85,7 +89,7 @@ const CommunityScreen: React.FC = () => {
           title: item.title,
           image: item.thumbnail,
           desc: item.description || "",
-          authorName: item.users?.full_name || "Bếp trưởng ẩn danh",
+          authorName: item.users?.full_name || t("chef.anonymous"),
           authorAvatar: item.users?.avatar_url || null,
           time: formatTimeAgo(item.created_at),
           likesCount: Math.floor(Math.random() * 50) + (item.rating || 0),
@@ -102,7 +106,6 @@ const CommunityScreen: React.FC = () => {
 
         setHasMore(data.length === pageSize);
         
-        // Animation
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
@@ -120,7 +123,8 @@ const CommunityScreen: React.FC = () => {
   useEffect(() => {
     if (isFocused) {
       setActiveBottomTab("world");
-      fetchPosts();
+      // Logic để tránh fetch lại nếu đã có data (tùy chọn)
+      if (posts.length === 0) fetchPosts();
     }
   }, [isFocused]);
 
@@ -137,7 +141,6 @@ const CommunityScreen: React.FC = () => {
           : post
       )
     );
-    console.log(`User ${newStatus ? "liked" : "unliked"} post ${postId}`);
   };
 
   const handleLoadMore = () => {
@@ -155,16 +158,8 @@ const CommunityScreen: React.FC = () => {
 
   const animateFab = () => {
     Animated.sequence([
-      Animated.timing(fabScale, {
-        toValue: 1.2,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-      Animated.timing(fabScale, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fabScale, { toValue: 0.9, duration: 100, useNativeDriver: true }),
+      Animated.timing(fabScale, { toValue: 1, duration: 100, useNativeDriver: true }),
     ]).start();
   };
 
@@ -177,7 +172,7 @@ const CommunityScreen: React.FC = () => {
             {
               translateY: fadeAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: [20 * (index + 1), 0],
+                outputRange: [10, 0], // Giảm khoảng cách animation cho mượt
               }),
             },
           ],
@@ -202,8 +197,10 @@ const CommunityScreen: React.FC = () => {
     if (!hasMore && posts.length > 0) {
       return (
         <View style={styles.footerContainer}>
-          <Ionicons name="checkmark-circle-outline" size={24} color={AppLightColor.success} />
-          <AppText style={styles.footerText}>Đã xem tất cả bài viết</AppText>
+          <Ionicons name="checkmark-circle-outline" size={20} color={theme.placeholder_text} />
+          <AppText style={[styles.footerText, { color: theme.placeholder_text }]}>
+            {t("common.seen_all")}
+          </AppText>
         </View>
       );
     }
@@ -211,13 +208,12 @@ const CommunityScreen: React.FC = () => {
     if (loading && posts.length > 0) {
       return (
         <View style={styles.footerContainer}>
-          <ActivityIndicator size="small" color={AppLightColor.primary_color} />
-          <AppText style={styles.loadingMoreText}>Đang tải thêm...</AppText>
+          <ActivityIndicator size="small" color={theme.primary_color} />
         </View>
       );
     }
     
-    return null;
+    return <View style={{ height: 20 }} />;
   };
 
   const renderEmptyState = () => {
@@ -225,22 +221,29 @@ const CommunityScreen: React.FC = () => {
     
     return (
       <View style={styles.emptyContainer}>
-        <View style={styles.emptyIllustration}>
-          <Ionicons name="newspaper-outline" size={80} color={AppLightColor.border} />
+        <View style={[styles.emptyIllustration, { 
+            borderColor: theme.border, 
+            backgroundColor: theme.background_contrast 
+        }]}>
+          <Ionicons name="newspaper-outline" size={60} color={theme.placeholder_text} />
         </View>
-        <AppText style={styles.emptyTitle}>Chưa có bài viết nào</AppText>
-        <AppText style={styles.emptyDescription}>
-          Hãy là người đầu tiên chia sẻ công thức nấu ăn của bạn!
+        <AppText variant="bold" style={[styles.emptyTitle, { color: theme.primary_text }]}>
+            {t("community.empty_title")}
+        </AppText>
+        <AppText style={[styles.emptyDescription, { color: theme.placeholder_text }]}>
+             {t("community.empty_desc")}
         </AppText>
         <TouchableOpacity
-          style={styles.createButton}
+          style={[styles.createButton, { backgroundColor: theme.primary_color }]}
           onPress={() => {
             animateFab();
             navigation.navigate("CreatePostScreen");
           }}
         >
           <Ionicons name="add" size={20} color="#fff" style={styles.createButtonIcon} />
-          <AppText style={styles.createButtonText}>Tạo bài viết đầu tiên</AppText>
+          <AppText variant="bold" style={styles.createButtonText}>
+             {t("community.create_first")}
+          </AppText>
         </TouchableOpacity>
       </View>
     );
@@ -258,59 +261,56 @@ const CommunityScreen: React.FC = () => {
       showsVerticalScrollIndicator={false}
       initialNumToRender={5}
       maxToRenderPerBatch={5}
-      windowSize={5}
-      removeClippedSubviews={true}
+      removeClippedSubviews={Platform.OS === 'android'}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          tintColor={AppLightColor.primary_color}
-          colors={[AppLightColor.primary_color]}
-          progressBackgroundColor="#fff"
+          tintColor={theme.primary_color}
+          colors={[theme.primary_color]}
+          progressBackgroundColor={theme.background_contrast} // Nền loading Android
         />
       }
       onEndReached={handleLoadMore}
-      onEndReachedThreshold={0.3}
+      onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
       ListEmptyComponent={renderEmptyState}
     />
-  ), [posts, loading, refreshing, renderItem, hasMore]);
+  ), [posts, loading, refreshing, renderItem, hasMore, theme]);
 
   return (
-    <AppSafeView style={styles.safeArea}>
+    // 👇 3. Background động
+    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+      {/* 👇 4. StatusBar động */}
       <StatusBar 
-        barStyle="dark-content" 
-        backgroundColor="#fff" 
+        barStyle={isDarkMode ? "light-content" : "dark-content"} 
+        backgroundColor={theme.background} 
         animated={true}
       />
       
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         {/* Header */}
         <AppHeader
           title={t("community.screen_title")}
           showBack={false}
-          rightIcon={
-            <TouchableOpacity 
-              style={styles.searchButton}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="search-outline" size={22} color="#333" />
-            </TouchableOpacity>
-          }
-          onRightPress={() => {}}
-          style={styles.header}
         />
 
-        {/* Feed List */}
+        {/* Skeleton Loading & Feed */}
         {loading && !refreshing && posts.length === 0 ? (
           <View style={styles.loadingContainer}>
             {[1, 2, 3].map((_, index) => (
-              <View key={index} style={styles.skeletonCard}>
-                <View style={styles.skeletonAvatar} />
+              <View 
+                key={index} 
+                style={[
+                    styles.skeletonCard, 
+                    { backgroundColor: theme.background_contrast, borderColor: theme.border }
+                ]}
+              >
+                <View style={[styles.skeletonAvatar, { backgroundColor: isDarkMode ? '#3A3A3C' : '#F0F0F0' }]} />
                 <View style={styles.skeletonContent}>
-                  <View style={[styles.skeletonLine, { width: '60%' }]} />
-                  <View style={[styles.skeletonLine, { width: '80%' }]} />
-                  <View style={[styles.skeletonLine, { width: '40%' }]} />
+                  <View style={[styles.skeletonLine, { width: '60%', backgroundColor: isDarkMode ? '#3A3A3C' : '#F0F0F0' }]} />
+                  <View style={[styles.skeletonLine, { width: '80%', backgroundColor: isDarkMode ? '#3A3A3C' : '#F0F0F0' }]} />
+                  <View style={[styles.skeletonLine, { width: '40%', backgroundColor: isDarkMode ? '#3A3A3C' : '#F0F0F0' }]} />
                 </View>
               </View>
             ))}
@@ -319,17 +319,23 @@ const CommunityScreen: React.FC = () => {
           memoizedList
         )}
 
-        {/* FAB */}
+        {/* FAB - Nút nổi */}
         <Animated.View style={[styles.fabContainer, { transform: [{ scale: fabScale }] }]}>
           <TouchableOpacity
-            style={styles.fab}
-            activeOpacity={0.7}
+            style={[
+                styles.fab, 
+                { 
+                    backgroundColor: theme.primary_color, 
+                    borderColor: theme.background_contrast 
+                }
+            ]}
+            activeOpacity={0.8}
             onPress={() => {
               animateFab();
-              navigation.navigate("CreatePostScreen");
+              navigation.navigate("CreateRecipeScreen");
             }}
           >
-            <Ionicons name="add" size={26} color="#fff" />
+            <Ionicons name="add" size={30} color="#fff" />
           </TouchableOpacity>
         </Animated.View>
 
@@ -338,11 +344,7 @@ const CommunityScreen: React.FC = () => {
           activeTab={activeBottomTab}
           onTabPress={(tab) => {
             setActiveBottomTab(tab);
-            if (tab === "home") navigation.navigate("HomeScreen");
-            if (tab === "profile") navigation.navigate("ProfileScreen");
-            if (tab === "category") navigation.navigate("CategoriesScreen");
           }}
-          style={styles.bottomNav}
         />
       </View>
     </AppSafeView>
@@ -352,61 +354,42 @@ const CommunityScreen: React.FC = () => {
 export default CommunityScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1, 
-    backgroundColor: "#fff" 
-  },
-  container: { 
-    flex: 1, 
-    backgroundColor: "#f8f9fa" 
-  },
-  header: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    elevation: 0,
-  },
+  safeArea: { flex: 1 },
+  container: { flex: 1 },
   
-  // Loading
+  // Loading Skeleton
   loadingContainer: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 16,
   },
   skeletonCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    borderWidth: 1,
   },
   skeletonAvatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
     marginRight: 12,
   },
   skeletonContent: {
     flex: 1,
     justifyContent: 'center',
+    gap: 8,
   },
   skeletonLine: {
     height: 12,
-    backgroundColor: '#f0f0f0',
     borderRadius: 6,
-    marginBottom: 8,
   },
   
   // List
   listContent: { 
-    paddingHorizontal: 16,
     paddingTop: 12,
-    paddingBottom: 100,
+    paddingBottom: 100, // Để tránh bị che bởi BottomNav
   },
   emptyListContent: {
     flexGrow: 1,
@@ -416,35 +399,32 @@ const styles = StyleSheet.create({
   
   // Search Button
   searchButton: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
-    backgroundColor: '#f5f5f5',
+    borderRadius: 18,
   },
   
   // FAB
   fabContainer: {
     position: "absolute",
     right: 20,
-    bottom: 110,
+    bottom: 100, // Cao hơn BottomNav
     zIndex: 1000,
   },
   fab: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
-    elevation: 6,
+    elevation: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
     shadowRadius: 6,
-    borderWidth: 3,
-    borderColor: "#fff",
+    borderWidth: 2, // Viền để tách biệt với nền card nếu trùng màu
   },
   
   // Footer
@@ -453,17 +433,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
   },
   footerText: {
-    color: AppLightColor.success,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
-  },
-  loadingMoreText: {
-    color: AppLightColor.text_secondary,
-    fontSize: 14,
-    marginLeft: 8,
   },
   
   // Empty State
@@ -472,61 +446,42 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
-    paddingTop: 60,
+    marginTop: 40,
   },
   emptyIllustration: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#f8f9fa',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
     borderWidth: 2,
-    borderColor: '#f0f0f0',
     borderStyle: 'dashed',
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: AppLightColor.text_primary,
+    fontSize: 18,
     marginBottom: 8,
     textAlign: 'center',
   },
   emptyDescription: {
     fontSize: 14,
-    color: AppLightColor.text_secondary,
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 24,
   },
   createButton: {
     flexDirection: 'row',
-    backgroundColor: AppLightColor.primary_color,
     paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 2,
-    shadowColor: AppLightColor.primary_color,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
-  createButtonIcon: {
-    marginRight: 8,
-  },
-  createButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  
-  // Bottom Nav
-  bottomNav: {
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    backgroundColor: '#fff',
-  },
+  createButtonIcon: { marginRight: 8 },
+  createButtonText: { color: '#fff', fontSize: 15 },
 });

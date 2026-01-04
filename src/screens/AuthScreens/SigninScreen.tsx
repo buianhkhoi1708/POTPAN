@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import {
   KeyboardAvoidingView,
@@ -6,39 +7,36 @@ import {
   Text,
   View,
   Alert,
-  Pressable,
   ScrollView,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-
-// --- IMPORT I18N ---
 import { useTranslation } from "react-i18next";
-
-// --- IMPORT THƯ VIỆN & SCHEMA ---
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { getRegisterSchema } from "../../utils/validationSchema"
 
+// Imports
+import { getRegisterSchema } from "../../utils/validationSchema";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useThemeStore } from "../../store/useThemeStore";
+import { AppFonts } from "../../styles/fonts";
+
+// Components
 import AppSafeView from "../../components/AppSafeView";
 import AppText from "../../components/AppText";
 import AppTextInput from "../../components/AppTextInput";
 import AppPasswordInput from "../../components/AppPasswordInput";
 import AppButton from "../../components/AppButton";
 import AppLogo from "../../components/AppLogo";
-import { AppLightColor } from "../../styles/color";
-import { AppFonts } from "../../styles/fonts";
 
 const SigninScreen = () => {
   const navigation = useNavigation<any>();
-  const { t } = useTranslation(); // Khởi tạo hook dịch
-  
+  const { t } = useTranslation();
+  const { theme } = useThemeStore();
   const register = useAuthStore((state) => state.register);
   const isLoading = useAuthStore((state) => state.isLoading);
 
-  // --- SETUP FORM ---
   const {
     control,
     handleSubmit,
@@ -54,15 +52,13 @@ const SigninScreen = () => {
     },
   });
 
-  // --- HÀM XỬ LÝ ĐĂNG KÝ ---
   const onSubmit = async (data: any) => {
     try {
       await register(data.email, data.password, data.fullName, data.phone);
-      
-      // Thông báo thành công
+
       Alert.alert(
-        t("auth.register_success_title"), 
-        t("auth.register_success_msg"), 
+        t("auth.register_success_title"),
+        t("auth.register_success_msg"),
         [
           {
             text: t("auth.login_button"),
@@ -71,19 +67,15 @@ const SigninScreen = () => {
         ]
       );
     } catch (error: any) {
-      // --- XỬ LÝ LỖI SUPABASE ---
       let msg = error.message || t("auth.errors.unknown");
       const errTitle = t("auth.errors.register_title");
-
-      // Map lỗi Supabase sang ngôn ngữ user chọn
       if (msg.includes("User already registered")) {
         msg = t("auth.errors.user_already_exists");
       } else if (msg.includes("Password should be at least")) {
         msg = t("auth.errors.weak_password");
       } else if (msg.includes("Too many requests")) {
-         msg = t("auth.errors.too_many_requests");
+        msg = t("auth.errors.too_many_requests");
       }
-
       Alert.alert(errTitle, msg);
     }
   };
@@ -96,7 +88,7 @@ const SigninScreen = () => {
   };
 
   return (
-    <AppSafeView style={styles.safeArea}>
+    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -105,16 +97,18 @@ const SigninScreen = () => {
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.mainContent}>
-            <AppLogo width={150} height={150} />
-            <AppText variant="bold" style={styles.headerTitle}>
+
+          <View style={[styles.mainContent, { backgroundColor: theme.background }]}>
+            <AppLogo width={185} height={185} />
+
+            <AppText variant="bold" style={[styles.headerTitle, { color: theme.primary_text }]}>
               {t("auth.register_title")}
             </AppText>
 
             <View style={styles.formContainer}>
-              {/* --- HỌ TÊN --- */}
+              {/* Họ tên */}
               <View style={styles.inputWrapper}>
-                <AppText variant="medium" style={styles.inputLabel}>
+                <AppText variant="medium" style={[styles.inputLabel, { color: theme.primary_text }]}>
                   {t("auth.fullname_label")}
                 </AppText>
                 <Controller
@@ -122,15 +116,20 @@ const SigninScreen = () => {
                   name="fullName"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppTextInput
-                      style={styles.inputValue}
+        
+                      style={[
+                        styles.inputValue, 
+                        { backgroundColor: theme.background_contrast, color: theme.primary_text }
+                      ]}
                       placeholder={t("auth.fullname_placeholder")}
+                      placeholderTextColor={theme.placeholder_text} 
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
                       children={
                         <Ionicons
                           name="person-outline"
-                          color="grey"
+                          color={theme.icon} 
                           size={25}
                           style={styles.inputIcon}
                         />
@@ -141,9 +140,9 @@ const SigninScreen = () => {
                 <ErrorMsg name="fullName" />
               </View>
 
-              {/* --- EMAIL --- */}
+              {/* Email */}
               <View style={styles.inputWrapper}>
-                <AppText style={[styles.inputLabel, styles.marginTop]}>
+                <AppText style={[styles.inputLabel, styles.marginTop, { color: theme.primary_text }]}>
                   {t("auth.email_label")}
                 </AppText>
                 <Controller
@@ -151,8 +150,12 @@ const SigninScreen = () => {
                   name="email"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppTextInput
-                      style={styles.inputValue}
+                      style={[
+                        styles.inputValue, 
+                        { backgroundColor: theme.background_contrast, color: theme.primary_text }
+                      ]}
                       placeholder={t("auth.email_placeholder")}
+                      placeholderTextColor={theme.placeholder_text}
                       keyboardType="email-address"
                       autoCapitalize="none"
                       onBlur={onBlur}
@@ -161,7 +164,7 @@ const SigninScreen = () => {
                       children={
                         <Ionicons
                           name="mail-outline"
-                          color="grey"
+                          color={theme.icon}
                           size={25}
                           style={styles.inputIcon}
                         />
@@ -172,39 +175,9 @@ const SigninScreen = () => {
                 <ErrorMsg name="email" />
               </View>
 
-              {/* --- SĐT --- */}
+              {/* Mật khẩu */}
               <View style={styles.inputWrapper}>
-                <AppText style={[styles.inputLabel, styles.marginTop]}>
-                  {t("auth.phone_label")}
-                </AppText>
-                <Controller
-                  control={control}
-                  name="phone"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <AppTextInput
-                      style={styles.inputValue}
-                      placeholder={t("auth.phone_placeholder")}
-                      keyboardType="phone-pad"
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      children={
-                        <Ionicons
-                          name="call-outline"
-                          color="grey"
-                          size={25}
-                          style={styles.inputIcon}
-                        />
-                      }
-                    />
-                  )}
-                />
-                <ErrorMsg name="phone" />
-              </View>
-
-              {/* --- MẬT KHẨU --- */}
-              <View style={styles.inputWrapper}>
-                <AppText style={[styles.inputLabel, styles.marginTop]}>
+                <AppText style={[styles.inputLabel, styles.marginTop, { color: theme.primary_text }]}>
                   {t("auth.password_label")}
                 </AppText>
                 <Controller
@@ -212,14 +185,18 @@ const SigninScreen = () => {
                   name="password"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppPasswordInput
-                      style={styles.inputValue}
+                      style={[
+                        styles.inputValue, 
+                        { backgroundColor: theme.background_contrast, color: theme.primary_text }
+                      ]}
                       placeholder={t("auth.password_placeholder")}
+                      placeholderTextColor={theme.placeholder_text}
                       onChangeText={onChange}
                       value={value}
                       children={
                         <Ionicons
                           name="lock-closed-outline"
-                          color="grey"
+                          color={theme.icon}
                           size={25}
                           style={styles.inputIcon}
                         />
@@ -230,9 +207,9 @@ const SigninScreen = () => {
                 <ErrorMsg name="password" />
               </View>
 
-              {/* --- XÁC NHẬN --- */}
+              {/* Xác nhận */}
               <View style={styles.inputWrapper}>
-                <AppText style={[styles.inputLabel, styles.marginTop]}>
+                <AppText style={[styles.inputLabel, styles.marginTop, { color: theme.primary_text }]}>
                   {t("auth.confirm_password_label")}
                 </AppText>
                 <Controller
@@ -240,14 +217,18 @@ const SigninScreen = () => {
                   name="confirmPassword"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppPasswordInput
-                      style={styles.inputValue}
+                      style={[
+                        styles.inputValue, 
+                        { backgroundColor: theme.background_contrast, color: theme.primary_text }
+                      ]}
                       placeholder={t("auth.password_placeholder")}
+                      placeholderTextColor={theme.placeholder_text}
                       onChangeText={onChange}
                       value={value}
                       children={
                         <Ionicons
                           name="shield-checkmark-outline"
-                          color="grey"
+                          color={theme.icon}
                           size={25}
                           style={styles.inputIcon}
                         />
@@ -259,7 +240,7 @@ const SigninScreen = () => {
               </View>
             </View>
 
-            {/* --- NÚT ĐĂNG KÝ --- */}
+            {/* Nút đăng ký */}
             {isLoading ? (
               <View
                 style={[styles.registerButton, { backgroundColor: "#ccc" }]}
@@ -269,17 +250,17 @@ const SigninScreen = () => {
             ) : (
               <AppButton
                 butName={t("auth.register_button")}
-                style={styles.registerButton}
+                style={[styles.registerButton, { backgroundColor: theme.primary_color }]}
                 style1={styles.registerButtonText}
                 onPress={handleSubmit(onSubmit)}
               />
             )}
 
             <View style={styles.footerContainer}>
-              <AppText variant="light" style={styles.footerText}>
+              <AppText variant="light" style={[styles.footerText, { color: theme.primary_text }]}>
                 {t("auth.has_account")}
                 <Text
-                  style={styles.loginLink}
+                  style={[styles.loginLink, { color: theme.primary_color }]}
                   onPress={() => navigation.navigate("LoginScreen")}
                 >
                   {t("auth.login_link")}
@@ -296,52 +277,87 @@ const SigninScreen = () => {
 export default SigninScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: AppLightColor.background },
-  keyboardContainer: { flex: 1 },
-  scrollContainer: { flexGrow: 1, alignItems: 'center' },
+  safeArea: {
+    flex: 1,
+  },
+  keyboardContainer: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    alignItems: "center",
+  },
   mainContent: {
     flex: 1,
-    backgroundColor: "white",
     paddingHorizontal: 24,
     alignItems: "center",
     paddingBottom: 40,
     paddingTop: 20,
-    
   },
   headerTitle: {
-    fontSize: 30,
+    fontSize: 34,
     fontWeight: "900",
     textAlign: "center",
     letterSpacing: 1,
     marginBottom: 30,
     fontFamily: AppFonts.RobotoSlabBold,
   },
-  formContainer: { width: "100%", marginBottom: 24 },
-  inputWrapper: { width: "100%", paddingHorizontal: 0 },
-  marginTop: { marginTop: 16 },
+  formContainer: {
+    width: "100%",
+    marginBottom: 24,
+  },
+  inputWrapper: {
+    width: "100%",
+    paddingHorizontal: 0,
+  },
+  marginTop: {
+    marginTop: 16,
+  },
   inputLabel: {
     fontSize: 17,
     fontFamily: AppFonts.RobotoMedium,
     fontWeight: "600",
     marginBottom: 4,
   },
-  inputValue: { fontSize: 16, fontWeight: "400", letterSpacing: 1 },
-  inputIcon: { marginRight: 10 },
+  inputValue: {
+    fontSize: 16,
+    fontWeight: "400",
+    letterSpacing: 1,
+    borderRadius: 8, 
+    paddingHorizontal: 12, 
+    height: 'auto',
+    width: 280,
+  },
+  inputIcon: {
+    marginLeft: 6,
+    marginRight: 3,
+  },
   registerButton: {
     marginTop: 10,
     alignSelf: "center",
     height: 50,
     borderRadius: 10,
-    backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
     width: 343,
     maxWidth: 600,
   },
-  registerButtonText: { color: "#ffffff", fontSize: 20, fontWeight: "800" },
-  footerContainer: { marginTop: 24, alignItems: "center" },
-  footerText: { fontSize: 16, fontFamily: AppFonts.RobotoMedium },
-  loginLink: { color: AppLightColor.primary_color, fontWeight: "800" },
+  registerButtonText: {
+    color: "#ffffff",
+    fontSize: 20,
+    fontWeight: "800",
+  },
+  footerContainer: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+  footerText: {
+    fontSize: 16,
+    fontFamily: AppFonts.RobotoMedium,
+  },
+  loginLink: {
+    fontWeight: "800",
+  },
   errorText: {
     color: "red",
     fontSize: 12,

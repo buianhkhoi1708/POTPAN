@@ -8,10 +8,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  StatusBar,
 } from "react-native";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next"; // 👈 Import i18n
+import { useTranslation } from "react-i18next"; 
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
@@ -19,9 +20,11 @@ import MainBottomNav, { type MainTabKey } from "../components/AppMainNavBar";
 import AppHeader from "../components/AppHeader";
 import BottomNavSpacer from "../components/AppBottomSpace";
 
-import { AppLightColor } from "../styles/color";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
+
+// 👇 1. Import Theme Store
+import { useThemeStore } from "../store/useThemeStore";
 
 type Chef = {
   id: string;
@@ -38,7 +41,10 @@ const FamousChefsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const { user } = useAuthStore();
-  const { t } = useTranslation(); // 👈 Init Hook
+  const { t } = useTranslation();
+  
+  // 👇 2. Lấy Theme
+  const { theme, isDarkMode } = useThemeStore();
 
   const [activeTab, setActiveTab] = useState<MainTabKey>("home");
   const [topChefs, setTopChefs] = useState<Chef[]>([]);
@@ -57,148 +63,109 @@ const FamousChefsScreen: React.FC = () => {
     try {
       if (!refreshing) setLoading(true);
 
-      const topQuery = supabase
-        .from("users")
-        .select("*")
-        .order("followers", { ascending: false })
-        .limit(5);
-      const favQuery = supabase
-        .from("users")
-        .select("*")
-        .order("followers", { ascending: false })
-        .range(5, 10);
-      const newQuery = supabase
-        .from("users")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(5);
+      const topQuery = supabase.from("users").select("*").order("followers", { ascending: false }).limit(5);
+      const favQuery = supabase.from("users").select("*").order("followers", { ascending: false }).range(5, 10);
+      const newQuery = supabase.from("users").select("*").order("created_at", { ascending: false }).limit(5);
 
-      const [topRes, favRes, newRes] = await Promise.all([
-        topQuery,
-        favQuery,
-        newQuery,
-      ]);
+      const [topRes, favRes, newRes] = await Promise.all([topQuery, favQuery, newQuery]);
 
       if (topRes.data) setTopChefs(topRes.data);
       if (favRes.data) setFavoriteChefs(favRes.data);
       if (newRes.data) setNewChefs(newRes.data);
 
       if (user) {
-        const { data: followData } = await supabase
-          .from("follows")
-          .select("following_id")
-          .eq("follower_id", user.id);
+        const { data: followData } = await supabase.from("follows").select("following_id").eq("follower_id", user.id);
         if (followData) {
           const newMap: Record<string, boolean> = {};
-          followData.forEach((f: any) => {
-            newMap[f.following_id] = true;
-          });
+          followData.forEach((f: any) => { newMap[f.following_id] = true; });
           setFollowMap(newMap);
         }
       }
-    } catch (error) {
-      console.log("Lỗi tải đầu bếp:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    } catch (error) { console.log("Lỗi tải đầu bếp:", error); } 
+    finally { setLoading(false); setRefreshing(false); }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
+  const onRefresh = useCallback(() => { setRefreshing(true); fetchData(); }, []);
 
   const toggleFollow = async (chefId: string) => {
-    if (!user) {
-      // Thông báo cần đăng nhập
-      alert(t("common.require_login")); 
-      return;
-    }
+    if (!user) { alert(t("common.require_login")); return; }
     const isFollowing = followMap[chefId];
     setFollowMap((prev) => ({ ...prev, [chefId]: !isFollowing }));
     try {
       if (isFollowing) {
-        await supabase
-          .from("follows")
-          .delete()
-          .eq("follower_id", user.id)
-          .eq("following_id", chefId);
+        await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", chefId);
       } else {
-        await supabase
-          .from("follows")
-          .insert({ follower_id: user.id, following_id: chefId });
+        await supabase.from("follows").insert({ follower_id: user.id, following_id: chefId });
       }
-    } catch (error) {
-      setFollowMap((prev) => ({ ...prev, [chefId]: isFollowing }));
-    }
+    } catch (error) { setFollowMap((prev) => ({ ...prev, [chefId]: isFollowing })); }
   };
 
   const renderChefCard = (chef: Chef) => {
     const isFollowing = followMap[chef.id] ?? false;
-    
-    // 👇 Logic: Kiểm tra xem có phải chính mình không
     const isMe = user?.id === chef.id;
 
     return (
       <Pressable
         key={chef.id}
-        style={styles.card}
+        style={[styles.card]}
         onPress={() => {
-          if (isMe) {
-            navigation.navigate("ProfileScreen");
-          } else {
-            navigation.navigate("ChefProfileScreen", {
-              chefId: chef.id,
-              chefName: chef.full_name,
-              chefAvatar: chef.avatar_url,
-            });
-          }
+          if (isMe) navigation.navigate("ProfileScreen");
+          else navigation.navigate("ChefProfileScreen", { chefId: chef.id, chefName: chef.full_name, chefAvatar: chef.avatar_url });
         }}
       >
-        <View style={styles.cardImageWrap}>
+        <View style={[styles.cardImageWrap, { backgroundColor: isDarkMode ? '#333' : '#eee' }]}>
           <Image
-            source={{
-              uri: chef.avatar_url || "https://i.pravatar.cc/150",
-            }}
-            style={styles.cardImage}
+            source={{ uri: chef.avatar_url || "https://i.pravatar.cc/150" }}
+            style={[styles.cardImage, isDarkMode && { opacity: 0.9 }]}
             resizeMode="cover"
           />
         </View>
 
-        <View style={styles.cardInfo}>
-          <AppText variant="bold" style={styles.chefName} numberOfLines={1}>
+        {/* 👇 Card Info: Nền động */}
+        <View style={[
+            styles.cardInfo, 
+            { 
+                backgroundColor: theme.background_contrast, 
+                borderColor: theme.border,
+                // Tắt shadow ở Dark Mode
+                shadowOpacity: isDarkMode ? 0 : 0.1 
+            }
+        ]}>
+          <AppText variant="bold" style={[styles.chefName, { color: theme.primary_text }]} numberOfLines={1}>
             {chef.full_name || t("community.anonymous_chef")}
-            {/* 👇 Hiển thị (Bạn) nếu là chính mình */}
             {isMe ? ` (${t("common.you")})` : ""}
           </AppText>
-          <AppText variant="light" style={styles.chefHandle} numberOfLines={1}>
+          <AppText variant="light" style={[styles.chefHandle, { color: theme.placeholder_text }]} numberOfLines={1}>
             @{chef.username || "user"}
           </AppText>
 
           <View style={styles.cardBottomRow}>
             <View style={styles.followersRow}>
-              <AppText variant="medium" style={styles.followersText}>
+              <AppText variant="medium" style={[styles.followersText, { color: theme.placeholder_text }]}>
                 {chef.followers || 0}
               </AppText>
-              <Ionicons name="person" size={12} color="#00000077" />
+              <Ionicons name="person" size={12} color={theme.placeholder_text} />
             </View>
 
-            {/* 👇 Chỉ hiện nút Follow nếu KHÔNG phải là mình */}
             {!isMe && (
               <Pressable
-                style={isFollowing ? styles.followBtnActive : styles.followBtn}
+                style={[
+                    isFollowing ? styles.followBtnActive : styles.followBtn,
+                    // 👇 Style động cho nút Follow
+                    isFollowing 
+                        ? { backgroundColor: theme.background, borderColor: theme.border } 
+                        : { backgroundColor: theme.primary_color }
+                ]}
                 onPress={() => toggleFollow(chef.id)}
               >
                 <AppText
                   variant="medium"
-                  style={
-                    isFollowing ? styles.followTextActive : styles.followText
-                  }
+                  style={[
+                    isFollowing ? styles.followTextActive : styles.followText,
+                    // 👇 Màu chữ nút
+                    isFollowing ? { color: theme.placeholder_text } : { color: '#fff' }
+                  ]}
                 >
                   {isFollowing ? t("chef.following") : t("chef.follow")}
                 </AppText>
@@ -211,8 +178,9 @@ const FamousChefsScreen: React.FC = () => {
   };
 
   return (
-    <AppSafeView style={styles.safeArea}>
-      <View style={styles.container}>
+    // 👇 3. Background động
+    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <AppHeader
           title={t("home.famous_chefs")}
           showBack={true}
@@ -221,10 +189,7 @@ const FamousChefsScreen: React.FC = () => {
 
         {loading && !refreshing ? (
           <View style={styles.centerLoading}>
-            <ActivityIndicator
-              size="large"
-              color={AppLightColor.primary_color}
-            />
+            <ActivityIndicator size="large" color={theme.primary_color} />
           </View>
         ) : (
           <ScrollView
@@ -235,27 +200,19 @@ const FamousChefsScreen: React.FC = () => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor={AppLightColor.primary_color}
+                tintColor={theme.primary_color}
+                colors={[theme.primary_color]}
+                progressBackgroundColor={theme.background_contrast}
               />
             }
           >
-            {/* SECTION: TOP CHEFS */}
-            <View style={styles.sectionBlockTop}>
+            {/* SECTION: TOP CHEFS (Nền màu chủ đạo) */}
+            <View style={[styles.sectionBlockTop, { backgroundColor: theme.primary_color }]}>
               <View style={styles.sectionTopInner}>
-                <AppText
-                  variant="bold"
-                  style={[
-                    styles.sectionTitle,
-                    { color: "#fff", marginBottom: 12 },
-                  ]}
-                >
+                <AppText variant="bold" style={[styles.sectionTitle, { color: "#fff", marginBottom: 12 }]}>
                   {t("chef.sections.top_trending")} 🔥
                 </AppText>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.horizontalList}
-                >
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
                   {topChefs.map(renderChefCard)}
                 </ScrollView>
               </View>
@@ -264,14 +221,10 @@ const FamousChefsScreen: React.FC = () => {
             {/* SECTION: FAVORITE */}
             {favoriteChefs.length > 0 && (
               <View style={styles.sectionBlock}>
-                <AppText variant="title" style={styles.sectionTitle}>
+                <AppText variant="title" style={[styles.sectionTitle, { color: theme.primary_text }]}>
                   {t("chef.sections.favorites")} ❤️
                 </AppText>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.horizontalList}
-                >
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
                   {favoriteChefs.map(renderChefCard)}
                 </ScrollView>
               </View>
@@ -280,14 +233,10 @@ const FamousChefsScreen: React.FC = () => {
             {/* SECTION: NEW */}
             {newChefs.length > 0 && (
               <View style={styles.sectionBlock}>
-                <AppText variant="title" style={styles.sectionTitle}>
+                <AppText variant="title" style={[styles.sectionTitle, { color: theme.primary_text }]}>
                   {t("chef.sections.new_faces")} ✨
                 </AppText>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.horizontalList}
-                >
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
                   {newChefs.map(renderChefCard)}
                 </ScrollView>
               </View>
@@ -313,80 +262,79 @@ const FamousChefsScreen: React.FC = () => {
 export default FamousChefsScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: "#fff" },
-  container: { flex: 1, backgroundColor: "#fff" },
+  safeArea: { flex: 1 },
+  container: { flex: 1 },
   centerLoading: { flex: 1, justifyContent: "center", alignItems: "center" },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 24 },
+  
+  // Section Top (Background màu chủ đạo)
   sectionBlockTop: {
     marginTop: 10,
     marginBottom: 20,
-    backgroundColor: AppLightColor.primary_color,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     paddingTop: 10,
   },
   sectionTopInner: { paddingLeft: 20, paddingBottom: 20 },
+  
+  // Sections khác
   sectionBlock: { marginBottom: 20, paddingLeft: 20 },
   sectionTitle: {
     fontSize: 18,
-    color: AppLightColor.primary_text,
     fontWeight: "700",
     marginBottom: 12,
   },
   horizontalList: { paddingRight: 20 },
+  
+  // Chef Card
   card: { width: CARD_WIDTH, marginRight: 12, marginBottom: 4 },
   cardImageWrap: {
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#eee",
     height: 150,
     width: "100%",
   },
   cardImage: { width: "100%", height: "100%" },
+  
   cardInfo: {
-    backgroundColor: "#ffffff",
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: "#eee",
     paddingHorizontal: 10,
     paddingVertical: 10,
-    marginTop: -20,
+    marginTop: -20, // Hiệu ứng nổi lên trên ảnh
     marginHorizontal: 4,
     zIndex: 2,
+    // Shadow mặc định
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
   },
-  chefName: {
-    fontSize: 14,
-    color: AppLightColor.primary_text,
-    marginBottom: 2,
-  },
-  chefHandle: { fontSize: 12, color: "#888", marginBottom: 8 },
+  chefName: { fontSize: 14, marginBottom: 2 },
+  chefHandle: { fontSize: 12, marginBottom: 8 },
+  
+  // Bottom Row in Card
   cardBottomRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   followersRow: { flexDirection: "row", alignItems: "center", columnGap: 2 },
-  followersText: { fontSize: 11, color: "#666", fontWeight: "600" },
+  followersText: { fontSize: 11, fontWeight: "600" },
+  
+  // Follow Button
   followBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: AppLightColor.primary_color,
   },
   followBtnActive: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: "#f0f0f0",
     borderWidth: 1,
-    borderColor: "#ddd",
   },
-  followText: { fontSize: 10, color: "#ffffff", fontWeight: "700" },
-  followTextActive: { fontSize: 10, color: "#666", fontWeight: "600" },
+  followText: { fontSize: 10, fontWeight: "700" },
+  followTextActive: { fontSize: 10, fontWeight: "600" },
 });

@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -8,42 +9,30 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
-  Dimensions,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next"; // <-- IMPORT I18N
-
+import { useTranslation } from "react-i18next";
 import { supabase } from "../config/supabaseClient";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppHeader from "../components/AppHeader";
-import { AppLightColor } from "../styles/color";
-
-const { width } = Dimensions.get("window");
-const PRIMARY_COLOR = AppLightColor.primary_color;
-
-// IE307.Q12_Nhom9
-
+import { useThemeStore } from "../store/useThemeStore";
+import AppAdminUserItem from "../components/AppAdminUserItem";
+import AppAdminRecipeItem from "../components/AppAdminRecipeItem";
 
 const AdminDashboardScreen = () => {
   const navigation = useNavigation<any>();
-  const { t } = useTranslation(); // <-- KHỞI TẠO HOOK
-
-  const [activeTab, setActiveTab] = useState<"pending" | "approved" | "users">(
-    "pending"
-  );
+  const { t } = useTranslation();
+  const { theme, isDarkMode } = useThemeStore();
+  const [activeTab, setActiveTab] = useState<"pending" | "approved" | "users">("pending");
   const [dataList, setDataList] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // --- HÀM TẢI DỮ LIỆU ---
   const fetchData = async (isRefreshing = false) => {
     if (!isRefreshing) setLoading(true);
-
     try {
       let data, error;
-
       if (activeTab === "users") {
         const res = await supabase
           .from("users")
@@ -60,7 +49,6 @@ const AdminDashboardScreen = () => {
         data = res.data;
         error = res.error;
       }
-
       if (error) throw error;
       setDataList(data || []);
     } catch (err) {
@@ -87,13 +75,7 @@ const AdminDashboardScreen = () => {
     fetchData(true);
   };
 
-  // --- HÀM GỬI THÔNG BÁO ---
-  const sendNotification = async (
-    userId: string,
-    title: string,
-    message: string,
-    type: "update" | "warn"
-  ) => {
+  const sendNotification = async (userId: string, title: string, message: string, type: "update" | "warn") => {
     try {
       if (!userId) return;
       await supabase.from("notifications").insert({
@@ -103,13 +85,11 @@ const AdminDashboardScreen = () => {
         type: type,
         is_read: false,
       });
-      console.log("Đã gửi thông báo cho user:", userId);
     } catch (error) {
       console.log("Lỗi gửi thông báo:", error);
     }
   };
 
-  // --- HÀM DUYỆT BÀI ---
   const handleApprove = async (item: any) => {
     try {
       const { data, error } = await supabase
@@ -117,20 +97,14 @@ const AdminDashboardScreen = () => {
         .update({ status: "approved" })
         .eq("id", item.id)
         .select();
-
       if (error) throw error;
-
       if (!data || data.length === 0) {
         Alert.alert("Lỗi RLS", t("admin.alerts.rls_error"));
         return;
       }
 
-      // 👇 GỬI THÔNG BÁO (Sử dụng t() để dịch nội dung)
       const notiTitle = t("admin.notifications.approve_title");
-      const notiMsg = t("admin.notifications.approve_msg", {
-        title: item.title,
-      }); // Truyền biến title vào chuỗi dịch
-
+      const notiMsg = t("admin.notifications.approve_msg", { title: item.title });
       await sendNotification(item.user_id, notiTitle, notiMsg, "update");
 
       Alert.alert(t("common.success"), t("admin.alerts.approve_success"));
@@ -141,13 +115,10 @@ const AdminDashboardScreen = () => {
     }
   };
 
-  // --- HÀM XÓA ---
   const handleDelete = (item: any) => {
-    const confirmMsg =
-      activeTab === "users"
+    const confirmMsg = activeTab === "users"
         ? t("admin.alerts.confirm_delete_user")
         : t("admin.alerts.confirm_delete_post");
-
     Alert.alert(t("common.confirm"), confirmMsg, [
       { text: t("common.cancel"), style: "cancel" },
       {
@@ -155,24 +126,14 @@ const AdminDashboardScreen = () => {
         style: "destructive",
         onPress: async () => {
           const table = activeTab === "users" ? "users" : "recipes";
-          const { error } = await supabase
-            .from(table)
-            .delete()
-            .eq("id", item.id);
-
+          const { error } = await supabase.from(table).delete().eq("id", item.id);
           if (!error) {
             setDataList((prev) => prev.filter((i) => i.id !== item.id));
-
-            // 👇 GỬI THÔNG BÁO XÓA (Trừ khi xóa user)
             if (activeTab !== "users") {
               const notiTitle = t("admin.notifications.reject_title");
-              const notiMsg = t("admin.notifications.reject_msg", {
-                title: item.title,
-              });
-
+              const notiMsg = t("admin.notifications.reject_msg", { title: item.title });
               await sendNotification(item.user_id, notiTitle, notiMsg, "warn");
             }
-
             Alert.alert(t("common.success"), t("admin.alerts.delete_success"));
           } else {
             Alert.alert(t("common.error"), t("admin.alerts.delete_error"));
@@ -182,116 +143,30 @@ const AdminDashboardScreen = () => {
     ]);
   };
 
+
   const renderItem = ({ item }: { item: any }) => {
-    // 1. GIAO DIỆN USER
     if (activeTab === "users") {
       return (
-        <View style={styles.card}>
-          <Image
-            source={{ uri: item.avatar_url || "https://vfqnjeoqxxapqqurdkoi.supabase.co/storage/v1/object/public/avatars/users/default.jpg" }}
-            style={styles.avatar}
-          />
-          <View style={styles.content}>
-            <AppText variant="bold">
-              {item.full_name || t("admin.no_name")}
-            </AppText>
-            <AppText style={styles.subText}>{item.email}</AppText>
-            <AppText
-              style={[
-                styles.subText,
-                { color: item.role === "admin" ? PRIMARY_COLOR : "#666" },
-              ]}
-            >
-              {t("admin.role")}: {item.role || "user"}
-            </AppText>
-          </View>
-          <Pressable
-            style={[styles.btnAction, { backgroundColor: "#333" }]}
-            onPress={() => handleDelete(item)}
-          >
-            <Ionicons name="ban-outline" size={18} color="#fff" />
-          </Pressable>
-        </View>
+        <AppAdminUserItem 
+          item={item} 
+          onDelete={handleDelete} 
+        />
       );
     }
-
-    // 2. GIAO DIỆN BÀI VIẾT
+    
     return (
-      <View style={styles.card}>
-        <Pressable
-          onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
-          style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
-        >
-          <Image
-            source={{ uri: item.image || item.thumbnail }}
-            style={styles.postImage}
-          />
-        </Pressable>
-
-        <View style={styles.content}>
-          <AppText variant="bold" numberOfLines={1} style={{ fontSize: 16 }}>
-            {item.title}
-          </AppText>
-          <AppText style={styles.subText}>
-            {t("admin.by")}: {item.users?.full_name || t("admin.anonymous")}
-          </AppText>
-          <AppText style={styles.dateText}>
-            {new Date(item.created_at).toLocaleDateString()}
-          </AppText>
-
-          <View style={styles.btnRow}>
-            {/* Nút Xóa */}
-            <Pressable
-              style={styles.btnDelete}
-              onPress={() => handleDelete(item)}
-            >
-              <Ionicons name="trash-outline" size={16} color="#fff" />
-              <AppText style={styles.btnText}>
-                {t("admin.actions.delete")}
-              </AppText>
-            </Pressable>
-
-            {/* Nút Duyệt */}
-            {activeTab === "pending" && (
-              <Pressable
-                style={styles.btnApprove}
-                onPress={() => handleApprove(item)}
-              >
-                <Ionicons
-                  name="checkmark-circle-outline"
-                  size={16}
-                  color="#fff"
-                />
-                <AppText style={styles.btnText}>
-                  {t("admin.actions.approve")}
-                </AppText>
-              </Pressable>
-            )}
-
-            {/* Nhãn Đã duyệt */}
-            {activeTab === "approved" && (
-              <View style={styles.badgeApproved}>
-                <Ionicons name="checkmark-done" size={14} color="green" />
-                <AppText
-                  style={{
-                    color: "green",
-                    fontSize: 12,
-                    fontWeight: "bold",
-                    marginLeft: 4,
-                  }}
-                >
-                  {t("admin.tabs.approved")}
-                </AppText>
-              </View>
-            )}
-          </View>
-        </View>
-      </View>
+      <AppAdminRecipeItem
+        item={item}
+        activeTab={activeTab}
+        onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
+        onDelete={handleDelete}
+        onApprove={handleApprove}
+      />
     );
   };
 
   return (
-    <AppSafeView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <AppSafeView style={[styles.container, { backgroundColor: theme.background }]}>
       <AppHeader
         title={t("admin.dashboard")}
         showBack
@@ -299,75 +174,62 @@ const AdminDashboardScreen = () => {
         showSearch={false}
       />
 
-      {/* TABS */}
-      <View style={styles.tabs}>
-        <Pressable
-          style={[styles.tab, activeTab === "pending" && styles.activeTab]}
-          onPress={() => setActiveTab("pending")}
-        >
-          <AppText
-            style={[
-              styles.tabText,
-              activeTab === "pending" && styles.activeText,
-            ]}
-          >
-            {t("admin.tabs.pending")}
-          </AppText>
-        </Pressable>
-        <Pressable
-          style={[styles.tab, activeTab === "approved" && styles.activeTab]}
-          onPress={() => setActiveTab("approved")}
-        >
-          <AppText
-            style={[
-              styles.tabText,
-              activeTab === "approved" && styles.activeText,
-            ]}
-          >
-            {t("admin.tabs.approved")}
-          </AppText>
-        </Pressable>
-        <Pressable
-          style={[styles.tab, activeTab === "users" && styles.activeTab]}
-          onPress={() => setActiveTab("users")}
-        >
-          <AppText
-            style={[styles.tabText, activeTab === "users" && styles.activeText]}
-          >
-            {t("admin.tabs.users")}
-          </AppText>
-        </Pressable>
+      {/* Tabs */}
+      <View style={[styles.tabContainer, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
+        <View style={[styles.tabWrapper, { backgroundColor: theme.background_contrast }]}>
+          {(["pending", "approved", "users"] as const).map((tab) => (
+            <Pressable
+              key={tab}
+              style={[
+                styles.tabItem,
+                activeTab === tab && [styles.tabItemActive, { backgroundColor: isDarkMode ? "#333" : "#fff" }],
+              ]}
+              onPress={() => setActiveTab(tab)}
+            >
+              <AppText
+                style={[
+                  styles.tabText,
+                  { color: theme.placeholder_text },
+                  activeTab === tab && [styles.tabTextActive, { color: theme.primary_color }],
+                ]}
+              >
+                {t(`admin.tabs.${tab}`)}
+              </AppText>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
-      {/* LIST */}
+      {/* Danh sách */}
       {loading ? (
-        <ActivityIndicator
-          size="large"
-          color={PRIMARY_COLOR}
-          style={{ marginTop: 40 }}
-        />
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={theme.primary_color} />
+        </View>
       ) : (
         <FlatList
           data={dataList}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
-          contentContainerStyle={{ padding: 16, paddingBottom: 50 }}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <View style={{ alignItems: "center", marginTop: 40 }}>
-              <Ionicons name="folder-open-outline" size={48} color="#ddd" />
-              <AppText
-                style={{ textAlign: "center", marginTop: 10, color: "#999" }}
-              >
+            <View style={styles.emptyState}>
+              <Image
+                source={{ uri: "https://cdn-icons-png.flaticon.com/512/7486/7486754.png" }}
+                style={{
+                  width: 100,
+                  height: 100,
+                  opacity: isDarkMode ? 0.3 : 0.5,
+                  marginBottom: 16,
+                }}
+              />
+              <AppText style={[styles.emptyText, { color: theme.placeholder_text }]}>
                 {t("common.empty_list")}
               </AppText>
             </View>
           }
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={PRIMARY_COLOR}
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary_color} />
           }
         />
       )}
@@ -378,72 +240,56 @@ const AdminDashboardScreen = () => {
 export default AdminDashboardScreen;
 
 const styles = StyleSheet.create({
-  tabs: { flexDirection: "row", borderBottomWidth: 1, borderColor: "#eee" },
-  tab: { flex: 1, alignItems: "center", paddingVertical: 14 },
-  activeTab: { borderBottomWidth: 2, borderColor: PRIMARY_COLOR },
-  tabText: { color: "#999", fontWeight: "600", fontSize: 15 },
-  activeText: { color: PRIMARY_COLOR },
-
-  card: {
-    flexDirection: "row",
-    marginBottom: 12,
-    padding: 10,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
-    elevation: 2,
+  container: { 
+    flex: 1 
   },
-  postImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 8,
-    backgroundColor: "#eee",
+  tabContainer: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    zIndex: 1,
   },
-  avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: "#eee" },
-
-  content: { flex: 1, marginLeft: 12, justifyContent: "center" },
-  subText: { fontSize: 13, color: "#666", marginTop: 2 },
-  dateText: { fontSize: 11, color: "#999", marginTop: 4 },
-
-  btnRow: {
-    flexDirection: "row",
-    marginTop: 10,
-    gap: 10,
-    alignItems: "center",
+  tabWrapper: { 
+    flexDirection: "row", 
+    borderRadius: 25, 
+    padding: 4 
   },
-  btnApprove: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#4CAF50",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  btnDelete: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FF3B30",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  btnText: { color: "#fff", fontSize: 12, fontWeight: "bold", marginLeft: 4 },
-
-  btnAction: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  tabItem: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    alignSelf: "center",
+    paddingVertical: 10,
+    borderRadius: 22,
   },
-  badgeApproved: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#E8F5E9",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+  tabItemActive: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  tabText: { 
+    fontWeight: "600", 
+    fontSize: 13 
+  },
+  tabTextActive: { 
+    fontWeight: "bold" 
+  },
+  centerContainer: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
+  listContent: { 
+    padding: 16, 
+    paddingBottom: 80 
+  },
+  emptyState: { 
+    alignItems: "center", 
+    marginTop: 60 
+  },
+  emptyText: { 
+    fontSize: 16, 
+    fontWeight: "500" 
   },
 });

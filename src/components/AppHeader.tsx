@@ -4,15 +4,16 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import AppText from "./AppText";
-import { AppLightColor } from "../styles/color";
 import AppSearchModal from "./AppSearchModal";
 
 // 👇 Import component Badge độc lập
 import NotificationBadge from "./AppNotificationBadge";
 
-// 👇 1. Import các Store cần thiết cho logic "Đã đọc"
+// 👇 Import các Store
 import { useNotificationStore } from "../store/useNotificationStore";
 import { useAuthStore } from "../store/useAuthStore";
+// 👇 1. Import Theme Store
+import { useThemeStore } from "../store/useThemeStore";
 
 interface AppHeaderProps {
   title?: string;
@@ -22,6 +23,7 @@ interface AppHeaderProps {
   onBackPress?: () => void;
   showBack?: boolean;
   onNotificationPress?: () => void; 
+  onSearchPress?: () => void; // Thêm props này nếu muốn xử lý search bên ngoài
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
@@ -32,22 +34,22 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   onBackPress,
   showBack = false,
   onNotificationPress,
+  onSearchPress,
 }) => {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const [searchVisible, setSearchVisible] = useState(false);
 
-  // 👇 2. Lấy User ID và hàm đánh dấu đã đọc
+  // 👇 2. Lấy Theme
+  const { theme, isDarkMode } = useThemeStore();
+
   const user = useAuthStore((state) => state.user);
   const markAllAsRead = useNotificationStore((state) => state.markAllAsRead);
 
   const handleNotificationPress = () => {
-    // 👇 3. Logic: Bấm vào là reset số về 0 ngay lập tức
     if (user?.id) {
       markAllAsRead(user.id);
     }
-
-    // Sau đó mới chuyển màn hình
     if (onNotificationPress) {
       onNotificationPress();
     } else {
@@ -62,22 +64,35 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
   return (
     <>
-      <View style={styles.header}>
+      {/* 👇 3. Áp dụng Background và Border động */}
+      <View style={[styles.header, { 
+          backgroundColor: theme.background,
+          borderBottomColor: theme.border 
+      }]}>
         <View style={styles.leftContainer}>
           {showBack && (
             <Pressable onPress={onBackPress} style={styles.backButton}>
-              <Ionicons name="chevron-back" size={24} color={AppLightColor.primary_color} />
+              <Ionicons name="chevron-back" size={24} color={theme.primary_color} />
             </Pressable>
           )}
 
           <View style={styles.textWrapper}>
             {userName ? (
               <>
-                <AppText variant="light" style={styles.helloSub}>{t("home.greeting")}</AppText>
-                <AppText variant="bold" style={styles.hello}>{userName} 👋</AppText>
+                {/* 👇 Text phụ màu xám */}
+                <AppText variant="light" style={[styles.helloSub, { color: theme.placeholder_text }]}>
+                  {t("home.greeting")}
+                </AppText>
+                {/* 👇 Text chính màu primary_text */}
+                <AppText variant="bold" style={[styles.hello, { color: theme.primary_text }]}>
+                  {userName} 👋
+                </AppText>
               </>
             ) : (
-              <AppText variant="bold" style={styles.screenTitle}>{title}</AppText>
+              // 👇 Title màu primary
+              <AppText variant="bold" style={[styles.screenTitle, { color: theme.primary_color }]}>
+                {title}
+              </AppText>
             )}
           </View>
         </View>
@@ -85,22 +100,25 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         <View style={styles.headerIcons}>
           {showSearch && (
             <Pressable 
-              style={styles.headerIconCircle} 
-              onPress={() => setSearchVisible(true)}
+              // 👇 Nút tròn màu primary (Giữ nguyên hoặc đổi theo theme)
+              style={[styles.headerIconCircle, { backgroundColor: theme.primary_color }]} 
+              onPress={onSearchPress ? onSearchPress : () => setSearchVisible(true)}
             >
+              {/* Icon bên trong nút primary thường là màu trắng để tương phản */}
               <Ionicons name="search-outline" size={20} color="#fff" />
             </Pressable>
           )}
 
          {showNotifications && (
-          <Pressable style={styles.headerIconCircle} onPress={handleNotificationPress}>
+          <Pressable 
+            style={[styles.headerIconCircle, { backgroundColor: theme.primary_color }]} 
+            onPress={handleNotificationPress}
+          >
             <Ionicons name="notifications-outline" size={20} color="#fff" />
             
-            {/* Component độc lập hiển thị số (sẽ tự biến mất khi hàm markAllAsRead chạy) */}
             <NotificationBadge 
                style={{ position: "absolute", top: -4, right: -4 }} 
             />
-            
           </Pressable>
         )}
         </View>
@@ -119,6 +137,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
 export default AppHeader;
 
+// Style tĩnh (Layout)
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
@@ -127,9 +146,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    // Background và BorderColor đã được xử lý inline
   },
   leftContainer: {
     flex: 1,
@@ -142,11 +160,10 @@ const styles = StyleSheet.create({
   textWrapper: {
     flex: 1,
   },
-  helloSub: { fontSize: 14, color: "#666", marginBottom: 2 },
-  hello: { fontSize: 24, color: AppLightColor.primary_text },
+  helloSub: { fontSize: 14, marginBottom: 2 },
+  hello: { fontSize: 24 },
   screenTitle: { 
     fontSize: 22, 
-    color: AppLightColor.primary_color,
     lineHeight: 28 
   },
   headerIcons: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -154,7 +171,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
   },

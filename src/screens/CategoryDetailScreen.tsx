@@ -8,20 +8,16 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next"; // Import i18n
-
-// --- COMPONENTS & CONFIG ---
+import { useTranslation } from "react-i18next";
 import { supabase } from "../config/supabaseClient";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppRecipeCard from "../components/AppRecipeCard";
-import AppHeader from "../components/AppHeader"; // <-- Dùng Header chuẩn
+import AppHeader from "../components/AppHeader";
 import AppBottomSpace from "../components/AppBottomSpace";
-import { AppLightColor } from "../styles/color";
+import { useThemeStore } from "../store/useThemeStore";
 
 const { width } = Dimensions.get("window");
-
-// Tính toán kích thước card cho Grid 2 cột
 const PADDING = 16;
 const GAP = 12;
 const CARD_WIDTH = (width - PADDING * 2 - GAP) / 2;
@@ -30,11 +26,8 @@ const CategoryDetailScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { t } = useTranslation();
-
-  // Lấy params truyền từ màn hình Categories
-  // categoryTitle đã được dịch (t(...)) từ màn hình trước
+  const { theme, isDarkMode } = useThemeStore();
   const { categoryTitle, categoryDbValue } = route.params || {};
-
   const [recipes, setRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,8 +38,6 @@ const CategoryDetailScreen = () => {
   const fetchRecipesByCategory = async () => {
     try {
       setLoading(true);
-      // Query database: lấy tất cả recipes có category trùng khớp
-      // categoryDbValue là giá trị gốc trong DB (VD: "Món mặn")
       const { data, error } = await supabase
         .from("recipes")
         .select("*")
@@ -62,39 +53,50 @@ const CategoryDetailScreen = () => {
     }
   };
 
-  // --- RENDER ITEM ---
+
   const renderItem = ({ item }: { item: any }) => (
     <AppRecipeCard
       item={item}
       variant="small"
-      style={{ width: CARD_WIDTH, marginBottom: 16 }}
+      style={{ 
+        width: CARD_WIDTH, 
+        marginBottom: 16,
+        backgroundColor: theme.background_contrast, 
+        borderColor: theme.border, 
+        borderWidth: isDarkMode ? 1 : 0, 
+      }}
       onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
     />
   );
 
   return (
-    <AppSafeView style={styles.safeArea}>
-      <View style={styles.container}>
+
+    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         
-        {/* --- HEADER CHUẨN --- */}
+        {/* HEADER */}
         <AppHeader 
           title={categoryTitle || t("category.screen_title")}
           showBack={true}
           onBackPress={() => navigation.goBack()}
-          showSearch={false} // Có thể bật true nếu muốn thêm search trong danh mục
+          showSearch={false}
         />
 
-        {/* --- CONTENT --- */}
+        {/* CONTENT */}
         {loading ? (
           <View style={styles.center}>
-            <ActivityIndicator size="large" color={AppLightColor.primary_color} />
+            <ActivityIndicator size="large" color={theme.primary_color} />
           </View>
         ) : recipes.length === 0 ? (
           // Empty State
           <View style={styles.emptyContainer}>
-            <Ionicons name="file-tray-outline" size={64} color="#ddd" />
-            <AppText style={styles.emptyText}>
-              {t("profile.no_recipes")} {/* Sử dụng key có sẵn: "Chưa có món ăn nào." */}
+            <Ionicons 
+              name="file-tray-outline" 
+              size={64} 
+              color={isDarkMode ? theme.icon : "#ddd"} 
+            />
+            <AppText style={[styles.emptyText, { color: theme.placeholder_text }]}>
+              {t("profile.no_recipes")}
             </AppText>
           </View>
         ) : (
@@ -122,11 +124,17 @@ const CategoryDetailScreen = () => {
 export default CategoryDetailScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#fff" },
-  container: { flex: 1, backgroundColor: "#fff" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-
-  // Empty State
+  safeArea: { 
+    flex: 1 
+  },
+  container: { 
+    flex: 1 
+  },
+  center: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
   emptyContainer: {
     flex: 1,
     alignItems: "center",
@@ -136,6 +144,5 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    color: "#999",
   },
 });

@@ -236,6 +236,7 @@
   },
   "settings": {
     "title": "Cài đặt",
+    "dark_mode": "Chế độ tối",
     "notifications": "Thông báo",
     "support": "Trung tâm trợ giúp",
     "privacy": "Chính sách",
