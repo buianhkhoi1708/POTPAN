@@ -1,21 +1,22 @@
+// Nhóm 9 - IE307.Q12
 import React, { ReactNode } from "react";
 import { StyleSheet, Text, TextProps, TextStyle, StyleProp } from "react-native";
 import { AppFonts } from "../styles/fonts";
 
-type AppTextVariant = "bold" | "medium" | "light" | "title"; // Có thể thêm 'title' nếu cần
+type AppTextVariant = "bold" | "medium" | "light" | "title"; 
 
-// Kế thừa TextProps để dùng được numberOfLines, onPress,...
+
 interface AppTextProps extends TextProps {
   children: ReactNode;
-  style?: StyleProp<TextStyle>; // Dùng StyleProp để hỗ trợ array style
+  style?: StyleProp<TextStyle>; 
   variant?: AppTextVariant;
 }
 
 const AppText = ({ 
   children, 
   style, 
-  variant = "light", // Mặc định là light nếu không truyền
-  ...rest // Các props còn lại (numberOfLines,...)
+  variant = "light", 
+  ...rest 
 }: AppTextProps) => {
   return (
     <Text 
@@ -43,10 +44,10 @@ const styles = StyleSheet.create({
   },
   light: {
     fontSize: 16,
-    fontFamily: AppFonts.RobotoRegular, // Nên thêm font regular nếu có
+    fontFamily: AppFonts.RobotoRegular,
     color: "#000",
   },
-  // Bạn có thể thêm variant 'title' nếu muốn
+ 
   title: {
     fontSize: 24,
     fontWeight: "bold",

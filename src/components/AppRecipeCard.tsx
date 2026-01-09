@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import {
   View,
@@ -11,14 +12,10 @@ import {
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
 import * as Haptics from "expo-haptics";
-
 import AppText from "./AppText";
-import { AppLightColor } from "../styles/color";
 import { formatRecipeTime } from "../utils/format";
-
 import { useAuthStore } from "../store/useAuthStore";
 import { useCollectionStore } from "../store/useCollectionStore";
-// 👇 1. Import Theme Store
 import { useThemeStore } from "../store/useThemeStore";
 
 type Recipe = {
@@ -49,10 +46,7 @@ const AppRecipeCard = ({
 }: RecipeCardProps) => {
   const isFeatured = variant === "featured";
   const { t } = useTranslation();
-  
-  // 👇 2. Lấy Theme
   const { theme, isDarkMode } = useThemeStore();
-
   const { user } = useAuthStore();
   const { savedRecipeIds, toggleSave } = useCollectionStore();
 
@@ -87,34 +81,48 @@ const AppRecipeCard = ({
   if (isFeatured) {
     return (
       <Pressable style={[styles.featuredCard, style]} onPress={onPress}>
-        <View style={[styles.featuredImageWrap, { backgroundColor: isDarkMode ? '#333' : '#f5f5f5' }]}>
+        <View
+          style={[
+            styles.featuredImageWrap,
+            { backgroundColor: isDarkMode ? "#333" : "#f5f5f5" },
+          ]}
+        >
           <Image
             source={{
-              uri: item.thumbnail || "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400",
+              uri:
+                item.thumbnail ||
+                "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400",
             }}
-            // 👇 Giảm độ sáng ảnh ở Dark Mode cho đỡ chói
             style={[styles.image, isDarkMode && { opacity: 0.9 }]}
             resizeMode="cover"
           />
           <HeartButton />
         </View>
-
-        {/* 👇 Container thông tin: Màu nền & Viền động */}
-        <View style={[
-            styles.featuredInfo, 
-            { 
-                backgroundColor: theme.background_contrast, 
-                borderColor: theme.border,
-                // Tắt shadow ở Dark Mode để tránh bị bẩn viền
-                shadowOpacity: isDarkMode ? 0 : 0.1 
-            }
-        ]}>
+        <View
+          style={[
+            styles.featuredInfo,
+            {
+              backgroundColor: theme.background_contrast,
+              borderColor: theme.border,
+              // Tắt shadow ở Dark Mode để tránh bị bẩn viền
+              shadowOpacity: isDarkMode ? 0 : 0.1,
+            },
+          ]}
+        >
           {/* 👇 Title màu động */}
-          <AppText variant="bold" style={[styles.featuredTitle, { color: theme.primary_text }]} numberOfLines={2}>
+          <AppText
+            variant="bold"
+            style={[styles.featuredTitle, { color: theme.primary_text }]}
+            numberOfLines={2}
+          >
             {item.title}
           </AppText>
           {/* 👇 Mô tả màu placeholder */}
-          <AppText variant="light" style={[styles.featuredDesc, { color: theme.placeholder_text }]} numberOfLines={2}>
+          <AppText
+            variant="light"
+            style={[styles.featuredDesc, { color: theme.placeholder_text }]}
+            numberOfLines={2}
+          >
             {item.description || t("recipe_detail.no_description")}
           </AppText>
 
@@ -125,12 +133,18 @@ const AppRecipeCard = ({
                 size={14}
                 color={theme.primary_color} // Dùng màu từ theme thay vì AppLightColor
               />
-              <AppText variant="light" style={[styles.metaText, { color: theme.primary_color }]}>
+              <AppText
+                variant="light"
+                style={[styles.metaText, { color: theme.primary_color }]}
+              >
                 {formattedTime}
               </AppText>
             </View>
             <View style={styles.metaRight}>
-              <AppText variant="light" style={[styles.metaText, { color: theme.primary_color }]}>
+              <AppText
+                variant="light"
+                style={[styles.metaText, { color: theme.primary_color }]}
+              >
                 {item.rating?.toFixed(1)}
               </AppText>
               <Ionicons name="star" size={14} color={theme.primary_color} />
@@ -141,13 +155,19 @@ const AppRecipeCard = ({
     );
   }
 
-  // --- SMALL VARIANT ---
   return (
     <Pressable style={[styles.smallCard, style]} onPress={onPress}>
-      <View style={[styles.smallImageWrap, { backgroundColor: isDarkMode ? '#333' : '#f5f5f5' }]}>
+      <View
+        style={[
+          styles.smallImageWrap,
+          { backgroundColor: isDarkMode ? "#333" : "#f5f5f5" },
+        ]}
+      >
         <Image
           source={{
-            uri: item.thumbnail || "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200",
+            uri:
+              item.thumbnail ||
+              "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200",
           }}
           style={[styles.image, isDarkMode && { opacity: 0.9 }]}
           resizeMode="cover"
@@ -155,16 +175,22 @@ const AppRecipeCard = ({
         <HeartButton isSmall={true} />
       </View>
 
-      <View style={[
-          styles.smallInfo, 
-          { 
-              backgroundColor: theme.background_contrast, 
-              borderColor: theme.border,
-              shadowOpacity: isDarkMode ? 0 : 0.1 
-          }
-      ]}>
+      <View
+        style={[
+          styles.smallInfo,
+          {
+            backgroundColor: theme.background_contrast,
+            borderColor: theme.border,
+            shadowOpacity: isDarkMode ? 0 : 0.1,
+          },
+        ]}
+      >
         <View style={styles.smallTitlePlaceholder}>
-          <AppText variant="bold" style={[styles.smallTitle, { color: theme.primary_text }]} numberOfLines={1}>
+          <AppText
+            variant="bold"
+            style={[styles.smallTitle, { color: theme.primary_text }]}
+            numberOfLines={1}
+          >
             {item.title}
           </AppText>
         </View>
@@ -176,12 +202,18 @@ const AppRecipeCard = ({
               size={12}
               color={theme.primary_color}
             />
-            <AppText variant="light" style={[styles.metaText, { color: theme.primary_color }]}>
+            <AppText
+              variant="light"
+              style={[styles.metaText, { color: theme.primary_color }]}
+            >
               {formattedTime}
             </AppText>
           </View>
           <View style={styles.metaRight}>
-            <AppText variant="light" style={[styles.metaText, { color: theme.primary_color }]}>
+            <AppText
+              variant="light"
+              style={[styles.metaText, { color: theme.primary_color }]}
+            >
               {item.rating?.toFixed(1) || "0.0"}
             </AppText>
             <Ionicons name="star" size={12} color={theme.primary_color} />
@@ -195,21 +227,33 @@ const AppRecipeCard = ({
 export default AppRecipeCard;
 
 const styles = StyleSheet.create({
-  image: { width: "100%", height: "100%" },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
   metaRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  metaLeft: { flexDirection: "row", alignItems: "center", gap: 4 },
-  metaRight: { flexDirection: "row", alignItems: "center", gap: 4 },
+  metaLeft: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    gap: 4 
+  },
+  metaRight: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    gap: 4 
+  },
   metaText: {
     fontSize: 12,
     fontWeight: "500",
   },
 
-  // --- Featured ---
-  featuredCard: { width: FEATURED_WIDTH },
+  featuredCard: { 
+    width: FEATURED_WIDTH 
+  },
   featuredImageWrap: {
     borderRadius: 20,
     overflow: "hidden",
@@ -231,7 +275,6 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: -20,
     marginHorizontal: 12,
-    // Shadow mặc định
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 8,
@@ -240,10 +283,17 @@ const styles = StyleSheet.create({
     height: 140,
     justifyContent: "space-between",
   },
-  featuredTitle: { fontSize: 18, lineHeight: 24, height: 48 },
-  featuredDesc: { fontSize: 13, lineHeight: 18, height: 36 },
+  featuredTitle: { 
+    fontSize: 18, 
+    lineHeight: 24, 
+    height: 48 
+  },
+  featuredDesc: { 
+    fontSize: 13, 
+    lineHeight: 18, 
+    height: 36 
+  },
 
-  // --- Small Card ---
   smallCard: { width: SMALL_WIDTH },
   smallImageWrap: {
     borderRadius: 12,
@@ -266,7 +316,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     marginTop: -12,
-    // Shadow mặc định
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,

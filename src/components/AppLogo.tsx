@@ -1,7 +1,6 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import LogoIcon from "../assets/images/logo.svg"
-
 
 interface AppLogo {
   width: number,

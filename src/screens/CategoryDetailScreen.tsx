@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -53,49 +54,47 @@ const CategoryDetailScreen = () => {
     }
   };
 
-
   const renderItem = ({ item }: { item: any }) => (
     <AppRecipeCard
       item={item}
       variant="small"
-      style={{ 
-        width: CARD_WIDTH, 
+      style={{
+        width: CARD_WIDTH,
         marginBottom: 16,
-        backgroundColor: theme.background_contrast, 
-        borderColor: theme.border, 
-        borderWidth: isDarkMode ? 1 : 0, 
+        backgroundColor: theme.background_contrast,
+        borderColor: theme.border,
+        borderWidth: isDarkMode ? 1 : 0,
       }}
       onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
     />
   );
 
   return (
-
-    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+    <AppSafeView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        
-        {/* HEADER */}
-        <AppHeader 
+        <AppHeader
           title={categoryTitle || t("category.screen_title")}
           showBack={true}
           onBackPress={() => navigation.goBack()}
-          showSearch={false}
+          showSearch={true}
         />
 
-        {/* CONTENT */}
         {loading ? (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={theme.primary_color} />
           </View>
         ) : recipes.length === 0 ? (
-          // Empty State
           <View style={styles.emptyContainer}>
-            <Ionicons 
-              name="file-tray-outline" 
-              size={64} 
-              color={isDarkMode ? theme.icon : "#ddd"} 
+            <Ionicons
+              name="file-tray-outline"
+              size={64}
+              color={isDarkMode ? theme.icon : "#ddd"}
             />
-            <AppText style={[styles.emptyText, { color: theme.placeholder_text }]}>
+            <AppText
+              style={[styles.emptyText, { color: theme.placeholder_text }]}
+            >
               {t("profile.no_recipes")}
             </AppText>
           </View>
@@ -124,16 +123,16 @@ const CategoryDetailScreen = () => {
 export default CategoryDetailScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1 
+  safeArea: {
+    flex: 1,
   },
-  container: { 
-    flex: 1 
+  container: {
+    flex: 1,
   },
-  center: { 
-    flex: 1, 
-    justifyContent: "center", 
-    alignItems: "center" 
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyContainer: {
     flex: 1,

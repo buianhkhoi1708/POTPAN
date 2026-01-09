@@ -76,19 +76,51 @@ const AdminDashboardScreen = () => {
   };
 
   const sendNotification = async (userId: string, title: string, message: string, type: "update" | "warn") => {
-    try {
-      if (!userId) return;
-      await supabase.from("notifications").insert({
-        user_id: userId,
-        title: title,
-        message: message,
-        type: type,
-        is_read: false,
-      });
-    } catch (error) {
-      console.log("Lỗi gửi thông báo:", error);
+  try {
+    if (!userId) return;
+
+    await supabase.from("notifications").insert({
+      user_id: userId,
+      title: title,
+      message: message,
+      type: type,
+      is_read: false,
+    });
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("expo_push_token")
+      .eq("id", userId)
+      .single();
+
+    if (userError || !userData?.expo_push_token) {
+      console.log("User không có token hoặc lỗi lấy token");
+      return; 
     }
-  };
+    const messagePayload = {
+      to: userData.expo_push_token,
+      sound: 'default',
+      title: title,
+      body: message,
+      data: { someData: 'goes here' }, 
+    };
+
+    await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(messagePayload),
+    });
+
+    console.log("Đã gửi Push Notification thành công!");
+
+  } catch (error) {
+    console.log("Lỗi quy trình thông báo:", error);
+  }
+};
 
   const handleApprove = async (item: any) => {
     try {
@@ -174,7 +206,6 @@ const AdminDashboardScreen = () => {
         showSearch={false}
       />
 
-      {/* Tabs */}
       <View style={[styles.tabContainer, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
         <View style={[styles.tabWrapper, { backgroundColor: theme.background_contrast }]}>
           {(["pending", "approved", "users"] as const).map((tab) => (
@@ -200,7 +231,6 @@ const AdminDashboardScreen = () => {
         </View>
       </View>
 
-      {/* Danh sách */}
       {loading ? (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={theme.primary_color} />

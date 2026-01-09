@@ -1,9 +1,8 @@
+// Nhóm 9 - IE307.Q12
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-
-// --- IMPORT SCREENS ---
-import StartingScreen from "../screens/StartingScreen"; 
+import StartingScreen from "../screens/StartingScreen";
 import IntroduceScreen from "../screens/IntroduceScreen";
 import Introduce1Screen from "../screens/Introduce1Screen";
 import Introduce2Screen from "../screens/Introduce2Screen";
@@ -11,8 +10,8 @@ import Introduce3Screen from "../screens/Introduce3Screen";
 import Introduce4Screen from "../screens/Introduce4Screen";
 import LoginScreen from "../screens/AuthScreens/LoginScreen";
 import SigninScreen from "../screens/AuthScreens/SigninScreen";
-
-// Main Screens
+import ForgotPasswordScreen from "../screens/AuthScreens/ForgotPasswordScreen";
+import ResetPasswordScreen from "../screens/AuthScreens/ResetPasswordScreen";
 import HomeScreen from "../screens/HomeScreen";
 import NotificationScreen from "../screens/NotificationScreen";
 import ProfileScreen from "../screens/ProfileScreen";
@@ -34,22 +33,17 @@ import CommunityScreen from "../screens/CommunityScreen";
 import FamousChefsScreen from "../screens/FamousChefsScreen";
 import AdminDashboardScreen from "../screens/AdminDashBoardScreen";
 import FridgeScreen from "../screens/FridgeScreen";
-
-// --- IMPORT TYPES & STORE ---
 import { RootStackParamList } from "../type/types";
 import { useAuthStore } from "../store/useAuthStore";
-
-// --- IMPORT NOTIFICATION & REF ---
 import GlobalNotification from "../components/AppGlobalNotification";
 import { navigationRef } from "../utils/RootNavigation";
 import NotificationManager from "../components/AppNotificationManager";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-// --- 1. AUTH STACK ---
 function AuthStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade" }}>
       <Stack.Screen name="IntroduceScreen" component={IntroduceScreen} />
       <Stack.Screen name="Introduce1Screen" component={Introduce1Screen} />
       <Stack.Screen name="Introduce2Screen" component={Introduce2Screen} />
@@ -57,21 +51,33 @@ function AuthStack() {
       <Stack.Screen name="Introduce4Screen" component={Introduce4Screen} />
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="SigninScreen" component={SigninScreen} />
+      <Stack.Screen
+        name="ResetPasswordScreen"
+        component={ResetPasswordScreen}
+      />
+      <Stack.Screen
+        name="ForgotPasswordScreen"
+        component={ForgotPasswordScreen}
+      />
     </Stack.Navigator>
   );
 }
-
-// --- 2. MAIN STACK ---
 function MainStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade" }}>
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
       <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
-      <Stack.Screen name="NotificationSettingsScreen" component={NotificationSettingsScreen} />
-      <Stack.Screen name="SupportCenterScreen" component={SupportCenterScreen} />
+      <Stack.Screen
+        name="NotificationSettingsScreen"
+        component={NotificationSettingsScreen}
+      />
+      <Stack.Screen
+        name="SupportCenterScreen"
+        component={SupportCenterScreen}
+      />
       <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
       <Stack.Screen name="RecipeDetailScreen" component={RecipeDetailScreen} />
       <Stack.Screen name="SearchResultScreen" component={SearchResultScreen} />
@@ -79,23 +85,30 @@ function MainStack() {
       <Stack.Screen name="FollowScreen" component={FollowScreen} />
       <Stack.Screen name="ReviewScreen" component={ReviewScreen} />
       <Stack.Screen name="CreateRecipeScreen" component={CreateRecipeScreen} />
-      <Stack.Screen name="CollectionDetailScreen" component={CollectionDetailScreen} />
+      <Stack.Screen
+        name="CollectionDetailScreen"
+        component={CollectionDetailScreen}
+      />
       <Stack.Screen name="CategoriesScreen" component={CategoriesScreen} />
-      <Stack.Screen name="CategoryDetailScreen" component={CategoryDetailScreen} />
+      <Stack.Screen
+        name="CategoryDetailScreen"
+        component={CategoryDetailScreen}
+      />
       <Stack.Screen name="CommunityScreen" component={CommunityScreen} />
       <Stack.Screen name="FamousChefsScreen" component={FamousChefsScreen} />
-      <Stack.Screen name="AdminDashboardScreen" component={AdminDashboardScreen} />
+      <Stack.Screen
+        name="AdminDashboardScreen"
+        component={AdminDashboardScreen}
+      />
       <Stack.Screen name="FridgeScreen" component={FridgeScreen} />
     </Stack.Navigator>
   );
 }
 
-// --- 3. ROOT NAVIGATOR ---
 export function AppNavigator() {
-  // [QUAN TRỌNG] Sử dụng Selector để React nhận biết thay đổi ngay lập tức
   const user = useAuthStore((state) => state.user);
   const checkSession = useAuthStore((state) => state.checkSession);
-  
+
   const [isShowSplash, setIsShowSplash] = useState(true);
 
   useEffect(() => {
@@ -117,21 +130,15 @@ export function AppNavigator() {
 
   return (
     <NavigationContainer ref={navigationRef}>
-      
-      {/* Logic hiển thị màn hình chính dựa trên user */}
       {user ? (
         <>
-          {/* Khi đã login, kích hoạt Manager chạy ngầm */}
-          <NotificationManager /> 
+          <NotificationManager />
           <MainStack />
         </>
       ) : (
         <AuthStack />
       )}
-
-      {/* Đặt GlobalNotification ở đây để nó nằm đè lên tất cả */}
       <GlobalNotification />
-      
     </NavigationContainer>
   );
 }

@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 export type RootStackParamList = {
   StartingScreen: undefined;
   IntroduceScreen: undefined;
@@ -29,6 +30,8 @@ export type RootStackParamList = {
   FamousChefsScreen: undefined;
   AdminDashboardScreen: undefined;
   FridgeScreen: undefined;
+  ResetPasswordScreen: undefined;
+  ForgotPasswordScreen: undefined;
 };
 
 export type Recipe = {
@@ -38,10 +41,23 @@ export type Recipe = {
   time: string;
   rating: number;
   description?: string;
+  user_id?: string;
+  difficulty?: string;
 };
 
 export type Chef = {
   id: any;
   avatar_url: string | null;
   full_name: string;
+  username: string | null;
+  followers: number;
+};
+
+export type CategoryItem = {
+  id: string;
+  name: string;
+  dbValue: string;
+  key: string;
+  image: any;
+  recipe_count: number;
 };

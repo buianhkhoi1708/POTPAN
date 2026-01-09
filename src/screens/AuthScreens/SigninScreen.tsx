@@ -46,7 +46,7 @@ const SigninScreen = () => {
     defaultValues: {
       fullName: "",
       email: "",
-      phone: "",
+      phone: "", // Đã thêm lại
       password: "",
       confirmPassword: "",
     },
@@ -54,6 +54,7 @@ const SigninScreen = () => {
 
   const onSubmit = async (data: any) => {
     try {
+      // Truyền data.phone vào hàm đăng ký
       await register(data.email, data.password, data.fullName, data.phone);
 
       Alert.alert(
@@ -80,6 +81,12 @@ const SigninScreen = () => {
     }
   };
 
+  // Hàm debug lỗi khi bấm nút không ăn
+  const onInvalid = (errors: any) => {
+    console.log("Lỗi Validation:", errors);
+    Alert.alert("Thông báo", "Vui lòng kiểm tra lại thông tin nhập (VD: Số điện thoại, Email)");
+  };
+
   const ErrorMsg = ({ name }: { name: string }) => {
     // @ts-ignore
     const error = errors[name];
@@ -96,6 +103,7 @@ const SigninScreen = () => {
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
 
           <View style={[styles.mainContent, { backgroundColor: theme.background }]}>
@@ -106,7 +114,7 @@ const SigninScreen = () => {
             </AppText>
 
             <View style={styles.formContainer}>
-              {/* Họ tên */}
+              {/* 1. Họ tên */}
               <View style={styles.inputWrapper}>
                 <AppText variant="medium" style={[styles.inputLabel, { color: theme.primary_text }]}>
                   {t("auth.fullname_label")}
@@ -116,10 +124,9 @@ const SigninScreen = () => {
                   name="fullName"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <AppTextInput
-        
                       style={[
                         styles.inputValue, 
-                        { backgroundColor: theme.background_contrast, color: theme.primary_text }
+                        { backgroundColor: theme.background, color: theme.primary_text }
                       ]}
                       placeholder={t("auth.fullname_placeholder")}
                       placeholderTextColor={theme.placeholder_text} 
@@ -140,7 +147,7 @@ const SigninScreen = () => {
                 <ErrorMsg name="fullName" />
               </View>
 
-              {/* Email */}
+              {/* 2. Email */}
               <View style={styles.inputWrapper}>
                 <AppText style={[styles.inputLabel, styles.marginTop, { color: theme.primary_text }]}>
                   {t("auth.email_label")}
@@ -152,7 +159,7 @@ const SigninScreen = () => {
                     <AppTextInput
                       style={[
                         styles.inputValue, 
-                        { backgroundColor: theme.background_contrast, color: theme.primary_text }
+                        { backgroundColor: theme.background, color: theme.primary_text }
                       ]}
                       placeholder={t("auth.email_placeholder")}
                       placeholderTextColor={theme.placeholder_text}
@@ -175,7 +182,41 @@ const SigninScreen = () => {
                 <ErrorMsg name="email" />
               </View>
 
-              {/* Mật khẩu */}
+              {/* 3. Số điện thoại (ĐÃ THÊM LẠI) */}
+              <View style={styles.inputWrapper}>
+                <AppText style={[styles.inputLabel, styles.marginTop, { color: theme.primary_text }]}>
+                  {t("auth.phone_label") || "Số điện thoại"}
+                </AppText>
+                <Controller
+                  control={control}
+                  name="phone"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <AppTextInput
+                      style={[
+                        styles.inputValue, 
+                        { backgroundColor: theme.background, color: theme.primary_text }
+                      ]}
+                      placeholder={t("auth.phone_placeholder") || "Nhập số điện thoại"}
+                      placeholderTextColor={theme.placeholder_text}
+                      keyboardType="phone-pad"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      children={
+                        <Ionicons
+                          name="call-outline"
+                          color={theme.icon}
+                          size={25}
+                          style={styles.inputIcon}
+                        />
+                      }
+                    />
+                  )}
+                />
+                <ErrorMsg name="phone" />
+              </View>
+
+              {/* 4. Mật khẩu */}
               <View style={styles.inputWrapper}>
                 <AppText style={[styles.inputLabel, styles.marginTop, { color: theme.primary_text }]}>
                   {t("auth.password_label")}
@@ -187,7 +228,7 @@ const SigninScreen = () => {
                     <AppPasswordInput
                       style={[
                         styles.inputValue, 
-                        { backgroundColor: theme.background_contrast, color: theme.primary_text }
+                        { backgroundColor: theme.background, color: theme.primary_text }
                       ]}
                       placeholder={t("auth.password_placeholder")}
                       placeholderTextColor={theme.placeholder_text}
@@ -207,7 +248,7 @@ const SigninScreen = () => {
                 <ErrorMsg name="password" />
               </View>
 
-              {/* Xác nhận */}
+              {/* 5. Xác nhận mật khẩu */}
               <View style={styles.inputWrapper}>
                 <AppText style={[styles.inputLabel, styles.marginTop, { color: theme.primary_text }]}>
                   {t("auth.confirm_password_label")}
@@ -219,7 +260,7 @@ const SigninScreen = () => {
                     <AppPasswordInput
                       style={[
                         styles.inputValue, 
-                        { backgroundColor: theme.background_contrast, color: theme.primary_text }
+                        { backgroundColor: theme.background, color: theme.primary_text }
                       ]}
                       placeholder={t("auth.password_placeholder")}
                       placeholderTextColor={theme.placeholder_text}
@@ -252,7 +293,8 @@ const SigninScreen = () => {
                 butName={t("auth.register_button")}
                 style={[styles.registerButton, { backgroundColor: theme.primary_color }]}
                 style1={styles.registerButtonText}
-                onPress={handleSubmit(onSubmit)}
+                // Thêm onInvalid để bắt lỗi
+                onPress={handleSubmit(onSubmit, onInvalid)}
               />
             )}
 

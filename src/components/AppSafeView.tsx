@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { ReactNode } from "react";
 import { StyleSheet, StyleProp, ViewStyle } from "react-native";
 import { SafeAreaView, SafeAreaViewProps } from "react-native-safe-area-context";

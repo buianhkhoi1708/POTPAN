@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { View } from "react-native";
 

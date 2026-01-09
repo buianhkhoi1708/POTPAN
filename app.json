@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "POTPAN",
-    "slug": "POTPAN",
+    "slug": "potpan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
@@ -33,6 +33,11 @@
       "expo-font",
       "expo-secure-store",
       "expo-asset"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9d6adb19-b48b-4fe1-b59f-562dddf1e1ab"
+      }
+    }
   }
 }

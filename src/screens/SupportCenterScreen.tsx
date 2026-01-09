@@ -1,60 +1,110 @@
+// Nhóm 9 - IE307.Q12
 import React, { useEffect, useMemo, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from "react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useTranslation } from "react-i18next"; // 👈 Import i18n
-
+import { useTranslation } from "react-i18next";
+import { Ionicons } from "@expo/vector-icons";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppBottomSpace from "../components/AppBottomSpace";
 import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
-import AppHeader from "../components/AppHeader"; // 👈 Header chung
-import { AppLightColor } from "../styles/color";
+import AppHeader from "../components/AppHeader";
+import { useThemeStore } from "../store/useThemeStore";
 
-import SettingNextIcon from "../assets/images/setting-next.svg";
-import Helpcenter1Icon from "../assets/images/helpcenter1.svg";
-import Helpcenter2Icon from "../assets/images/helpcenter2.svg";
-
-const ROBOTO_SLAB_BOLD = "RobotoSlab-Bold";
+if (Platform.OS === "android") {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
 
 type TopTab = "faq" | "contact";
 type SupportSection = "general" | "account" | "service";
-type RowItem = { id: string; title: string };
+type RowItem = { id: string; title: string; answer?: string };
 
 const SupportCenterScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
-  const { t } = useTranslation(); // 👈 Init Hook
-
+  const { t } = useTranslation();
+  const { theme } = useThemeStore();
   const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
   const [topTab, setTopTab] = useState<TopTab>("faq");
   const [section, setSection] = useState<SupportSection>("general");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isFocused) setActiveTab("profile");
   }, [isFocused]);
 
-  // Dùng useMemo với [t] để cập nhật khi đổi ngôn ngữ
   const faqGeneral: RowItem[] = useMemo(
     () => [
-      { id: "q1", title: t("support.faq_general.q1") },
-      { id: "q2", title: t("support.faq_general.q2") },
-      { id: "q3", title: t("support.faq_general.q3") },
+      {
+        id: "q1",
+        title: t("support.faq_general.q1", "Làm sao để tạo công thức?"),
+        answer: t(
+          "support.ans_gen.q1",
+          "Để tạo công thức, bạn vui lòng làm theo các bước:\n1. Vào tab 'Hồ sơ' (Profile).\n2. Bấm vào nút dấu cộng (+) ở góc trên bên phải.\n3. Điền đầy đủ thông tin và bấm 'Lưu'."
+        ),
+      },
+      {
+        id: "q2",
+        title: t("support.faq_general.q2", "Làm sao để lưu công thức?"),
+        answer: t(
+          "support.ans_gen.q2",
+          "Tại màn hình chi tiết công thức, bạn bấm vào biểu tượng 'Bookmark' ở góc trên bên phải để lưu vào bộ sưu tập."
+        ),
+      },
+      {
+        id: "q3",
+        title: t("support.faq_general.q3", "Ứng dụng có miễn phí không?"),
+        answer: t(
+          "support.ans_gen.q3",
+          "Có, Potpan hoàn toàn miễn phí cho người dùng cơ bản."
+        ),
+      },
     ],
     [t]
   );
 
   const faqAccount: RowItem[] = useMemo(
     () => [
-      { id: "a1", title: t("support.faq_account.q1") },
-      { id: "a2", title: t("support.faq_account.q2") },
+      {
+        id: "a1",
+        title: t("support.faq_account.q1", "Làm sao đổi mật khẩu?"),
+        answer: t(
+          "support.ans_acc.q1",
+          "Bạn vào Cài đặt (Settings) -> Chọn 'Đổi mật khẩu' -> Nhập mật khẩu cũ và mới."
+        ),
+      },
+      {
+        id: "a2",
+        title: t("support.faq_account.q2", "Xóa tài khoản thế nào?"),
+        answer: t(
+          "support.ans_acc.q2",
+          "Trong màn hình Cài đặt, cuộn xuống dưới cùng và chọn 'Xóa tài khoản'. Lưu ý hành động này không thể khôi phục."
+        ),
+      },
     ],
     [t]
   );
 
   const faqService: RowItem[] = useMemo(
     () => [
-      { id: "s1", title: t("support.faq_service.q1") },
-      { id: "s2", title: t("support.faq_service.q2") },
+      {
+        id: "s1",
+        title: t("support.faq_service.q1", "Có hỗ trợ giao hàng không?"),
+        answer: t(
+          "support.ans_ser.q1",
+          "Hiện tại Potpan chỉ là nền tảng chia sẻ công thức, chưa hỗ trợ đặt món hay giao hàng."
+        ),
+      },
     ],
     [t]
   );
@@ -67,63 +117,84 @@ const SupportCenterScreen: React.FC = () => {
 
   const contactList = useMemo(
     () => [
-      { id: "c1", title: t("support.contact.web"), kind: "svg1" as const },
-      { id: "c2", title: t("support.contact.fb"), kind: "svg2" as const },
-      { id: "c3", title: t("support.contact.wa"), kind: "png3" as const },
-      { id: "c4", title: t("support.contact.ig"), kind: "png4" as const },
+      {
+        id: "c1",
+        title: t("support.contact.web", "Website"),
+        icon: "globe-outline",
+      },
+      {
+        id: "c2",
+        title: t("support.contact.fb", "Facebook"),
+        icon: "logo-facebook",
+      },
+      {
+        id: "c3",
+        title: t("support.contact.wa", "WhatsApp"),
+        icon: "logo-whatsapp",
+      },
+      {
+        id: "c4",
+        title: t("support.contact.ig", "Instagram"),
+        icon: "logo-instagram",
+      },
     ],
     [t]
   );
 
-  const renderContactIcon = (kind: "svg1" | "svg2" | "png3" | "png4") => {
-    if (kind === "svg1") return <Helpcenter1Icon width={18} height={18} />;
-    if (kind === "svg2") return <Helpcenter2Icon width={18} height={18} />;
-    if (kind === "png3")
-      return (
-        <Image
-          source={require("../assets/images/helpcenter3.png")}
-          style={styles.contactPngIcon}
-        />
-      );
-    return (
-      <Image
-        source={require("../assets/images/helpcenter4.png")}
-        style={styles.contactPngIcon}
-      />
-    );
+  const toggleExpand = (id: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  const TopPill = ({
-    label,
-    active,
-    onPress,
-  }: {
-    label: string;
-    active: boolean;
-    onPress: () => void;
-  }) => (
-    <Pressable style={active ? styles.topPillActive : styles.topPill} onPress={onPress}>
+  const TopPill = ({ label, active, onPress }: any) => (
+    <Pressable
+      style={[
+        styles.topPill,
+        {
+          backgroundColor: active
+            ? theme.primary_color
+            : theme.background_contrast,
+        },
+      ]}
+      onPress={onPress}
+    >
       <AppText
         variant="bold"
-        style={active ? styles.topPillTextActive : styles.topPillText}
+        style={{ color: active ? "#fff" : theme.primary_text, fontSize: 13 }}
       >
         {label}
       </AppText>
     </Pressable>
   );
 
-  const SubPill = ({ label, active, onPress }: { label: string; active?: boolean; onPress: () => void }) => (
-    <Pressable style={active ? styles.subPillActive : styles.subPill} onPress={onPress}>
-      <AppText variant="bold" style={active ? styles.subPillTextActive : styles.subPillText}>
+  const SubPill = ({ label, active, onPress }: any) => (
+    <Pressable
+      style={[
+        styles.subPill,
+        {
+          backgroundColor: active
+            ? theme.primary_color
+            : theme.background_contrast,
+          borderWidth: 1,
+          borderColor: active ? theme.primary_color : theme.border,
+        },
+      ]}
+      onPress={onPress}
+    >
+      <AppText
+        variant="bold"
+        style={{ color: active ? "#fff" : theme.primary_text, fontSize: 12 }}
+      >
         {label}
       </AppText>
     </Pressable>
   );
 
   return (
-    <AppSafeView style={styles.safeArea}>
+    <AppSafeView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
       <View style={styles.container}>
-        {/* HEADER CHUNG */}
         <AppHeader
           title={t("support.title")}
           showBack={true}
@@ -136,61 +207,146 @@ const SupportCenterScreen: React.FC = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.topBlock}>
-            <View style={styles.topRow}>
-              <TopPill label={t("support.tabs.faq")} active={topTab === "faq"} onPress={() => setTopTab("faq")} />
-              <TopPill
-                label={t("support.tabs.contact")}
-                active={topTab === "contact"}
-                onPress={() => setTopTab("contact")}
+          <View style={styles.topRow}>
+            <TopPill
+              label={t("support.tabs.faq")}
+              active={topTab === "faq"}
+              onPress={() => setTopTab("faq")}
+            />
+            <TopPill
+              label={t("support.tabs.contact")}
+              active={topTab === "contact"}
+              onPress={() => setTopTab("contact")}
+            />
+          </View>
+
+          {topTab === "faq" && (
+            <View style={styles.subRow}>
+              <SubPill
+                label={t("support.tabs.general")}
+                active={section === "general"}
+                onPress={() => setSection("general")}
+              />
+              <SubPill
+                label={t("support.tabs.account")}
+                active={section === "account"}
+                onPress={() => setSection("account")}
+              />
+              <SubPill
+                label={t("support.tabs.service")}
+                active={section === "service"}
+                onPress={() => setSection("service")}
               />
             </View>
+          )}
 
-            {topTab === "faq" && (
-              <View style={styles.subRow}>
-                <SubPill label={t("support.tabs.general")} active={section === "general"} onPress={() => setSection("general")} />
-                <SubPill label={t("support.tabs.account")} active={section === "account"} onPress={() => setSection("account")} />
-                <SubPill label={t("support.tabs.service")} active={section === "service"} onPress={() => setSection("service")} />
-              </View>
-            )}
-
-            <View style={styles.searchPill}>
-              <AppText variant="light" style={styles.searchPlaceholder}>
-                {t("support.search_placeholder")}
-              </AppText>
-            </View>
+          <View
+            style={[
+              styles.searchPill,
+              { backgroundColor: theme.background_contrast },
+            ]}
+          >
+            <Ionicons
+              name="search"
+              size={18}
+              color={theme.placeholder_text}
+              style={{ marginRight: 8 }}
+            />
+            <AppText variant="light" style={{ color: theme.placeholder_text }}>
+              {t("support.search_placeholder")}
+            </AppText>
           </View>
 
           {topTab === "faq" ? (
             <View style={styles.listWrap}>
-              {faqList.map((it) => (
-                <Pressable key={it.id} style={styles.faqRow} onPress={() => {}}>
-                  <View style={styles.faqLeft}>
-                    <AppText variant="medium" style={styles.faqText}>
-                      {it.title}
-                    </AppText>
-                  </View>
+              {faqList.map((it) => {
+                const isExpanded = expandedId === it.id;
+                return (
+                  <View
+                    key={it.id}
+                    style={[
+                      styles.faqContainer,
+                      { borderBottomColor: theme.border },
+                    ]}
+                  >
+                    <Pressable
+                      style={styles.faqHeader}
+                      onPress={() => toggleExpand(it.id)}
+                    >
+                      <View style={styles.faqLeft}>
+                        <AppText
+                          variant="medium"
+                          style={{
+                            color: isExpanded
+                              ? theme.primary_color
+                              : theme.primary_text,
+                            fontSize: 14,
+                          }}
+                        >
+                          {it.title}
+                        </AppText>
+                      </View>
+                      <Ionicons
+                        name={isExpanded ? "chevron-up" : "chevron-down"}
+                        size={16}
+                        color={theme.placeholder_text}
+                      />
+                    </Pressable>
 
-                  <View style={styles.faqRight}>
-                    <SettingNextIcon width={16} height={16} />
+                    {isExpanded && (
+                      <View
+                        style={[
+                          styles.faqBody,
+                          { backgroundColor: theme.background_contrast },
+                        ]}
+                      >
+                        <AppText
+                          style={{
+                            color: theme.primary_text,
+                            lineHeight: 22,
+                            fontSize: 14,
+                          }}
+                        >
+                          {it.answer}
+                        </AppText>
+                      </View>
+                    )}
                   </View>
-                </Pressable>
-              ))}
+                );
+              })}
             </View>
           ) : (
             <View style={styles.contactWrap}>
               {contactList.map((c) => (
-                <Pressable key={c.id} style={styles.contactRow} onPress={() => {}}>
+                <Pressable
+                  key={c.id}
+                  style={[
+                    styles.contactRow,
+                    { backgroundColor: theme.background_contrast },
+                  ]}
+                  onPress={() => {}}
+                >
                   <View style={styles.contactLeft}>
-                    <View style={styles.contactIconCircle}>{renderContactIcon(c.kind)}</View>
-                    <AppText variant="bold" style={styles.contactText}>
+                    <View
+                      style={[
+                        styles.contactIconCircle,
+                        { backgroundColor: theme.primary_color },
+                      ]}
+                    >
+                      <Ionicons name={c.icon as any} size={18} color="#fff" />
+                    </View>
+                    <AppText
+                      variant="bold"
+                      style={{ color: theme.primary_text, fontSize: 14 }}
+                    >
                       {c.title}
                     </AppText>
                   </View>
-
-                  <View style={styles.contactRight}>
-                    <SettingNextIcon width={16} height={16} />
-                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={16}
+                    color={theme.placeholder_text}
+                  />
                 </Pressable>
               ))}
             </View>
@@ -203,10 +359,6 @@ const SupportCenterScreen: React.FC = () => {
           activeTab={activeTab}
           onTabPress={(tab) => {
             setActiveTab(tab);
-            if (tab === "home") navigation.navigate("HomeScreen");
-            if (tab === "world") navigation.navigate("CommunityScreen");
-            if (tab === "profile") navigation.navigate("ProfileScreen");
-            if (tab === "category") navigation.navigate("CategoriesScreen");
           }}
         />
       </View>
@@ -217,109 +369,101 @@ const SupportCenterScreen: React.FC = () => {
 export default SupportCenterScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: "#fff" },
-  container: { flex: 1, backgroundColor: "#fff" },
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 10 },
+  safeArea: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 10,
+  },
 
-  // Đã xóa header cũ
-
-  topBlock: { marginTop: 4, alignItems: "center" },
-
-  topRow: { width: "100%", flexDirection: "row", columnGap: 12, marginTop: 6 },
-
+  topRow: {
+    flexDirection: "row",
+    columnGap: 12,
+    marginBottom: 12,
+  },
   topPill: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 999,
-    backgroundColor: "#ffe3e2",
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-  },
-  topPillActive: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 999,
-    backgroundColor: AppLightColor.primary_color,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  topPillText: {
-    fontSize: 13,
-    fontWeight: "900",
-    color: AppLightColor.primary_color,
-    fontFamily: ROBOTO_SLAB_BOLD,
-  },
-  topPillTextActive: {
-    fontSize: 13,
-    fontWeight: "900",
-    color: "#fff",
-    fontFamily: ROBOTO_SLAB_BOLD,
   },
 
-  subRow: { width: "100%", flexDirection: "row", columnGap: 10, marginTop: 10 },
+  subRow: {
+    flexDirection: "row",
+    columnGap: 10,
+    marginBottom: 16,
+  },
   subPill: {
     flex: 1,
-    paddingVertical: 9,
-    borderRadius: 999,
-    backgroundColor: "#ffe3e2",
+    paddingVertical: 8,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-  },
-  subPillActive: { // Thêm style active cho sub pill nếu cần
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 999,
-    backgroundColor: AppLightColor.primary_color,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  subPillText: {
-    fontSize: 12,
-    fontWeight: "900",
-    color: AppLightColor.primary_color,
-    fontFamily: ROBOTO_SLAB_BOLD,
-  },
-  subPillTextActive: {
-    fontSize: 12,
-    fontWeight: "900",
-    color: "#fff",
-    fontFamily: ROBOTO_SLAB_BOLD,
   },
 
   searchPill: {
-    marginTop: 12,
-    width: "100%",
-    backgroundColor: "#ffe3e2",
-    borderRadius: 999,
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 24,
     paddingVertical: 12,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
-  searchPlaceholder: { fontSize: 13, color: "#111", opacity: 0.7 },
 
-  listWrap: { marginTop: 14 },
-  faqRow: {
+  listWrap: {
+    marginTop: 8,
+  },
+
+  faqContainer: {
+    borderBottomWidth: 1,
+    overflow: "hidden",
+  },
+  faqHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 11,
+    paddingVertical: 16,
   },
-  faqLeft: { flex: 1, paddingRight: 10 },
-  faqText: { fontSize: 13, color: "#000000ff" },
-  faqRight: { width: 26, alignItems: "flex-end" },
+  faqBody: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  faqLeft: {
+    flex: 1,
+    paddingRight: 10,
+  },
 
-  contactWrap: { marginTop: 16, rowGap: 12 },
-  contactRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  contactLeft: { flexDirection: "row", alignItems: "center", columnGap: 12 },
+  contactWrap: {
+    marginTop: 8,
+    rowGap: 12,
+  },
+  contactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    borderRadius: 16,
+  },
+  contactLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 12,
+  },
   contactIconCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: AppLightColor.primary_color,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  contactPngIcon: { width: 18, height: 18, resizeMode: "contain" },
-  contactText: { fontSize: 14, fontWeight: "900", color: "#000000ff", fontFamily: ROBOTO_SLAB_BOLD },
-  contactRight: { width: 26, alignItems: "flex-end" },
 });

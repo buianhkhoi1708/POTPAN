@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { Pressable, View, StyleSheet } from "react-native";
 import AppText from "./AppText";
@@ -13,25 +14,37 @@ interface SettingItemProps {
   onPress?: () => void;
 }
 
-const AppSettingItem = React.memo(({ title, Icon, showNext, onPress }: SettingItemProps) => (
-  <Pressable style={styles.itemRow} onPress={onPress}>
-    <View style={styles.leftGroup}>
-      <View style={styles.iconCircle}>
-        <Icon width={18} height={18} />
+const AppSettingItem = React.memo(
+  ({ title, Icon, showNext, onPress }: SettingItemProps) => (
+    <Pressable style={styles.itemRow} onPress={onPress}>
+      <View style={styles.leftGroup}>
+        <View style={styles.iconCircle}>
+          <Icon width={18} height={18} />
+        </View>
+        <AppText variant="bold" style={styles.itemText}>
+          {title}
+        </AppText>
       </View>
-      <AppText variant="bold" style={styles.itemText}>{title}</AppText>
-    </View>
-    {showNext && (
-      <View style={styles.nextWrap}>
-        <NextIcon width={16} height={16} />
-      </View>
-    )}
-  </Pressable>
-));
+      {showNext && (
+        <View style={styles.nextWrap}>
+          <NextIcon width={16} height={16} />
+        </View>
+      )}
+    </Pressable>
+  )
+);
 
 const styles = StyleSheet.create({
-  itemRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  leftGroup: { flexDirection: "row", alignItems: "center", columnGap: 14 },
+  itemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  leftGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 14,
+  },
   iconCircle: {
     width: 36,
     height: 36,
@@ -46,7 +59,10 @@ const styles = StyleSheet.create({
     color: AppLightColor.primary_color,
     fontFamily: ROBOTO_SLAB_BOLD,
   },
-  nextWrap: { width: 24, alignItems: "flex-end" },
+  nextWrap: {
+    width: 24,
+    alignItems: "flex-end",
+  },
 });
 
 export default AppSettingItem;

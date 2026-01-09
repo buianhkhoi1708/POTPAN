@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -8,63 +9,94 @@ import {
   Alert,
   Dimensions,
   Animated,
-  Platform,
+  FlatList,
+  StatusBar,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Svg, { Circle, G } from "react-native-svg"; 
-import { useKeepAwake } from "expo-keep-awake"; 
-
+import Svg, { Circle, G } from "react-native-svg";
+import { useKeepAwake } from "expo-keep-awake";
 import AppSafeView from "./AppSafeView";
 import AppText from "./AppText";
+import { useThemeStore } from "../store/useThemeStore";
 
-const PRIMARY_COLOR = "#FF6967";
 const { width } = Dimensions.get("window");
-const TIMER_RADIUS = 80;
-const TIMER_STROKE = 10;
+const TIMER_RADIUS = 90;
+const TIMER_STROKE = 12;
 const TIMER_CIRCUMFERENCE = 2 * Math.PI * TIMER_RADIUS;
 
-// --- COMPONENT: CIRCULAR TIMER (Hiện đại) ---
-const ModernTimer = ({ initialTime, onComplete, isActive, onToggle }: any) => {
-  const [timeLeft, setTimeLeft] = useState(initialTime);
-  const animatedValue = useRef(new Animated.Value(0)).current;
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+const useManualTimer = () => {
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [initialTime, setInitialTime] = useState(1);
+  const [isActive, setIsActive] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Hiệu ứng vòng tròn
-  useEffect(() => {
-    const progress = 1 - timeLeft / (initialTime || 1);
-    Animated.timing(animatedValue, {
-      toValue: progress,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start();
-  }, [timeLeft, initialTime]);
-
-  // Logic đếm ngược
   useEffect(() => {
     if (isActive && timeLeft > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev: number) => {
+      intervalRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
           if (prev <= 1) {
-            clearInterval(timerRef.current!);
-            onComplete();
+            clearInterval(intervalRef.current!);
+            setIsActive(false);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Alert.alert("⏰ Hết giờ!", "Đã xong bước này chưa?");
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
     } else {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setIsActive(false);
     }
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isActive]);
 
+  const toggleTimer = () => {
+    if (timeLeft === 0) return;
+    setIsActive(!isActive);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
   const addTime = (seconds: number) => {
-    setTimeLeft((prev: number) => prev + seconds);
+    if (isActive) setIsActive(false);
+
+    setTimeLeft((prev) => {
+      const newVal = Math.max(0, prev + seconds);
+      if (newVal > initialTime || prev === 0) {
+        setInitialTime(newVal);
+      }
+      return newVal;
+    });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
+
+  const resetTimer = () => {
+    setIsActive(false);
+    setTimeLeft(0);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+  };
+
+  return { timeLeft, initialTime, isActive, toggleTimer, addTime, resetTimer };
+};
+
+const ManualTimer = ({ theme, isDarkMode }: any) => {
+  const { timeLeft, initialTime, isActive, toggleTimer, addTime, resetTimer } =
+    useManualTimer();
+
+  const animatedValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const max = initialTime > 0 ? initialTime : 1;
+    const progress = timeLeft / max;
+    Animated.timing(animatedValue, {
+      toValue: progress,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, [timeLeft, initialTime]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -74,11 +106,10 @@ const ModernTimer = ({ initialTime, onComplete, isActive, onToggle }: any) => {
       .padStart(2, "0")}`;
   };
 
-  // Animated Circle Props
   const AnimatedCircle = Animated.createAnimatedComponent(Circle);
   const strokeDashoffset = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [TIMER_CIRCUMFERENCE, 0], // Chạy ngược hoặc xuôi tùy ý
+    outputRange: [TIMER_CIRCUMFERENCE, 0],
   });
 
   return (
@@ -95,21 +126,25 @@ const ModernTimer = ({ initialTime, onComplete, isActive, onToggle }: any) => {
               TIMER_RADIUS + TIMER_STROKE
             }`}
           >
-            {/* Vòng nền mờ */}
             <Circle
               cx={TIMER_RADIUS + TIMER_STROKE}
               cy={TIMER_RADIUS + TIMER_STROKE}
               r={TIMER_RADIUS}
-              stroke="#FFE0E0"
+              stroke={isDarkMode ? "#333" : "#F0F0F0"}
               strokeWidth={TIMER_STROKE}
               fill="transparent"
             />
-            {/* Vòng chạy */}
             <AnimatedCircle
               cx={TIMER_RADIUS + TIMER_STROKE}
               cy={TIMER_RADIUS + TIMER_STROKE}
               r={TIMER_RADIUS}
-              stroke={PRIMARY_COLOR}
+              stroke={
+                isActive
+                  ? theme.primary_color
+                  : timeLeft > 0
+                  ? "#FFB74D"
+                  : "transparent"
+              }
               strokeWidth={TIMER_STROKE}
               strokeLinecap="round"
               fill="transparent"
@@ -119,64 +154,94 @@ const ModernTimer = ({ initialTime, onComplete, isActive, onToggle }: any) => {
           </G>
         </Svg>
 
-        {/* Số giờ ở giữa */}
         <View style={styles.timerCenter}>
-          <AppText variant="bold" style={styles.timerDigits}>
+          <AppText
+            variant="bold"
+            style={[styles.timerDigits, { color: theme.primary_text }]}
+          >
             {formatTime(timeLeft)}
           </AppText>
-          <AppText style={styles.timerLabel}>phút : giây</AppText>
+          {timeLeft === 0 ? (
+            <AppText
+              style={[styles.timerLabel, { color: theme.placeholder_text }]}
+            >
+              Cài đặt giờ
+            </AppText>
+          ) : (
+            <TouchableOpacity onPress={resetTimer} style={{ marginTop: 4 }}>
+              <AppText style={{ color: "red", fontWeight: "bold" }}>
+                RESET
+              </AppText>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
-      {/* Control Buttons */}
       <View style={styles.timerControls}>
         <TouchableOpacity
-          style={styles.controlSmallBtn}
-          onPress={() => addTime(30)}
+          style={[
+            styles.controlSmallBtn,
+            { backgroundColor: theme.background_contrast },
+          ]}
+          onPress={() => addTime(10)}
         >
-          <AppText style={styles.controlSmallText}>+30s</AppText>
+          <AppText
+            style={[styles.controlSmallText, { color: theme.primary_text }]}
+          >
+            +10s
+          </AppText>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={onToggle}
-          style={[styles.playPauseBtn, isActive && styles.pauseBtn]}
+          onPress={toggleTimer}
+          disabled={timeLeft === 0}
+          style={[
+            styles.playPauseBtn,
+            {
+              backgroundColor:
+                timeLeft === 0
+                  ? theme.border
+                  : isActive
+                  ? "#FFB74D"
+                  : theme.primary_color,
+            },
+          ]}
         >
-          <Ionicons name={isActive ? "pause" : "play"} size={32} color="#fff" />
+          <Ionicons name={isActive ? "pause" : "play"} size={36} color="#fff" />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.controlSmallBtn}
+          style={[
+            styles.controlSmallBtn,
+            { backgroundColor: theme.background_contrast },
+          ]}
           onPress={() => addTime(60)}
         >
-          <AppText style={styles.controlSmallText}>+1m</AppText>
+          <AppText
+            style={[styles.controlSmallText, { color: theme.primary_text }]}
+          >
+            +1m
+          </AppText>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-// --- MAIN COMPONENT ---
-type Props = {
-  visible: boolean;
-  onClose: () => void;
-  onCompleteCooking: (timeUsed: number) => void;
-  item: any;
-};
-
-// IE307.Q12_Nhom9
-
 const CookingModeModal = ({
   visible,
   onClose,
   onCompleteCooking,
   item,
-}: Props) => {
-  useKeepAwake(); 
+}: any) => {
+  useKeepAwake();
+  const { theme, isDarkMode } = useThemeStore();
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([]);
   const [isIngredientsChecked, setIsIngredientsChecked] = useState(false);
-  const [stepTimerActive, setStepTimerActive] = useState(false);
+
+  const flatListRef = useRef<FlatList>(null);
   const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
@@ -195,82 +260,145 @@ const CookingModeModal = ({
     );
   };
 
-  const goToNextStep = () => {
-    if (currentStepIndex < (item.steps?.length || 0) - 1) {
-      setCurrentStepIndex((prev) => prev + 1);
-      setStepTimerActive(false); // Reset timer state cho bước mới
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } else {
-      const timeUsed = (Date.now() - startTimeRef.current) / 1000;
-      onCompleteCooking(timeUsed);
-    }
+  const finishCooking = () => {
+    const timeUsed = (Date.now() - startTimeRef.current) / 1000;
+    onCompleteCooking(timeUsed);
   };
 
-  const parseTimeToSeconds = (timeString: string) => {
-    if (!timeString) return 0;
-    const match = timeString.match(/(\d+)/);
-    // Nếu trong string có chữ "phút" hoặc mặc định là phút -> * 60
-    // Nếu muốn chính xác hơn có thể check keyword "giây"
-    return match ? parseInt(match[0]) * 60 : 0;
-  };
+  const renderStepItem = ({
+    item: step,
+    index,
+  }: {
+    item: any;
+    index: number;
+  }) => {
+    return (
+      <View style={{ width: width, padding: 20 }}>
+        <View
+          style={[
+            styles.stepCard,
+            { backgroundColor: theme.background_contrast },
+          ]}
+        >
+          <View style={styles.stepCardHeader}>
+            <View
+              style={[
+                styles.stepBadge,
+                { backgroundColor: theme.primary_color },
+              ]}
+            >
+              <AppText style={styles.stepBadgeText}>#{index + 1}</AppText>
+            </View>
+            <AppText
+              variant="bold"
+              style={[styles.stepName, { color: theme.primary_text }]}
+            >
+              {step.title || `Bước ${index + 1}`}
+            </AppText>
+          </View>
 
-  // Tính progress bar tổng thể
-  const totalSteps = item.steps?.length || 1;
-  const progressPercent = ((currentStepIndex + 1) / totalSteps) * 100;
+          <ScrollView
+            style={{ maxHeight: 150 }}
+            showsVerticalScrollIndicator={true}
+          >
+            <AppText
+              style={[styles.stepDescription, { color: theme.primary_text }]}
+            >
+              {step.content}
+            </AppText>
+          </ScrollView>
+        </View>
+
+        <ManualTimer
+          key={`manual-timer-${index}`}
+          theme={theme}
+          isDarkMode={isDarkMode}
+        />
+      </View>
+    );
+  };
 
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={onClose}>
-      <AppSafeView style={styles.container}>
-        {/* Header với Progress Bar */}
-        <View style={styles.header}>
+      <AppSafeView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
+        <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
+
+        <View style={[styles.header, { backgroundColor: theme.background }]}>
           <View style={styles.headerTopRow}>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={20} color="#333" />
+            <TouchableOpacity
+              onPress={onClose}
+              style={[
+                styles.closeBtn,
+                { backgroundColor: theme.background_contrast },
+              ]}
+            >
+              <Ionicons name="close" size={24} color={theme.primary_text} />
             </TouchableOpacity>
-            <View style={styles.headerTitleWrap}>
+
+            <View style={styles.progressContainer}>
+              <View
+                style={[
+                  styles.progressBarTrack,
+                  { backgroundColor: theme.background_contrast },
+                ]}
+              >
+                <Animated.View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${
+                        isIngredientsChecked
+                          ? ((currentStepIndex + 1) /
+                              (item.steps?.length || 1)) *
+                            100
+                          : 0
+                      }%`,
+                      backgroundColor: theme.primary_color,
+                    },
+                  ]}
+                />
+              </View>
               <AppText
-                variant="bold"
-                style={styles.headerTitle}
-                numberOfLines={1}
+                style={[styles.progressText, { color: theme.placeholder_text }]}
               >
                 {isIngredientsChecked
-                  ? `Bước ${currentStepIndex + 1}/${totalSteps}`
+                  ? `Bước ${currentStepIndex + 1}/${item.steps?.length}`
                   : "Chuẩn bị"}
               </AppText>
             </View>
-            <View style={{ width: 32 }} />
-          </View>
-
-          <View style={styles.progressBarTrack}>
-            <View
-              style={[
-                styles.progressBarFill,
-                { width: `${isIngredientsChecked ? progressPercent : 0}%` },
-              ]}
-            />
           </View>
         </View>
 
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* GIAI ĐOẠN 1: CHECKLIST NGUYÊN LIỆU */}
-          {!isIngredientsChecked ? (
-            <View style={styles.cardContainer}>
+        {!isIngredientsChecked ? (
+          <ScrollView
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
+            <View
+              style={[
+                styles.cardContainer,
+                { backgroundColor: theme.background_contrast },
+              ]}
+            >
               <View style={styles.cardHeader}>
                 <MaterialCommunityIcons
                   name="basket-outline"
                   size={28}
-                  color={PRIMARY_COLOR}
+                  color={theme.primary_color}
                 />
-                <AppText variant="bold" style={styles.cardTitle}>
-                  Nguyên liệu cần có
+                <AppText
+                  variant="bold"
+                  style={[styles.cardTitle, { color: theme.primary_text }]}
+                >
+                  Nguyên liệu
                 </AppText>
               </View>
-
-              <AppText style={styles.hintText}>
-                Chạm để đánh dấu những gì bạn đã chuẩn bị
+              <AppText
+                style={[styles.hintText, { color: theme.placeholder_text }]}
+              >
+                Kiểm tra nguyên liệu trước khi nấu
               </AppText>
 
               {item.ingredients?.map((ing: any, index: number) => {
@@ -280,7 +408,8 @@ const CookingModeModal = ({
                     key={index}
                     style={[
                       styles.ingredientItem,
-                      isChecked && styles.ingredientItemChecked,
+                      { borderBottomColor: theme.border },
+                      isChecked && { opacity: 0.5 },
                     ]}
                     onPress={() => toggleIngredientCheck(index.toString())}
                     activeOpacity={0.7}
@@ -288,23 +417,33 @@ const CookingModeModal = ({
                     <View
                       style={[
                         styles.checkbox,
-                        isChecked && styles.checkboxActive,
+                        { borderColor: theme.border },
+                        isChecked && {
+                          backgroundColor: theme.primary_color,
+                          borderColor: theme.primary_color,
+                        },
                       ]}
                     >
                       {isChecked && (
-                        <Ionicons name="checkmark" size={14} color="#fff" />
+                        <Ionicons name="checkmark" size={16} color="#fff" />
                       )}
                     </View>
                     <View style={{ flex: 1 }}>
                       <AppText
                         style={[
                           styles.ingText,
-                          isChecked && styles.ingTextChecked,
+                          { color: theme.primary_text },
+                          isChecked && { textDecorationLine: "line-through" },
                         ]}
                       >
                         {ing.name}
                       </AppText>
-                      <AppText style={styles.ingAmount}>
+                      <AppText
+                        style={[
+                          styles.ingAmount,
+                          { color: theme.primary_color },
+                        ]}
+                      >
                         {ing.amount || ing.quantity}
                       </AppText>
                     </View>
@@ -317,9 +456,16 @@ const CookingModeModal = ({
               <TouchableOpacity
                 style={[
                   styles.bigButton,
-                  checkedIngredients.length === item.ingredients?.length
-                    ? styles.btnPrimary
-                    : styles.btnDisabled,
+                  {
+                    backgroundColor:
+                      checkedIngredients.length === item.ingredients?.length
+                        ? theme.primary_color
+                        : theme.background,
+                  },
+                  checkedIngredients.length !== item.ingredients?.length && {
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                  },
                 ]}
                 onPress={() => {
                   if (checkedIngredients.length === item.ingredients?.length) {
@@ -329,179 +475,195 @@ const CookingModeModal = ({
                     );
                   } else {
                     Alert.alert(
-                      "Chưa xong!",
-                      "Bạn cần chuẩn bị đủ nguyên liệu trước khi bắt đầu nấu."
+                      "Khoan đã!",
+                      "Bạn cần chuẩn bị đủ nguyên liệu trước."
                     );
                   }
                 }}
               >
-                <AppText variant="bold" style={styles.bigButtonText}>
+                <AppText
+                  variant="bold"
+                  style={[
+                    styles.bigButtonText,
+                    {
+                      color:
+                        checkedIngredients.length === item.ingredients?.length
+                          ? "#fff"
+                          : theme.placeholder_text,
+                    },
+                  ]}
+                >
                   BẮT ĐẦU NẤU
                 </AppText>
-                <Ionicons name="arrow-forward" size={20} color="#fff" />
+                <Ionicons
+                  name="arrow-forward"
+                  size={20}
+                  color={
+                    checkedIngredients.length === item.ingredients?.length
+                      ? "#fff"
+                      : theme.placeholder_text
+                  }
+                />
               </TouchableOpacity>
             </View>
-          ) : (
-            /* GIAI ĐOẠN 2: CÁC BƯỚC NẤU (STEP BY STEP) */
-            <View>
-              {/* Step Card */}
-              <View style={styles.stepCard}>
-                <View style={styles.stepCardHeader}>
-                  <View style={styles.stepBadge}>
-                    <AppText style={styles.stepBadgeText}>
-                      #{currentStepIndex + 1}
-                    </AppText>
-                  </View>
-                  <AppText variant="bold" style={styles.stepName}>
-                    {item.steps[currentStepIndex]?.title ||
-                      `Bước ${currentStepIndex + 1}`}
-                  </AppText>
-                </View>
+          </ScrollView>
+        ) : (
+          <View style={{ flex: 1 }}>
+            <FlatList
+              ref={flatListRef}
+              data={item.steps}
+              renderItem={renderStepItem}
+              keyExtractor={(_, index) => index.toString()}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={(e) => {
+                const newIndex = Math.round(
+                  e.nativeEvent.contentOffset.x / width
+                );
+                if (newIndex !== currentStepIndex) {
+                  setCurrentStepIndex(newIndex);
+                  Haptics.selectionAsync();
+                }
+              }}
+            />
 
-                <AppText style={styles.stepDescription}>
-                  {item.steps[currentStepIndex]?.content}
-                </AppText>
-              </View>
-
-              {/* Timer (Chỉ hiện nếu bước này có thời gian) */}
-              {parseTimeToSeconds(item.steps[currentStepIndex]?.time) > 0 ? (
-                <ModernTimer
-                  key={currentStepIndex} // Reset timer khi đổi bước
-                  initialTime={parseTimeToSeconds(
-                    item.steps[currentStepIndex].time
-                  )}
-                  onComplete={() => {
-                    Haptics.notificationAsync(
-                      Haptics.NotificationFeedbackType.Warning
-                    );
-                    Alert.alert("Hết giờ!", "Đã xong bước này chưa?");
-                  }}
-                  isActive={stepTimerActive}
-                  onToggle={() => setStepTimerActive(!stepTimerActive)}
-                />
-              ) : (
-                <View style={styles.noTimerPlaceholder}>
-                  <Ionicons name="infinite" size={32} color="#ddd" />
-                  <AppText style={{ color: "#999", marginTop: 8 }}>
-                    Bước này không giới hạn thời gian
-                  </AppText>
-                </View>
-              )}
-
-              {/* Navigation Buttons */}
-              <View style={styles.navRow}>
-                <TouchableOpacity
-                  style={[styles.navBtn, styles.navBtnSecondary]}
-                  disabled={currentStepIndex === 0}
-                  onPress={() => {
-                    setCurrentStepIndex((p) => p - 1);
-                    setStepTimerActive(false);
-                  }}
-                >
-                  <Ionicons name="arrow-back" size={20} color="#666" />
-                  <AppText style={styles.navBtnTextSec}>Quay lại</AppText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.navBtn, styles.navBtnPrimary]}
-                  onPress={goToNextStep}
-                >
-                  <AppText style={styles.navBtnTextPri}>
-                    {currentStepIndex === (item.steps?.length || 0) - 1
-                      ? "HOÀN THÀNH"
-                      : "TIẾP THEO"}
-                  </AppText>
-                  <Ionicons
-                    name={
-                      currentStepIndex === (item.steps?.length || 0) - 1
-                        ? "checkmark"
-                        : "arrow-forward"
-                    }
-                    size={20}
-                    color="#fff"
+            <View
+              style={[styles.footerControls, { borderTopColor: theme.border }]}
+            >
+              <View style={styles.dotsContainer}>
+                {item.steps.map((_: any, i: number) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor:
+                          i === currentStepIndex
+                            ? theme.primary_color
+                            : theme.border,
+                      },
+                    ]}
                   />
-                </TouchableOpacity>
+                ))}
               </View>
-            </View>
-          )}
 
-          <View style={{ height: 40 }} />
-        </ScrollView>
+              {currentStepIndex === item.steps.length - 1 && (
+                <TouchableOpacity
+                  style={[
+                    styles.finishBtn,
+                    { backgroundColor: theme.primary_color },
+                  ]}
+                  onPress={finishCooking}
+                >
+                  <AppText variant="bold" style={{ color: "#fff" }}>
+                    HOÀN THÀNH
+                  </AppText>
+                  <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
       </AppSafeView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F9FAFB" },
-
-  // Header
-  header: { backgroundColor: "#fff", paddingTop: 10, paddingBottom: 0 },
+  container: {
+    flex: 1,
+  },
+  header: {
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
   headerTopRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    paddingHorizontal: 20,
   },
   closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F0F0F0",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitleWrap: { flex: 1, alignItems: "center" },
-  headerTitle: { fontSize: 16, color: "#333" },
-  progressBarTrack: { height: 4, backgroundColor: "#E0E0E0", width: "100%" },
-  progressBarFill: { height: "100%", backgroundColor: PRIMARY_COLOR },
 
-  content: { padding: 20 },
+  progressContainer: {
+    flex: 1,
+    marginLeft: 16,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  progressBarTrack: {
+    flex: 1,
+    height: 6,
+    borderRadius: 3,
+    overflow: "hidden",
+    marginRight: 10,
+  },
+  progressBarFill: {
+    height: "100%",
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: "bold",
+  },
 
-  // Card Style (Dùng chung cho Ingredients)
-  cardContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
+  content: {
     padding: 20,
+  },
+
+  // Card
+  cardContainer: {
+    borderRadius: 24,
+    padding: 24,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 10,
-    elevation: 3,
+    elevation: 5,
   },
-  cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
-  cardTitle: { fontSize: 20, color: "#333", marginLeft: 8 },
-  hintText: { color: "#888", marginBottom: 20, fontSize: 14 },
-
-  // Ingredients List
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  cardTitle: {
+    fontSize: 20,
+    marginLeft: 8,
+  },
+  hintText: {
+    marginBottom: 20,
+    fontSize: 14,
+  },
   ingredientItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
   },
-  ingredientItemChecked: { opacity: 0.6 },
   checkbox: {
     width: 24,
     height: 24,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: "#DDD",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 14,
   },
-  checkboxActive: {
-    backgroundColor: PRIMARY_COLOR,
-    borderColor: PRIMARY_COLOR,
+  ingText: {
+    fontSize: 16,
+    flex: 1,
   },
-  ingText: { fontSize: 16, color: "#333", flex: 1 },
-  ingTextChecked: { textDecorationLine: "line-through", color: "#999" },
-  ingAmount: { fontSize: 14, color: PRIMARY_COLOR, fontWeight: "600" },
+  ingAmount: {
+    fontSize: 15,
+    fontWeight: "bold",
+  },
 
-  // Big Button
   bigButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -509,29 +671,19 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     gap: 10,
+    marginTop: 10,
   },
-  btnPrimary: {
-    backgroundColor: PRIMARY_COLOR,
-    shadowColor: PRIMARY_COLOR,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+  bigButtonText: {
+    fontSize: 16,
+    letterSpacing: 0.5,
   },
-  btnDisabled: { backgroundColor: "#CCC" },
-  bigButtonText: { color: "#fff", fontSize: 16, letterSpacing: 0.5 },
 
-  // Step View
   stepCard: {
-    backgroundColor: "#fff",
     borderRadius: 24,
     padding: 24,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 6,
+    height: "40%",
+    justifyContent: "center",
   },
   stepCardHeader: {
     flexDirection: "row",
@@ -539,91 +691,103 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   stepBadge: {
-    backgroundColor: "#FFF0F0",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginRight: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginRight: 12,
   },
-  stepBadgeText: { color: PRIMARY_COLOR, fontWeight: "bold", fontSize: 14 },
-  stepName: { fontSize: 18, color: "#333", flex: 1 },
-  stepDescription: { fontSize: 17, color: "#444", lineHeight: 28 },
+  stepBadgeText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  stepName: {
+    fontSize: 20,
+    flex: 1,
+  },
+  stepDescription: {
+    fontSize: 16,
+    lineHeight: 26,
+  },
 
-  // Timer
-  timerWrapper: { alignItems: "center", marginBottom: 30 },
+  timerWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
   svgContainer: {
     position: "relative",
     alignItems: "center",
     justifyContent: "center",
   },
-  timerCenter: { position: "absolute", alignItems: "center" },
-  timerDigits: { fontSize: 36, color: "#333", fontVariant: ["tabular-nums"] }, // tabular-nums giúp số không bị nhảy
-  timerLabel: { fontSize: 12, color: "#999" },
-
+  timerCenter: {
+    position: "absolute",
+    alignItems: "center",
+  },
+  timerDigits: {
+    fontSize: 48,
+    fontVariant: ["tabular-nums"],
+  },
+  timerLabel: {
+    fontSize: 14,
+    marginTop: 4,
+  },
   timerControls: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 24,
-    gap: 20,
+    gap: 24,
   },
   playPauseBtn: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: PRIMARY_COLOR,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: PRIMARY_COLOR,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
   },
-  pauseBtn: { backgroundColor: "#FFB74D" }, // Màu cam khi pause
   controlSmallBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#F0F0F0",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
   },
-  controlSmallText: { fontSize: 13, fontWeight: "bold", color: "#666" },
-
-  noTimerPlaceholder: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 30,
-    marginBottom: 20,
-    opacity: 0.5,
+  controlSmallText: {
+    fontSize: 14,
+    fontWeight: "bold",
   },
 
-  // Nav Buttons Row
-  navRow: { flexDirection: "row", gap: 16 },
-  navBtn: {
-    flex: 1,
+  footerControls: {
+    position: "absolute",
+    bottom: 20,
+    left: 0,
+    right: 0,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 16,
+    justifyContent: "space-between",
+    paddingHorizontal: 30,
+  },
+  dotsContainer: {
+    flexDirection: "row",
     gap: 8,
   },
-  navBtnSecondary: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
-  navBtnPrimary: {
-    backgroundColor: PRIMARY_COLOR,
-    shadowColor: PRIMARY_COLOR,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
+  finishBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+    gap: 8,
   },
-  navBtnTextSec: { color: "#666", fontWeight: "600", fontSize: 15 },
-  navBtnTextPri: { color: "#fff", fontWeight: "bold", fontSize: 15 },
 });
 
 export default CookingModeModal;

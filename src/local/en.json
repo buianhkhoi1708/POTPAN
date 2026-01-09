@@ -23,6 +23,8 @@
     "no_results": "No results",
     "clear_all": "Clear all",
     "empty_notifications": "No notifications yet.",
+    "save_changes": "Save changes",
+    "joined": "Joined",
     "difficulty": {
       "easy": "Easy",
       "medium": "Medium",
@@ -31,6 +33,19 @@
     "exit": "Confirm"
   },
   "auth": {
+    "reset_password_title": "Reset Password",
+    "enter_otp_msg": "Enter the OTP sent to your email and your new password.",
+    "fill_all": "Please fill in all fields",
+    "password_mismatch": "Passwords do not match",
+    "password_reset_success": "Password reset successfully! Please login again.",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "confirm_reset": "Reset Password",
+    "forgot_password_title": "Forgot Password",
+    "forgot_password_desc": "Enter your registered email address. We will send you a verification code to reset your password.",
+    "email_required": "Please enter your email",
+    "otp_sent": "A verification code has been sent to your email.",
+    "send_code": "Send Verification Code",
     "login_title": "LOGIN",
     "register_title": "SIGN IN",
     "login_button": "Login",
@@ -88,6 +103,7 @@
     "over_60": "> 60 mins"
   },
   "search": {
+    "placeholderfol": "Search people",
     "placeholder": "Search recipes, description...",
     "reset": "Reset",
     "apply": "Search",

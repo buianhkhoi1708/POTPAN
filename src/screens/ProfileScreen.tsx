@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -12,20 +13,15 @@ import {
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-
-// --- STORES & COMPONENTS ---
 import { useAuthStore } from "../store/useAuthStore";
 import { useRecipeStore } from "../store/useRecipeStore";
 import { useCollectionStore } from "../store/useCollectionStore";
 import { supabase } from "../config/supabaseClient";
-
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppMainNavBar, { MainTabKey } from "../components/AppMainNavBar";
 import AppRecipeCard from "../components/AppRecipeCard";
 import AppCollectionModal from "../components/AppCollectionModal";
-
-// 👇 1. Import Theme Store
 import { useThemeStore } from "../store/useThemeStore";
 
 const { width } = Dimensions.get("window");
@@ -35,40 +31,43 @@ const ProfileScreen = () => {
   const navigation = useNavigation<any>();
   const { user, profile, fetchUserProfile } = useAuthStore();
   const { t } = useTranslation();
-
-  // 👇 2. Lấy Theme
   const { theme, isDarkMode } = useThemeStore();
-
   const {
     myRecipes,
     fetchMyRecipes,
     isLoading: recipeLoading,
   } = useRecipeStore();
-  
   const {
     myCollections,
     fetchMyCollections,
     isLoading: collectionLoading,
     deleteCollection,
   } = useCollectionStore();
-
-  const [activeTab, setActiveTab] = useState<"recipes" | "favorites">("recipes");
+  const [activeTab, setActiveTab] = useState<"recipes" | "favorites">(
+    "recipes"
+  );
   const [activeNavTab, setActiveNavTab] = useState<MainTabKey>("profile");
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-
-  // --- LẤY DỮ LIỆU ---
   const fetchSocialCounts = async () => {
     if (!user) return;
     try {
       const [followersRes, followingRes] = await Promise.all([
-        supabase.from("follows").select("*", { count: "exact", head: true }).eq("following_id", user.id),
-        supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", user.id),
+        supabase
+          .from("follows")
+          .select("*", { count: "exact", head: true })
+          .eq("following_id", user.id),
+        supabase
+          .from("follows")
+          .select("*", { count: "exact", head: true })
+          .eq("follower_id", user.id),
       ]);
       if (followersRes.count !== null) setFollowerCount(followersRes.count);
       if (followingRes.count !== null) setFollowingCount(followingRes.count);
-    } catch (error) { console.log("Lỗi tải follow:", error); }
+    } catch (error) {
+      console.log("Lỗi tải follow:", error);
+    }
   };
 
   useFocusEffect(
@@ -83,16 +82,24 @@ const ProfileScreen = () => {
     }, [user])
   );
 
-  // --- XỬ LÝ SỰ KIỆN ---
   const handleShareProfile = async () => {
     try {
-      const profileUrl = `https://potpan.app/u/${profile?.username || user?.id}`;
-      const message = `👨‍🍳 ${t("profile.share_msg")} ${profile?.full_name}: ${profileUrl}`;
+      const profileUrl = `https://potpan.app/u/${
+        profile?.username || user?.id
+      }`;
+      const message = `👨‍🍳 ${t("profile.share_msg")} ${
+        profile?.full_name
+      }: ${profileUrl}`;
       await Share.share({ message, title: t("profile.share_title") });
-    } catch (error) { Alert.alert(t("common.error"), "Không thể chia sẻ hồ sơ"); }
+    } catch (error) {
+      Alert.alert(t("common.error"), "Không thể chia sẻ hồ sơ");
+    }
   };
 
-  const handleDeleteCollection = (collectionId: number, collectionName: string) => {
+  const handleDeleteCollection = (
+    collectionId: number,
+    collectionName: string
+  ) => {
     Alert.alert(
       t("profile.delete_collection_title"),
       t("profile.delete_collection_msg", { name: collectionName }),
@@ -104,59 +111,101 @@ const ProfileScreen = () => {
           onPress: async () => {
             try {
               await deleteCollection(collectionId);
-              Alert.alert(t("common.success"), t("profile.delete_collection_success"));
-            } catch (error) { Alert.alert(t("common.error"), t("profile.delete_collection_error")); }
+              Alert.alert(
+                t("common.success"),
+                t("profile.delete_collection_success")
+              );
+            } catch (error) {
+              Alert.alert(
+                t("common.error"),
+                t("profile.delete_collection_error")
+              );
+            }
           },
         },
       ]
     );
   };
 
-  const onCreateCollectionSuccess = () => { if (user) fetchMyCollections(user.id); };
-
-  // --- RENDER HEADER ---
+  const onCreateCollectionSuccess = () => {
+    if (user) fetchMyCollections(user.id);
+  };
   const renderHeader = () => (
     <View style={styles.headerContainer}>
       <View style={styles.profileRow}>
-        <View style={[styles.avatarWrapper, { borderColor: theme.primary_color }]}>
+        <View
+          style={[styles.avatarWrapper, { borderColor: theme.primary_color }]}
+        >
           <Image
-            source={{ uri: profile?.avatar_url || "https://vfqnjeoqxxapqqurdkoi.supabase.co/storage/v1/object/public/avatars/users/default.jpg" }}
+            source={{
+              uri:
+                profile?.avatar_url ||
+                "https://vfqnjeoqxxapqqurdkoi.supabase.co/storage/v1/object/public/avatars/users/default.jpg",
+            }}
             style={styles.avatar}
           />
         </View>
 
         <View style={styles.infoCol}>
-          <AppText variant="bold" style={[styles.nameText, { color: theme.primary_text }]}>
+          <AppText
+            variant="bold"
+            style={[styles.nameText, { color: theme.primary_text }]}
+          >
             {profile?.full_name || t("profile.new_user")}
           </AppText>
-          <AppText variant="medium" style={[styles.handleText, { color: theme.primary_color }]}>
-            {profile?.username ? `@${profile.username}` : t("profile.no_username")}
+          <AppText
+            variant="medium"
+            style={[styles.handleText, { color: theme.primary_color }]}
+          >
+            {profile?.username
+              ? `@${profile.username}`
+              : t("profile.no_username")}
           </AppText>
-          <AppText style={[styles.bioText, { color: theme.primary_text }]} numberOfLines={2}>
+          <AppText
+            style={[styles.bioText, { color: theme.primary_text }]}
+            numberOfLines={2}
+          >
             {profile?.bio || t("profile.no_bio")}
           </AppText>
         </View>
 
         <View style={styles.topRightIcons}>
           <Pressable
-            style={[styles.smallIconCircle, { backgroundColor: theme.background_contrast }]}
+            style={[
+              styles.smallIconCircle,
+              { backgroundColor: theme.background_contrast },
+            ]}
             onPress={() => navigation.navigate("CreateRecipeScreen")}
           >
             <Ionicons name="add" size={20} color={theme.primary_color} />
           </Pressable>
           {profile?.role === "admin" && (
             <Pressable
-              style={[styles.smallIconCircle, { marginLeft: 8, backgroundColor: theme.background_contrast }]}
+              style={[
+                styles.smallIconCircle,
+                { marginLeft: 8, backgroundColor: theme.background_contrast },
+              ]}
               onPress={() => navigation.navigate("AdminDashboardScreen")}
             >
-              <Ionicons name="shield-checkmark" size={18} color={theme.primary_text} />
+              <Ionicons
+                name="shield-checkmark"
+                size={18}
+                color={theme.primary_text}
+              />
             </Pressable>
           )}
           <Pressable
-            style={[styles.smallIconCircle, { marginLeft: 8, backgroundColor: theme.background_contrast }]}
+            style={[
+              styles.smallIconCircle,
+              { marginLeft: 8, backgroundColor: theme.background_contrast },
+            ]}
             onPress={() => navigation.navigate("SettingsScreen")}
           >
-            <Ionicons name="settings-outline" size={20} color={theme.primary_color} />
+            <Ionicons
+              name="settings-outline"
+              size={20}
+              color={theme.primary_color}
+            />
           </Pressable>
         </View>
       </View>
@@ -171,51 +220,99 @@ const ProfileScreen = () => {
             {t("profile.edit_profile")}
           </AppText>
         </Pressable>
-        <Pressable 
-            style={[
-                styles.shareButton, 
-                { backgroundColor: theme.background, borderColor: theme.primary_color }
-            ]} 
-            onPress={handleShareProfile}
+        <Pressable
+          style={[
+            styles.shareButton,
+            {
+              backgroundColor: theme.background,
+              borderColor: theme.primary_color,
+            },
+          ]}
+          onPress={handleShareProfile}
         >
-          <Ionicons name="share-social-outline" size={16} color={theme.primary_color} />
-          <AppText variant="bold" style={[styles.shareButtonText, { color: theme.primary_color }]}>
+          <Ionicons
+            name="share-social-outline"
+            size={16}
+            color={theme.primary_color}
+          />
+          <AppText
+            variant="bold"
+            style={[styles.shareButtonText, { color: theme.primary_color }]}
+          >
             {t("profile.share_profile")}
           </AppText>
         </Pressable>
       </View>
 
-      <View style={[
-          styles.statsContainer, 
-          { backgroundColor: theme.background_contrast, borderColor: theme.border }
-      ]}>
+      <View
+        style={[
+          styles.statsContainer,
+          {
+            backgroundColor: theme.background_contrast,
+            borderColor: theme.border,
+          },
+        ]}
+      >
         <View style={styles.statItem}>
-          <AppText variant="bold" style={[styles.statNumber, { color: theme.primary_text }]}>
+          <AppText
+            variant="bold"
+            style={[styles.statNumber, { color: theme.primary_text }]}
+          >
             {myRecipes.length}
           </AppText>
-          <AppText style={[styles.statLabel, { color: theme.placeholder_text }]}>
+          <AppText
+            style={[styles.statLabel, { color: theme.placeholder_text }]}
+          >
             {t("profile.recipes_saved")}
           </AppText>
         </View>
-        <View style={[styles.verticalDivider, { backgroundColor: theme.border }]} />
+        <View
+          style={[styles.verticalDivider, { backgroundColor: theme.border }]}
+        />
         <Pressable
           style={styles.statItem}
-          onPress={() => navigation.navigate("FollowScreen", { type: "following", userId: user?.id })}
+          onPress={() =>
+            navigation.navigate("FollowScreen", {
+              type: "following",
+              userId: user?.id,
+            })
+          }
         >
-          <AppText variant="bold" style={[styles.statNumber, { color: theme.primary_text }]}>
+          <AppText
+            variant="bold"
+            style={[styles.statNumber, { color: theme.primary_text }]}
+          >
             {followingCount}
           </AppText>
-          <AppText style={[styles.statLabel, { color: theme.placeholder_text }]}>{t("profile.following")}</AppText>
+          <AppText
+            style={[styles.statLabel, { color: theme.placeholder_text }]}
+          >
+            {t("profile.following")}
+          </AppText>
         </Pressable>
-        <View style={[styles.verticalDivider, { backgroundColor: theme.border }]} />
+        <View
+          style={[styles.verticalDivider, { backgroundColor: theme.border }]}
+        />
         <Pressable
           style={styles.statItem}
-          onPress={() => navigation.navigate("FollowScreen", { type: "followers", userId: user?.id })}
+          onPress={() =>
+            navigation.navigate("FollowScreen", {
+              type: "followers",
+              userId: user?.id,
+            })
+          }
         >
-          <AppText variant="bold" style={[styles.statNumber, { color: theme.primary_text }]}>
+          <AppText
+            variant="bold"
+            style={[styles.statNumber, { color: theme.primary_text }]}
+          >
             {followerCount}
           </AppText>
-          <AppText style={[styles.statLabel, { color: theme.placeholder_text }]}>{t("profile.followers")}</AppText>
+          <AppText
+            style={[styles.statLabel, { color: theme.placeholder_text }]}
+          >
+            {t("profile.followers")}
+          </AppText>
         </Pressable>
       </View>
 
@@ -223,7 +320,10 @@ const ProfileScreen = () => {
         <Pressable
           style={[
             styles.tabItem,
-            activeTab === "recipes" && { borderBottomWidth: 2, borderBottomColor: theme.primary_color },
+            activeTab === "recipes" && {
+              borderBottomWidth: 2,
+              borderBottomColor: theme.primary_color,
+            },
           ]}
           onPress={() => setActiveTab("recipes")}
         >
@@ -231,7 +331,12 @@ const ProfileScreen = () => {
             variant="bold"
             style={[
               styles.tabText,
-              { color: activeTab === "recipes" ? theme.primary_color : theme.placeholder_text }
+              {
+                color:
+                  activeTab === "recipes"
+                    ? theme.primary_color
+                    : theme.placeholder_text,
+              },
             ]}
           >
             {t("profile.my_recipes")}
@@ -240,7 +345,10 @@ const ProfileScreen = () => {
         <Pressable
           style={[
             styles.tabItem,
-            activeTab === "favorites" && { borderBottomWidth: 2, borderBottomColor: theme.primary_color },
+            activeTab === "favorites" && {
+              borderBottomWidth: 2,
+              borderBottomColor: theme.primary_color,
+            },
           ]}
           onPress={() => setActiveTab("favorites")}
         >
@@ -248,7 +356,12 @@ const ProfileScreen = () => {
             variant="bold"
             style={[
               styles.tabText,
-              { color: activeTab === "favorites" ? theme.primary_color : theme.placeholder_text }
+              {
+                color:
+                  activeTab === "favorites"
+                    ? theme.primary_color
+                    : theme.placeholder_text,
+              },
             ]}
           >
             {t("profile.my_collections")}
@@ -268,7 +381,12 @@ const ProfileScreen = () => {
       />
       {item.status === "pending" && (
         <View style={styles.pendingBadge}>
-          <Ionicons name="time-outline" size={12} color="#fff" style={{ marginRight: 4 }} />
+          <Ionicons
+            name="time-outline"
+            size={12}
+            color="#fff"
+            style={{ marginRight: 4 }}
+          />
           <AppText style={styles.pendingText}>{t("profile.pending")}</AppText>
         </View>
       )}
@@ -278,14 +396,26 @@ const ProfileScreen = () => {
   const renderCollectionItem = ({ item }: { item: any }) => (
     <Pressable
       style={[
-          styles.collectionCard, 
-          { backgroundColor: theme.background_contrast, borderColor: theme.border }
+        styles.collectionCard,
+        {
+          backgroundColor: theme.background_contrast,
+          borderColor: theme.border,
+        },
       ]}
-      onPress={() => navigation.navigate("CollectionDetailScreen", { collectionId: item.id, collectionName: item.name })}
+      onPress={() =>
+        navigation.navigate("CollectionDetailScreen", {
+          collectionId: item.id,
+          collectionName: item.name,
+        })
+      }
     >
       <View style={styles.imageWrapper}>
         <Image
-          source={{ uri: item.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80" }}
+          source={{
+            uri:
+              item.image ||
+              "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
+          }}
           style={[styles.collectionImage, isDarkMode && { opacity: 0.85 }]}
           resizeMode="cover"
         />
@@ -305,21 +435,32 @@ const ProfileScreen = () => {
       </View>
       <View style={styles.collectionBody}>
         <View style={{ flex: 1, paddingRight: 8 }}>
-          <AppText variant="bold" style={[styles.collectionName, { color: theme.primary_text }]} numberOfLines={1}>
+          <AppText
+            variant="bold"
+            style={[styles.collectionName, { color: theme.primary_text }]}
+            numberOfLines={1}
+          >
             {item.name}
           </AppText>
-          <AppText style={[styles.collectionSub, { color: theme.placeholder_text }]}>
+          <AppText
+            style={[styles.collectionSub, { color: theme.placeholder_text }]}
+          >
             {t("profile.view_detail")}
           </AppText>
         </View>
-        <Ionicons name="chevron-forward-circle" size={32} color={theme.primary_color} />
+        <Ionicons
+          name="chevron-forward-circle"
+          size={32}
+          color={theme.primary_color}
+        />
       </View>
     </Pressable>
   );
 
   return (
-    // 👇 3. Background động
-    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+    <AppSafeView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
       <AppCollectionModal
         visible={createModalVisible}
         onClose={() => setCreateModalVisible(false)}
@@ -329,11 +470,15 @@ const ProfileScreen = () => {
 
       <FlatList
         data={activeTab === "recipes" ? myRecipes : myCollections}
-        renderItem={activeTab === "recipes" ? renderRecipeItem : renderCollectionItem}
+        renderItem={
+          activeTab === "recipes" ? renderRecipeItem : renderCollectionItem
+        }
         keyExtractor={(item) => item.id.toString()}
         numColumns={activeTab === "recipes" ? 2 : 1}
         key={activeTab} // Force re-render khi đổi tab để đổi số cột
-        columnWrapperStyle={activeTab === "recipes" ? styles.columnWrapper : undefined}
+        columnWrapperStyle={
+          activeTab === "recipes" ? styles.columnWrapper : undefined
+        }
         contentContainerStyle={styles.listContent}
         refreshing={activeTab === "recipes" ? recipeLoading : collectionLoading}
         onRefresh={() => {
@@ -347,10 +492,18 @@ const ProfileScreen = () => {
             {renderHeader()}
             {activeTab === "favorites" && (
               <Pressable
-                style={[styles.createCollectionBtn, { backgroundColor: theme.primary_color }]}
+                style={[
+                  styles.createCollectionBtn,
+                  { backgroundColor: theme.primary_color },
+                ]}
                 onPress={() => setCreateModalVisible(true)}
               >
-                <Ionicons name="add-circle" size={24} color="#fff" style={{ marginRight: 8 }} />
+                <Ionicons
+                  name="add-circle"
+                  size={24}
+                  color="#fff"
+                  style={{ marginRight: 8 }}
+                />
                 <AppText variant="bold" style={{ color: "#fff" }}>
                   {t("profile.create_collect")}
                 </AppText>
@@ -361,12 +514,18 @@ const ProfileScreen = () => {
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 60 }}>
             <Ionicons
-              name={activeTab === "recipes" ? "fast-food-outline" : "heart-dislike-outline"}
+              name={
+                activeTab === "recipes"
+                  ? "fast-food-outline"
+                  : "heart-dislike-outline"
+              }
               size={48}
               color={theme.border}
             />
             <AppText style={{ color: theme.placeholder_text, marginTop: 12 }}>
-              {activeTab === "recipes" ? t("profile.no_recipes") : t("profile.no_collections")}
+              {activeTab === "recipes"
+                ? t("profile.no_recipes")
+                : t("profile.no_collections")}
             </AppText>
           </View>
         }
@@ -388,8 +547,13 @@ const ProfileScreen = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  headerContainer: { paddingHorizontal: 16, paddingTop: 10 },
+  safeArea: {
+    flex: 1,
+  },
+  headerContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -401,11 +565,27 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 2,
   },
-  avatar: { width: 80, height: 80, borderRadius: 40 },
-  infoCol: { flex: 1, marginLeft: 16 },
-  nameText: { fontSize: 20, marginBottom: 4 },
-  handleText: { fontSize: 14, marginBottom: 6 },
-  bioText: { fontSize: 13, lineHeight: 18 },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  infoCol: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  nameText: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  handleText: {
+    fontSize: 14,
+    marginBottom: 6,
+  },
+  bioText: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
   topRightIcons: {
     flexDirection: "row",
     position: "absolute",
@@ -435,7 +615,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     gap: 8,
   },
-  editButtonText: { color: "#fff", fontSize: 14 },
+  editButtonText: {
+    color: "#fff",
+    fontSize: 14,
+  },
   shareButton: {
     flex: 1,
     flexDirection: "row",
@@ -479,7 +662,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 16,
-    // Shadow cho Light mode
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
@@ -488,8 +670,15 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
   },
-  imageWrapper: { height: 140, width: "100%", position: "relative" },
-  collectionImage: { width: "100%", height: "100%" },
+  imageWrapper: {
+    height: 140,
+    width: "100%",
+    position: "relative",
+  },
+  collectionImage: {
+    width: "100%",
+    height: "100%",
+  },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.1)",
@@ -525,8 +714,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  collectionName: { fontSize: 18, marginBottom: 4 },
-  collectionSub: { fontSize: 13 },
+  collectionName: {
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  collectionSub: {
+    fontSize: 13,
+  },
   createCollectionBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -536,7 +730,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
   },
-  navBarWrapper: { position: "absolute", bottom: 0, left: 0, right: 0 },
+  navBarWrapper: {
+    position: "absolute",
+    bottom: 35,
+    left: 0,
+    right: 0,
+  },
   pendingBadge: {
     position: "absolute",
     top: 8,
@@ -554,5 +753,9 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 3,
   },
-  pendingText: { color: "#fff", fontSize: 10, fontWeight: "bold" },
+  pendingText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
 });

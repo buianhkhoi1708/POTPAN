@@ -1,8 +1,9 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { View, StyleSheet, Image, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import AppText from "./AppText"; 
+import AppText from "./AppText";
 import { useThemeStore } from "../store/useThemeStore";
 
 interface AppAdminRecipeItemProps {
@@ -150,16 +151,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: "hidden",
   },
-  cardBody: { flexDirection: "row", padding: 12 },
-  postImage: { width: 100, height: 100, borderRadius: 12 },
+  cardBody: {
+    flexDirection: "row",
+
+    padding: 12,
+  },
+  postImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+  },
   postContent: {
     flex: 1,
     marginLeft: 14,
     justifyContent: "space-between",
     paddingVertical: 2,
   },
-  postTitle: { fontSize: 16, lineHeight: 22, marginBottom: 4 },
-  postAuthor: { fontSize: 13 },
+  postTitle: {
+    fontSize: 16,
+    lineHeight: 22,
+    marginBottom: 4,
+  },
+  postAuthor: {
+    fontSize: 13,
+  },
   postDate: {
     fontSize: 12,
     alignSelf: "flex-start",
@@ -168,7 +183,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     overflow: "hidden",
   },
-  separator: { height: 1, marginHorizontal: 12 },
+  separator: {
+    height: 1,
+    marginHorizontal: 12,
+  },
   cardActions: {
     flexDirection: "row",
     padding: 8,
@@ -183,7 +201,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginHorizontal: 4,
   },
-  actionBtnText: { fontSize: 13, fontWeight: "700", marginLeft: 6 },
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    marginLeft: 6,
+  },
   statusApproved: {
     flex: 1,
     flexDirection: "row",

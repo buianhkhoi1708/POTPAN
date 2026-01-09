@@ -1,35 +1,26 @@
-import React, { useEffect, useState, useCallback } from "react";
+// Nhóm 9 - IE307.Q12
+import React, { useState, useCallback } from "react";
 import {
   View,
   ScrollView,
-  Pressable,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { formatDistanceToNow } from "date-fns";
-// 👇 1. Import các locale của date-fns
 import { vi, enUS } from "date-fns/locale";
-
-// 👇 2. Import i18n
 import { useTranslation } from "react-i18next";
-
+import { Ionicons } from "@expo/vector-icons";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
 import BottomNavSpacer from "../components/AppBottomSpace";
-import { AppLightColor } from "../styles/color";
-
-// --- IMPORT SVG (GIỮ NGUYÊN) ---
-import BackArrow from "../assets/images/backarrow.svg";
-import UpdateIcon from "../assets/images/update.svg";
-import WarnIcon from "../assets/images/warn.svg";
-import StarNotiIcon from "../assets/images/star-noti.svg";
-
+import AppHeader from "../components/AppHeader";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
-import AppHeader from "../components/AppHeader";
+import { useThemeStore } from "../store/useThemeStore";
 
 type NotiType = "update" | "warn" | "star";
 
@@ -41,7 +32,9 @@ interface NotiItem {
   created_at: string;
   timeLabel?: string;
   is_read: boolean;
+  recipe_id?: number;
 }
+
 interface GroupedOldDay {
   dateLabel: string;
   items: NotiItem[];
@@ -50,41 +43,39 @@ interface GroupedOldDay {
 const NotificationScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { user } = useAuthStore();
-  
-  // 👇 3. Khởi tạo hook dịch
   const { t, i18n } = useTranslation();
-
+  const { theme, isDarkMode } = useThemeStore();
   const [activeTab, setActiveTab] = useState<MainTabKey>("home");
   const [todayList, setTodayList] = useState<NotiItem[]>([]);
   const [yesterdayList, setYesterdayList] = useState<NotiItem[]>([]);
   const [otherDays, setOtherDays] = useState<GroupedOldDay[]>([]);
-  
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // --- HÀM TÍNH THỜI GIAN (ĐA NGÔN NGỮ) ---
   const getTimeAgo = (dateString: string) => {
     try {
-      // Chọn locale cho date-fns dựa trên ngôn ngữ hiện tại của i18n
-      const currentLocale = i18n.language === 'en' ? enUS : vi;
-      
+      const currentLocale = i18n.language === "en" ? enUS : vi;
       return formatDistanceToNow(new Date(dateString), {
         addSuffix: true,
         locale: currentLocale,
       });
     } catch (e) {
-      return t("common.just_now"); // "Vừa xong"
+      return t("common.just_now");
     }
   };
 
-  // Hàm xử lý và phân nhóm thông báo
   const processNotifications = (rawData: any[]) => {
     const today: NotiItem[] = [];
     const yesterday: NotiItem[] = [];
     const othersMap: Record<string, NotiItem[]> = {};
-    
+
     const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
     const startOfYesterday = new Date(startOfToday);
     startOfYesterday.setDate(startOfToday.getDate() - 1);
 
@@ -93,11 +84,14 @@ const NotificationScreen: React.FC = () => {
       const newItem: NotiItem = {
         ...item,
         timeLabel: getTimeAgo(item.created_at),
-        // Nếu DB trả về type null, mặc định là 'update'
-        type: item.type || 'update', 
+        type: item.type || "update",
       };
-      
-      const checkDate = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
+
+      const checkDate = new Date(
+        itemDate.getFullYear(),
+        itemDate.getMonth(),
+        itemDate.getDate()
+      );
 
       if (checkDate.getTime() === startOfToday.getTime()) {
         today.push(newItem);
@@ -106,8 +100,9 @@ const NotificationScreen: React.FC = () => {
       } else {
         const dateKey = `${itemDate.getDate().toString().padStart(2, "0")}/${(
           itemDate.getMonth() + 1
-        ).toString().padStart(2, "0")}/${itemDate.getFullYear()}`;
-        
+        )
+          .toString()
+          .padStart(2, "0")}/${itemDate.getFullYear()}`;
         if (!othersMap[dateKey]) othersMap[dateKey] = [];
         othersMap[dateKey].push(newItem);
       }
@@ -123,12 +118,10 @@ const NotificationScreen: React.FC = () => {
     );
   };
 
-  // Hàm tải dữ liệu từ Supabase
   const fetchNotifications = useCallback(async () => {
     try {
       if (!user) return;
       if (!refreshing) setLoading(true);
-      
       const { data, error } = await supabase
         .from("notifications")
         .select("*")
@@ -143,21 +136,18 @@ const NotificationScreen: React.FC = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user, refreshing, i18n.language]); // Thêm i18n.language để khi đổi ngôn ngữ nó load lại timeLabel
+  }, [user, refreshing, i18n.language]);
 
-  // Tự động tải và đánh dấu đã đọc khi vào màn hình
   useFocusEffect(
     useCallback(() => {
       fetchNotifications();
-      
       const markAsRead = async () => {
-        if (user) {
+        if (user)
           await supabase
             .from("notifications")
             .update({ is_read: true })
             .eq("user_id", user.id)
             .eq("is_read", false);
-        }
       };
       markAsRead();
     }, [fetchNotifications])
@@ -168,51 +158,123 @@ const NotificationScreen: React.FC = () => {
     fetchNotifications();
   };
 
-  const renderIcon = (type: NotiType) => {
-    switch (type) {
-      case "update":
-        return <UpdateIcon width={22} height={22} />;
-      case "warn":
-        return <WarnIcon width={22} height={22} />;
-      case "star":
-        return <StarNotiIcon width={22} height={22} />;
-      default:
-        return <UpdateIcon width={22} height={22} />;
+  const handleItemPress = async (item: NotiItem) => {
+    if (item.recipe_id) {
+      try {
+        const { data, error } = await supabase
+          .from("recipes")
+          .select("*, users(*)")
+          .eq("id", item.recipe_id)
+          .single();
+
+        if (data && !error) {
+          const shouldFocusComment =
+            item.type === "update" || item.type === "star";
+          navigation.navigate("RecipeDetailScreen", {
+            item: data,
+            autoFocusComment: shouldFocusComment,
+          });
+          return;
+        }
+      } catch (err) {
+        console.log("Lỗi lấy bài viết:", err);
+      }
     }
   };
 
+  const renderIcon = (type: NotiType) => {
+    let iconName: any = "notifications";
+    let color = theme.primary_color;
+
+    switch (type) {
+      case "update":
+        iconName = "chatbubble-ellipses";
+        color = "#2196F3";
+      case "warn":
+        iconName = "warning";
+        color = "#FF9800";
+        break;
+      case "star":
+        iconName = "star";
+        color = "#FFC107";
+        break;
+      default:
+        iconName = "notifications";
+        color = theme.primary_color;
+    }
+
+    return (
+      <View
+        style={[
+          styles.iconCircle,
+          { backgroundColor: isDarkMode ? "#333" : "#fff" },
+        ]}
+      >
+        <Ionicons name={iconName} size={20} color={color} />
+      </View>
+    );
+  };
+
   const renderItem = (item: NotiItem) => (
-    <View key={item.id} style={styles.itemWrapper}>
-      <View style={[styles.itemRow, !item.is_read && styles.unreadRow]}> 
+    <TouchableOpacity
+      key={item.id}
+      style={[
+        styles.itemWrapper,
+        {
+          backgroundColor: item.is_read
+            ? theme.background
+            : isDarkMode
+            ? "#3A3A3C"
+            : "#E3F2FD",
+          borderColor: theme.border,
+        },
+      ]}
+      activeOpacity={0.7}
+      onPress={() => handleItemPress(item)}
+    >
+      <View style={styles.itemRow}>
         <View style={styles.itemLeft}>
-          <View style={styles.iconCircle}>{renderIcon(item.type)}</View>
+          {renderIcon(item.type)}
           <View style={styles.itemTextCol}>
-            <AppText variant="medium" style={styles.notiTitle}>
+            <AppText
+              variant="bold"
+              style={[styles.notiTitle, { color: theme.primary_text }]}
+            >
               {item.title}
             </AppText>
-            <AppText variant="light" style={styles.notiMessage}>
+            <AppText
+              numberOfLines={2}
+              style={[styles.notiMessage, { color: theme.placeholder_text }]}
+            >
               {item.message}
+            </AppText>
+            <AppText
+              style={[styles.notiTime, { color: theme.placeholder_text }]}
+            >
+              {item.timeLabel}
             </AppText>
           </View>
         </View>
+        {!item.is_read && <View style={styles.unreadDot} />}
       </View>
-      <AppText variant="light" style={styles.notiTime}>
-        {item.timeLabel}
-      </AppText>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
-    <AppSafeView style={styles.safeArea}>
-      <View style={styles.container}>
-        <AppHeader title=  {t("settings.notifications")} showBack={true} onBackPress={navigation.goBack} showNotifications={false}/>
+    <AppSafeView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <AppHeader
+          title={t("settings.notifications")}
+          showBack={true}
+          onBackPress={navigation.goBack}
+          showNotifications={false}
+        />
 
         {loading && !refreshing ? (
           <View style={styles.centerLoading}>
-            <ActivityIndicator
-              size="large"
-              color={AppLightColor.primary_color}
-            />
+            <ActivityIndicator size="large" color={theme.primary_color} />
           </View>
         ) : (
           <ScrollView
@@ -223,13 +285,18 @@ const NotificationScreen: React.FC = () => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor={AppLightColor.primary_color}
+                tintColor={theme.primary_color}
+                colors={[theme.primary_color]} // Android
+                progressBackgroundColor={theme.background_contrast}
               />
             }
           >
             {todayList.length > 0 && (
               <>
-                <AppText variant="medium" style={styles.sectionLabel}>
+                <AppText
+                  variant="bold"
+                  style={[styles.sectionLabel, { color: theme.primary_text }]}
+                >
                   {t("common.today")}
                 </AppText>
                 {todayList.map(renderItem)}
@@ -237,7 +304,10 @@ const NotificationScreen: React.FC = () => {
             )}
             {yesterdayList.length > 0 && (
               <>
-                <AppText variant="medium" style={styles.sectionLabel}>
+                <AppText
+                  variant="bold"
+                  style={[styles.sectionLabel, { color: theme.primary_text }]}
+                >
                   {t("common.yesterday")}
                 </AppText>
                 {yesterdayList.map(renderItem)}
@@ -245,17 +315,31 @@ const NotificationScreen: React.FC = () => {
             )}
             {otherDays.map((group) => (
               <View key={group.dateLabel} style={styles.dateGroup}>
-                <AppText variant="medium" style={styles.dateLabel}>
+                <AppText
+                  variant="bold"
+                  style={[styles.dateLabel, { color: theme.primary_text }]}
+                >
                   {group.dateLabel}
                 </AppText>
                 {group.items.map(renderItem)}
               </View>
             ))}
+
             {todayList.length === 0 &&
               yesterdayList.length === 0 &&
               otherDays.length === 0 && (
                 <View style={styles.emptyContainer}>
-                  <AppText style={styles.emptyText}>
+                  <Ionicons
+                    name="notifications-off-outline"
+                    size={64}
+                    color={theme.placeholder_text}
+                  />
+                  <AppText
+                    style={[
+                      styles.emptyText,
+                      { color: theme.placeholder_text },
+                    ]}
+                  >
                     {t("common.empty_notifications")}
                   </AppText>
                 </View>
@@ -266,9 +350,9 @@ const NotificationScreen: React.FC = () => {
         <AppMainNavBar
           activeTab={activeTab}
           onTabPress={(tab) => {
-             setActiveTab(tab);
-             if(tab === 'home') navigation.navigate('HomeScreen');
-             if(tab === 'profile') navigation.navigate('ProfileScreen');
+            setActiveTab(tab);
+            if (tab === "home") navigation.navigate("HomeScreen");
+            if (tab === "profile") navigation.navigate("ProfileScreen");
           }}
         />
       </View>
@@ -277,85 +361,104 @@ const NotificationScreen: React.FC = () => {
 };
 export default NotificationScreen;
 
-// GIỮ NGUYÊN STYLE CŨ CỦA BẠN
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: "#fff" },
-  container: { flex: 1, backgroundColor: "#fff" },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 12,
-  },
-  backButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: AppLightColor.primary_color,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
+  safeArea: {
     flex: 1,
-    textAlign: "center",
-    fontSize: 22,
-    color: AppLightColor.primary_color,
   },
-  headerSpacer: { width: 32, height: 32 },
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 24 },
-  centerLoading: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyContainer: { alignItems: "center", marginTop: 50 },
-  emptyText: { color: "#999", fontSize: 14 },
+  container: {
+    flex: 1,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+  },
+  centerLoading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  emptyContainer: {
+    alignItems: "center",
+    marginTop: 80,
+    opacity: 0.7,
+  },
+  emptyText: {
+    fontSize: 16,
+    marginTop: 12,
+  },
+
   sectionLabel: {
-    marginTop: 8,
-    marginBottom: 8,
-    fontSize: 14,
-    color: AppLightColor.primary_text,
-    fontWeight: "700",
+    marginTop: 16,
+    marginBottom: 10,
+    fontSize: 15,
   },
-  dateGroup: { marginTop: 8 },
+  dateGroup: { marginTop: 16 },
   dateLabel: {
-    marginBottom: 8,
-    fontSize: 13,
-    color: AppLightColor.primary_text,
+    marginBottom: 10,
+    fontSize: 14,
   },
-  itemWrapper: { marginBottom: 10 },
+
+  itemWrapper: {
+    marginBottom: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
   itemRow: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: "#ffe3e2", // Màu nền hồng gốc của bạn
+    alignItems: "flex-start",
+    justifyContent: "space-between",
   },
-  unreadRow: {
-    backgroundColor: "#ffcdd2", // Đậm hơn chút nếu chưa đọc (tùy chọn)
+  itemLeft: {
+    flexDirection: "row",
+    flex: 1,
+    marginRight: 8,
   },
-  itemLeft: { flexDirection: "row", alignItems: "center", flexShrink: 1 },
   iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#ffffff",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 10,
+    marginRight: 12,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  itemTextCol: { flexShrink: 1 },
+  itemTextCol: {
+    flex: 1,
+    justifyContent: "center",
+  },
   notiTitle: {
-    fontSize: 14,
-    color: AppLightColor.primary_color,
-    fontWeight: "700",
-    marginBottom: 2,
+    fontSize: 15,
+    marginBottom: 4,
   },
-  notiMessage: { fontSize: 13, color: AppLightColor.primary_text },
+  notiMessage: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 6,
+  },
   notiTime: {
-    marginTop: 4,
     fontSize: 11,
-    color: "#000000ff",
-    alignSelf: "flex-end",
-    marginRight: 4,
+  },
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#FF3B30",
+    marginTop: 6,
   },
 });

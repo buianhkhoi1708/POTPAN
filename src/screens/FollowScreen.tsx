@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -11,14 +12,13 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next"; // 1. Hook dịch
-
+import { useTranslation } from "react-i18next";
 import { supabase } from "../config/supabaseClient";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
-import AppHeader from "../components/AppHeader"; // 2. Header chung
+import AppHeader from "../components/AppHeader";
 import { useAuthStore } from "../store/useAuthStore";
-import { AppLightColor } from "../styles/color";
+import { useThemeStore } from "../store/useThemeStore";
 
 type UserItem = {
   id: string;
@@ -32,10 +32,9 @@ const FollowScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { user: currentUser } = useAuthStore();
-
+  const { theme, isDarkMode } = useThemeStore();
   const targetUserId = route.params?.userId || currentUser?.id;
   const initialTab = route.params?.type || "followers";
-
   const [activeTab, setActiveTab] = useState<"followers" | "following">(
     initialTab
   );
@@ -135,23 +134,35 @@ const FollowScreen = () => {
       >
         <Image
           source={{ uri: item.avatar_url || "https://i.pravatar.cc/150" }}
-          style={styles.avatar}
+          style={[styles.avatar, { borderColor: theme.border, borderWidth: 1 }]}
         />
         <View style={styles.userInfo}>
-          <AppText variant="bold" style={styles.userName}>
+          <AppText
+            variant="bold"
+            style={[styles.userName, { color: theme.primary_text }]}
+          >
             {item.full_name}
           </AppText>
-          <AppText style={styles.userHandle}>
+          <AppText
+            style={[styles.userHandle, { color: theme.placeholder_text }]}
+          >
             @{item.username || "user"}
           </AppText>
         </View>
-        
-        {/* Nút hành động chỉ hiện khi xem danh sách của chính mình */}
+
         {isMe && (
           <TouchableOpacity
             style={[
               styles.actionBtn,
-              activeTab === "following" ? styles.btnOutline : styles.btnGray,
+              activeTab === "following"
+                ? [
+                    styles.btnOutline,
+                    {
+                      borderColor: theme.border,
+                      backgroundColor: theme.background,
+                    },
+                  ]
+                : [{ backgroundColor: theme.background_contrast }],
             ]}
             onPress={() =>
               activeTab === "following"
@@ -163,13 +174,13 @@ const FollowScreen = () => {
               style={[
                 styles.actionBtnText,
                 activeTab === "following"
-                  ? { color: AppLightColor.primary_color }
-                  : { color: "#333" },
+                  ? { color: theme.primary_color }
+                  : { color: theme.primary_text },
               ]}
             >
               {activeTab === "following"
-                ? t("chef.following") 
-                : t("follow.remove")}  
+                ? t("chef.following")
+                : t("follow.remove")}
             </AppText>
           </TouchableOpacity>
         )}
@@ -184,8 +195,9 @@ const FollowScreen = () => {
   );
 
   return (
-    <AppSafeView style={styles.container}>
-      {/* HEADER CHUNG */}
+    <AppSafeView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       <AppHeader
         title={
           currentUser?.id === targetUserId
@@ -197,12 +209,14 @@ const FollowScreen = () => {
         showSearch={false}
       />
 
-      {/* TABS */}
-      <View style={styles.tabs}>
+      <View style={[styles.tabs, { borderBottomColor: theme.border }]}>
         <TouchableOpacity
           style={[
             styles.tabItem,
-            activeTab === "followers" && styles.activeTab,
+            activeTab === "followers" && {
+              borderBottomWidth: 2,
+              borderBottomColor: theme.primary_color,
+            },
           ]}
           onPress={() => setActiveTab("followers")}
         >
@@ -210,8 +224,8 @@ const FollowScreen = () => {
             variant="bold"
             style={
               activeTab === "followers"
-                ? styles.activeText
-                : styles.inactiveText
+                ? { color: theme.primary_color, fontSize: 16 }
+                : { color: theme.placeholder_text, fontSize: 16 }
             }
           >
             {t("follow.followers")}
@@ -221,7 +235,10 @@ const FollowScreen = () => {
         <TouchableOpacity
           style={[
             styles.tabItem,
-            activeTab === "following" && styles.activeTab,
+            activeTab === "following" && {
+              borderBottomWidth: 2,
+              borderBottomColor: theme.primary_color,
+            },
           ]}
           onPress={() => setActiveTab("following")}
         >
@@ -229,8 +246,8 @@ const FollowScreen = () => {
             variant="bold"
             style={
               activeTab === "following"
-                ? styles.activeText
-                : styles.inactiveText
+                ? { color: theme.primary_color, fontSize: 16 }
+                : { color: theme.placeholder_text, fontSize: 16 }
             }
           >
             {t("chef.following")}
@@ -238,12 +255,17 @@ const FollowScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* SEARCH BAR */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#999" />
+      <View
+        style={[
+          styles.searchContainer,
+          { backgroundColor: theme.background_contrast },
+        ]}
+      >
+        <Ionicons name="search" size={20} color={theme.placeholder_text} />
         <TextInput
-          style={styles.searchInput}
-          placeholder={t("search.placeholder")}
+          style={[styles.searchInput, { color: theme.primary_text }]}
+          placeholder={t("search.placeholderfol")}
+          placeholderTextColor={theme.placeholder_text}
           value={searchText}
           onChangeText={setSearchText}
         />
@@ -251,7 +273,7 @@ const FollowScreen = () => {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator color={AppLightColor.primary_color} />
+          <ActivityIndicator color={theme.primary_color} />
         </View>
       ) : (
         <FlatList
@@ -261,7 +283,7 @@ const FollowScreen = () => {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <View style={styles.emptyBox}>
-              <AppText style={{ color: "#999" }}>
+              <AppText style={{ color: theme.placeholder_text }}>
                 {t("common.empty_list")}
               </AppText>
             </View>
@@ -275,42 +297,63 @@ const FollowScreen = () => {
 export default FollowScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: {
+    flex: 1,
+  },
   tabs: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
   },
-  tabItem: { flex: 1, alignItems: "center", paddingVertical: 14 },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: AppLightColor.primary_color,
+  tabItem: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 14,
   },
-  activeText: { color: AppLightColor.primary_color, fontSize: 16 },
-  inactiveText: { color: "#999", fontSize: 16 },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
     margin: 16,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 10,
+    borderWidth: 0.5,
   },
-  searchInput: { marginLeft: 8, flex: 1, fontSize: 16 },
-  listContent: { paddingBottom: 20 },
-  loadingBox: { marginTop: 40 },
-  emptyBox: { alignItems: "center", marginTop: 40 },
+  searchInput: {
+    marginLeft: 8,
+    flex: 1,
+    fontSize: 16,
+  },
+  listContent: {
+    paddingBottom: 20,
+  },
+  loadingBox: {
+    marginTop: 40,
+  },
+  emptyBox: {
+    alignItems: "center",
+    marginTop: 40,
+  },
   userRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  avatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: "#eee" },
-  userInfo: { flex: 1, marginLeft: 12 },
-  userName: { fontSize: 16, color: "#333" },
-  userHandle: { fontSize: 14, color: "#666" },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  userInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  userName: {
+    fontSize: 16,
+  },
+  userHandle: {
+    fontSize: 14,
+  },
   actionBtn: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -318,7 +361,11 @@ const styles = StyleSheet.create({
     minWidth: 80,
     alignItems: "center",
   },
-  btnGray: { backgroundColor: "#f0f0f0" },
-  btnOutline: { borderWidth: 1, borderColor: "#ddd", backgroundColor: "#fff" },
-  actionBtnText: { fontSize: 14, fontWeight: "600" },
+  btnOutline: {
+    borderWidth: 1,
+  },
+  actionBtnText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
 });

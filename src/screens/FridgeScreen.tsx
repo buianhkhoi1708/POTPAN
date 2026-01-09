@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
@@ -8,20 +9,20 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
-import { AppLightColor } from "../styles/color";
 import { supabase } from "../config/supabaseClient";
+import { useThemeStore } from "../store/useThemeStore";
 
 const INGREDIENT_GROUPS = [
   {
     id: "1",
-    labelKey: "fridge.group_meat", // Key dịch
+    labelKey: "fridge.group_meat",
     icon: "restaurant-outline",
     items: ["Thịt bò", "Thịt lợn", "Gà", "Vịt", "Trứng", "Xúc xích"],
   },
@@ -53,23 +54,29 @@ const INGREDIENT_GROUPS = [
   },
 ];
 
-// --- COMPONENT CON ---
 const IngredientChip = React.memo(
-  ({
-    item,
-    isSelected,
-    onPress,
-  }: {
-    item: string;
-    isSelected: boolean;
-    onPress: (item: string) => void;
-  }) => (
+  ({ item, isSelected, onPress, theme, isDarkMode }: any) => (
     <Pressable
       onPress={() => onPress(item)}
-      style={[styles.chip, isSelected && styles.chipActive]}
-      android_ripple={{ color: "rgba(0,0,0,0.1)", borderless: true }}
+      style={[
+        styles.chip,
+        {
+          backgroundColor: isSelected
+            ? theme.primary_color
+            : theme.background_contrast,
+          borderColor: isSelected ? theme.primary_color : theme.border,
+        },
+      ]}
     >
-      <AppText style={[styles.chipText, isSelected && styles.chipTextActive]}>
+      <AppText
+        style={[
+          styles.chipText,
+          {
+            color: isSelected ? "#fff" : theme.primary_text,
+            fontWeight: isSelected ? "bold" : "normal",
+          },
+        ]}
+      >
         {item}
       </AppText>
       {isSelected && (
@@ -85,35 +92,30 @@ const IngredientChip = React.memo(
 );
 
 const IngredientGroup = React.memo(
-  ({
-    group,
-    selectedItems,
-    onToggle,
-    title,
-  }: {
-    group: (typeof INGREDIENT_GROUPS)[0];
-    selectedItems: string[];
-    onToggle: (name: string) => void;
-    title: string; 
-  }) => (
+  ({ group, selectedItems, onToggle, title, theme, isDarkMode }: any) => (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <Ionicons
           name={group.icon as any}
           size={20}
-          color={AppLightColor.primary_color}
+          color={theme.primary_color}
         />
-        <AppText variant="bold" style={styles.sectionName}>
+        <AppText
+          variant="bold"
+          style={[styles.sectionName, { color: theme.primary_text }]}
+        >
           {title}
         </AppText>
       </View>
       <View style={styles.chipContainer}>
-        {group.items.map((item) => (
+        {group.items.map((item: string) => (
           <IngredientChip
             key={item}
             item={item}
             isSelected={selectedItems.includes(item)}
             onPress={onToggle}
+            theme={theme}
+            isDarkMode={isDarkMode}
           />
         ))}
       </View>
@@ -121,10 +123,12 @@ const IngredientGroup = React.memo(
   )
 );
 
-// IE307.Q12_Nhom9
 const FridgeScreen = () => {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
+
+  // 👇 2. Lấy Theme
+  const { theme, isDarkMode } = useThemeStore();
 
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -138,35 +142,45 @@ const FridgeScreen = () => {
   const selectedCount = useMemo(() => selectedItems.length, [selectedItems]);
 
   const findRecipes = async () => {
-    if (selectedCount === 0) {
-      Alert.alert(t("common.alert"), t("fridge.select_at_least_one"));
+    // 1. Kiểm tra đầu vào: Nên chọn ít nhất 2 nguyên liệu
+    if (selectedCount < 2) {
+      Alert.alert(
+        t("common.note"), 
+        t("fridge.select_more_hint", "Vui lòng chọn ít nhất 2 nguyên liệu để có gợi ý chính xác hơn.")
+      );
       return;
     }
 
     setLoading(true);
     try {
+      // 2. Gọi hàm SQL mới
       const { data, error } = await supabase.rpc(
-        "find_recipes_by_ingredients",
-        {
-          selected_ingredients: selectedItems,
-        }
+        "find_recipes_by_ingredients", 
+        { selected_ingredients: selectedItems }
       );
 
       if (error) throw error;
 
+      // 3. Xử lý khi không có kết quả
       if (!data || data.length === 0) {
-        Alert.alert(t("common.no_results"), t("fridge.no_recipes"));
+        Alert.alert(
+          t("common.no_results"), 
+          // Thông báo giải thích rõ về logic 80%
+          t("fridge.strict_filter_hint", "Không tìm thấy món nào đáp ứng đủ 80% nguyên liệu bạn chọn. Hãy thử chọn thêm các loại gia vị hoặc rau củ phổ biến xem sao!")
+        );
         return;
       }
 
+      // 4. Chuyển sang màn hình kết quả
       navigation.navigate("SearchResultScreen", {
         recipes: data,
-        title: t("fridge.suggested_title"),
+        title: t("fridge.suggested_title"), // "Gợi ý từ tủ lạnh"
         searchQuery: selectedItems.join(", "),
         isFridgeSearch: true,
       });
+
     } catch (error: any) {
-      console.error("Find recipes error:", error);
+      console.log("Error finding recipes:", error);
       Alert.alert(t("common.error"), t("common.error_occurred"));
     } finally {
       setLoading(false);
@@ -178,18 +192,20 @@ const FridgeScreen = () => {
   };
 
   return (
-    <AppSafeView style={styles.safeArea}>
+    <AppSafeView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={theme.primary_color}
+      />
+
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => navigation.goBack()}
-            style={styles.backBtn}
-            hitSlop={10}
-          >
+        <View style={[styles.header, { backgroundColor: theme.primary_color }]}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </Pressable>
           <AppText variant="bold" style={styles.headerTitle}>
@@ -197,31 +213,51 @@ const FridgeScreen = () => {
           </AppText>
         </View>
 
-        {/* Content */}
         <ScrollView
           style={styles.container}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Intro */}
-          <View style={styles.introBox}>
+          <View
+            style={[
+              styles.introBox,
+              {
+                backgroundColor: isDarkMode
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "#FFF5F5",
+              },
+            ]}
+          >
             <Ionicons
               name="bulb-outline"
               size={24}
-              color={AppLightColor.primary_color}
+              color={theme.primary_color}
             />
-            <AppText style={styles.introText}>{t("fridge.intro_text")}</AppText>
+            <AppText
+              style={[styles.introText, { color: theme.placeholder_text }]}
+            >
+              {t("fridge.intro_text")}
+            </AppText>
           </View>
 
-          {/* Preview Selected */}
           {selectedCount > 0 && (
-            <View style={styles.selectedPreview}>
+            <View
+              style={[
+                styles.selectedPreview,
+                { backgroundColor: theme.background_contrast },
+              ]}
+            >
               <View style={styles.selectedHeader}>
-                <AppText variant="bold" style={styles.selectedTitle}>
+                <AppText
+                  variant="bold"
+                  style={[styles.selectedTitle, { color: theme.primary_text }]}
+                >
                   {t("fridge.selected_label")} ({selectedCount})
                 </AppText>
                 <Pressable onPress={handleClearAll} style={styles.clearBtn}>
-                  <AppText style={styles.clearText}>
+                  <AppText
+                    style={[styles.clearText, { color: theme.primary_color }]}
+                  >
                     {t("common.clear_all")}
                   </AppText>
                 </Pressable>
@@ -232,13 +268,30 @@ const FridgeScreen = () => {
                 style={styles.selectedScroll}
               >
                 {selectedItems.map((item) => (
-                  <View key={item} style={styles.selectedTag}>
-                    <AppText style={styles.selectedTagText}>{item}</AppText>
-                    <Pressable
-                      onPress={() => toggleIngredient(item)}
-                      hitSlop={5}
+                  <View
+                    key={item}
+                    style={[
+                      styles.selectedTag,
+                      {
+                        backgroundColor: theme.background,
+                        borderColor: theme.border,
+                      },
+                    ]}
+                  >
+                    <AppText
+                      style={[
+                        styles.selectedTagText,
+                        { color: theme.primary_text },
+                      ]}
                     >
-                      <Ionicons name="close" size={14} color="#666" />
+                      {item}
+                    </AppText>
+                    <Pressable onPress={() => toggleIngredient(item)}>
+                      <Ionicons
+                        name="close"
+                        size={14}
+                        color={theme.placeholder_text}
+                      />
                     </Pressable>
                   </View>
                 ))}
@@ -246,14 +299,15 @@ const FridgeScreen = () => {
             </View>
           )}
 
-          {/* Ingredient Groups - Render Dynamic Title */}
           {INGREDIENT_GROUPS.map((group) => (
             <IngredientGroup
               key={group.id}
               group={group}
-              title={t(group.labelKey)} // Dịch tiêu đề nhóm tại đây
+              title={t(group.labelKey)}
               selectedItems={selectedItems}
               onToggle={toggleIngredient}
+              theme={theme}
+              isDarkMode={isDarkMode}
             />
           ))}
 
@@ -261,13 +315,26 @@ const FridgeScreen = () => {
         </ScrollView>
 
         {/* Footer */}
-        <View style={styles.footer}>
+        <View
+          style={[
+            styles.footer,
+            { backgroundColor: theme.background, borderTopColor: theme.border },
+          ]}
+        >
           <View style={styles.footerContent}>
             <View style={styles.selectedCount}>
-              <AppText style={styles.selectedLabel}>
+              <AppText
+                style={[
+                  styles.selectedLabel,
+                  { color: theme.placeholder_text },
+                ]}
+              >
                 {t("fridge.selected_short")}:{" "}
               </AppText>
-              <AppText variant="bold" style={styles.selectedNumber}>
+              <AppText
+                variant="bold"
+                style={[styles.selectedNumber, { color: theme.primary_color }]}
+              >
                 {selectedCount}
               </AppText>
             </View>
@@ -275,6 +342,7 @@ const FridgeScreen = () => {
             <Pressable
               style={[
                 styles.findBtn,
+                { backgroundColor: theme.primary_color },
                 (loading || selectedCount === 0) && styles.findBtnDisabled,
               ]}
               onPress={findRecipes}
@@ -306,28 +374,43 @@ const FridgeScreen = () => {
 export default FridgeScreen;
 
 const styles = StyleSheet.create({
-  // ... (Giữ nguyên Style cũ của bạn, không cần thay đổi)
-  safeArea: { flex: 1, backgroundColor: "#fff" },
-  flex: { flex: 1 },
+  safeArea: {
+    flex: 1,
+  },
+  flex: {
+    flex: 1,
+  },
   header: {
-    backgroundColor: AppLightColor.primary_color,
     paddingVertical: 16,
     paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
   },
-  backBtn: { marginRight: 12, padding: 4 },
-  headerTitle: { fontSize: 18, color: "#fff", flex: 1 },
-  container: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 20 },
+  backBtn: {
+    marginRight: 12,
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 18,
+    color: "#fff",
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+
   introBox: {
     flexDirection: "row",
-    backgroundColor: "#FFF5F5",
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
@@ -336,13 +419,10 @@ const styles = StyleSheet.create({
   introText: {
     flex: 1,
     marginLeft: 12,
-    color: "#666",
     fontSize: 14,
     lineHeight: 20,
   },
-
   selectedPreview: {
-    backgroundColor: "#F8F9FA",
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
@@ -353,54 +433,69 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  selectedTitle: { fontSize: 15, color: "#333" },
-  clearBtn: { paddingHorizontal: 8, paddingVertical: 4 },
-  clearText: { color: AppLightColor.primary_color, fontSize: 13 },
-  selectedScroll: { flexGrow: 0 },
+  selectedTitle: {
+    fontSize: 15,
+  },
+  clearBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  clearText: {
+    fontSize: 13,
+  },
+  selectedScroll: {
+    flexGrow: 0,
+  },
   selectedTag: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: "#E9ECEF",
   },
-  selectedTagText: { fontSize: 13, color: "#333", marginRight: 6 },
+  selectedTagText: {
+    fontSize: 13,
+    marginRight: 6,
+  },
 
-  section: { marginBottom: 28 },
+  section: {
+    marginBottom: 28,
+  },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
   },
-  sectionName: { marginLeft: 8, fontSize: 17, color: "#333" },
-  chipContainer: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  sectionName: {
+    marginLeft: 8,
+    fontSize: 17,
+  },
+  chipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
 
+  // Chip
   chip: {
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#E9ECEF",
-    backgroundColor: "#F8F9FA",
     flexDirection: "row",
     alignItems: "center",
   },
-  chipActive: {
-    backgroundColor: AppLightColor.primary_color,
-    borderColor: AppLightColor.primary_color,
+  chipText: {
+    fontSize: 14,
   },
-  chipText: { fontSize: 14, color: "#495057" },
-  chipTextActive: { color: "#fff", fontWeight: "bold" },
-  checkIcon: { marginLeft: 6 },
+  checkIcon: {
+    marginLeft: 6,
+  },
 
   footer: {
-    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: "#F1F3F5",
     paddingBottom: Platform.OS === "ios" ? 34 : 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
@@ -415,11 +510,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
-  selectedCount: { flexDirection: "row", alignItems: "center" },
-  selectedLabel: { fontSize: 15, color: "#666", marginRight: 4 },
-  selectedNumber: { fontSize: 16, color: AppLightColor.primary_color },
+  selectedCount: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  selectedLabel: {
+    fontSize: 15,
+    marginRight: 4,
+  },
+  selectedNumber: {
+    fontSize: 16,
+  },
   findBtn: {
-    backgroundColor: AppLightColor.primary_color,
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 25,
@@ -427,13 +529,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     minWidth: 140,
     justifyContent: "center",
-    shadowColor: AppLightColor.primary_color,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 6,
   },
-  findBtnDisabled: { backgroundColor: "#CED4DA", shadowOpacity: 0.1 },
-  findBtnText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  findIcon: { marginLeft: 8 },
+  findBtnDisabled: {
+    opacity: 0.5,
+    shadowOpacity: 0,
+  },
+  findBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  findIcon: {
+    marginLeft: 8,
+  },
 });

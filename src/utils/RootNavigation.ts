@@ -1,5 +1,6 @@
-// utils/RootNavigation.ts
-import { createNavigationContainerRef } from '@react-navigation/native';
+// Nhóm 9 - IE307.Q12
+
+import { createNavigationContainerRef } from "@react-navigation/native";
 
 export const navigationRef = createNavigationContainerRef<any>();
 

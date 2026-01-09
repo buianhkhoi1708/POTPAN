@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -14,21 +15,18 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Controller, useForm, Resolver} from "react-hook-form";
+import { Controller, useForm, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { decode } from "base64-arraybuffer";
-import { useTranslation } from "react-i18next"; 
+import { useTranslation } from "react-i18next";
 
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
 import { getRecipeSchema } from "../utils/validationSchema";
-
-// 👇 1. Import Theme Store
 import { useThemeStore } from "../store/useThemeStore";
 
-// --- TYPES ---
 interface IngredientItem {
   id: string;
   quantity: string;
@@ -59,14 +57,11 @@ const CreateRecipeScreen: React.FC = () => {
   const route = useRoute<any>();
   const { user } = useAuthStore();
   const { t } = useTranslation();
-  
-  // 👇 2. Lấy Theme
   const { theme, isDarkMode } = useThemeStore();
-
   const { isEdit, recipeData } = route.params || {};
-
-  // State
-  const [imageBase64, setImageBase64] = useState<string | null | undefined>(null);
+  const [imageBase64, setImageBase64] = useState<string | null | undefined>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [formChanged, setFormChanged] = useState(false);
@@ -89,13 +84,15 @@ const CreateRecipeScreen: React.FC = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     setValue,
     getValues,
     watch,
     reset,
   } = useForm<RecipeFormData>({
-    resolver: yupResolver(getRecipeSchema(t)) as unknown as Resolver<RecipeFormData>,
+    resolver: yupResolver(
+      getRecipeSchema(t)
+    ) as unknown as Resolver<RecipeFormData>,
     defaultValues: {
       title: "",
       description: "",
@@ -113,19 +110,55 @@ const CreateRecipeScreen: React.FC = () => {
   const watchSteps = watch("steps");
   const watchThumbnail = watch("thumbnail");
 
+  // --- FIX SIÊU MẠNH: Xử lý dữ liệu đầu vào ---
   useEffect(() => {
     if (isEdit && recipeData) {
-        // ... (Logic reset form giữ nguyên)
-        reset({
-            title: recipeData.title || "",
-            description: recipeData.description || "",
-            time: recipeData.time || "",
-            difficulty: recipeData.difficulty || "Trung bình",
-            category: recipeData.category || "Món mặn",
-            thumbnail: recipeData.thumbnail || "",
-            ingredients: Array.isArray(recipeData.ingredients) ? recipeData.ingredients : [{ id: `ing-${Date.now()}`, quantity: "", name: "" }],
-            steps: Array.isArray(recipeData.steps) ? recipeData.steps : [{ id: `step-${Date.now()}`, title: "", content: "" }],
-        });
+      console.log("Loading Recipe Data:", recipeData); // Debug xem dữ liệu gốc là gì
+
+      // Hàm helper: Ép kiểu dữ liệu an toàn tuyệt đối
+      const safeString = (value: any) => {
+        if (value === null || value === undefined) return "";
+        if (typeof value === "object") return JSON.stringify(value); // Tránh lỗi [Object]
+        return String(value);
+      };
+
+      const processIngredients = (items: any[]) => {
+        if (!Array.isArray(items)) return [];
+        return items.map((item, index) => ({
+          ...item,
+          id: item.id || `ing-${Date.now()}-${index}`,
+          name: safeString(item.name),
+          // FIX: Kiểm tra cả 'quantity' và 'amount' (phòng trường hợp DB lưu tên khác)
+          quantity: safeString(item.quantity || item.amount), 
+        }));
+      };
+
+      const processSteps = (items: any[]) => {
+        if (!Array.isArray(items)) return [];
+        return items.map((item, index) => ({
+          ...item,
+          id: item.id || `step-${Date.now()}-${index}`,
+          title: safeString(item.title),
+          content: safeString(item.content),
+        }));
+      };
+
+      reset({
+        title: safeString(recipeData.title),
+        description: safeString(recipeData.description),
+        time: safeString(recipeData.time),
+        difficulty: recipeData.difficulty || "Trung bình",
+        category: recipeData.category || "Món mặn",
+        thumbnail: recipeData.thumbnail || "",
+        ingredients:
+          recipeData.ingredients && recipeData.ingredients.length > 0
+            ? processIngredients(recipeData.ingredients)
+            : [{ id: `ing-${Date.now()}`, quantity: "", name: "" }],
+        steps:
+          recipeData.steps && recipeData.steps.length > 0
+            ? processSteps(recipeData.steps)
+            : [{ id: `step-${Date.now()}`, title: "", content: "" }],
+      });
     }
   }, [isEdit, recipeData, reset]);
 
@@ -134,117 +167,258 @@ const CreateRecipeScreen: React.FC = () => {
     return () => subscription.unsubscribe();
   }, [watch]);
 
-  // ... (Các hàm pickImage, uploadImageToSupabase, add/remove Ingredient/Step giữ nguyên logic)
+  // --- Image Handling ---
   const pickImage = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") return Alert.alert(t("alert.permission_required"), t("alert.permission_desc_photo"));
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted")
+        return Alert.alert(
+          t("alert.permission_required"),
+          t("alert.permission_desc_photo")
+        );
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [4, 3], quality: 0.5, base64: true,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.5,
+        base64: true,
       });
       if (!result.canceled && result.assets[0].uri) {
         setValue("thumbnail", result.assets[0].uri, { shouldValidate: true });
         setImageBase64(result.assets[0].base64);
       }
-    } catch (error) { Alert.alert(t("alert.error_title"), t("alert.pick_image_error")); }
+    } catch (error) {
+      Alert.alert(t("alert.error_title"), t("alert.pick_image_error"));
+    }
   };
 
-  const uploadImageToSupabase = async (imageUri: string, base64Data: string | null | undefined) => {
+  const uploadImageToSupabase = async (
+    imageUri: string,
+    base64Data: string | null | undefined
+  ) => {
     if (imageUri.startsWith("http")) return imageUri;
     if (!base64Data || !user) throw new Error("Missing image data");
     const fileExt = imageUri.split(".").pop()?.toLowerCase() || "jpg";
     const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-    const { error: uploadError } = await supabase.storage.from("recipe_images").upload(filePath, decode(base64Data), { contentType: `image/${fileExt}`, upsert: true });
+    const { error: uploadError } = await supabase.storage
+      .from("recipe_images")
+      .upload(filePath, decode(base64Data), {
+        contentType: `image/${fileExt}`,
+        upsert: true,
+      });
     if (uploadError) throw uploadError;
-    const { data } = supabase.storage.from("recipe_images").getPublicUrl(filePath);
+    const { data } = supabase.storage
+      .from("recipe_images")
+      .getPublicUrl(filePath);
     return data.publicUrl;
   };
 
+  // --- Dynamic Form Handlers ---
   const addIngredient = () => {
     const current = getValues("ingredients");
-    setValue("ingredients", [...current, { id: `ing-${Date.now()}-${Math.random()}`, quantity: "", name: "" }], { shouldValidate: true });
+    setValue(
+      "ingredients",
+      [
+        ...current,
+        { id: `ing-${Date.now()}-${Math.random()}`, quantity: "", name: "" },
+      ],
+      { shouldValidate: true }
+    );
   };
   const removeIngredient = (id: string) => {
     const current = getValues("ingredients");
-    if (current.length > 1) setValue("ingredients", current.filter((item) => item.id !== id), { shouldValidate: true });
+    if (current.length > 1)
+      setValue(
+        "ingredients",
+        current.filter((item) => item.id !== id),
+        { shouldValidate: true }
+      );
   };
   const updateIngredient = (id: string, field: any, value: string) => {
     const current = getValues("ingredients");
-    setValue("ingredients", current.map((item) => item.id === id ? { ...item, [field]: value } : item), { shouldValidate: true });
+    setValue(
+      "ingredients",
+      current.map((item) =>
+        item.id === id ? { ...item, [field]: value } : item
+      ),
+      { shouldValidate: true }
+    );
   };
 
   const addStep = () => {
     const current = getValues("steps");
-    setValue("steps", [...current, { id: `step-${Date.now()}-${Math.random()}`, title: "", content: "" }], { shouldValidate: true });
+    setValue(
+      "steps",
+      [
+        ...current,
+        { id: `step-${Date.now()}-${Math.random()}`, title: "", content: "" },
+      ],
+      { shouldValidate: true }
+    );
   };
   const removeStep = (id: string) => {
     const current = getValues("steps");
-    if (current.length > 1) setValue("steps", current.filter((item) => item.id !== id), { shouldValidate: true });
+    if (current.length > 1)
+      setValue(
+        "steps",
+        current.filter((item) => item.id !== id),
+        { shouldValidate: true }
+      );
   };
   const updateStep = (id: string, field: any, value: string) => {
     const current = getValues("steps");
-    setValue("steps", current.map((item) => item.id === id ? { ...item, [field]: value } : item), { shouldValidate: true });
+    setValue(
+      "steps",
+      current.map((item) =>
+        item.id === id ? { ...item, [field]: value } : item
+      ),
+      { shouldValidate: true }
+    );
   };
 
-  // ... (Hàm onSubmit, handleGoBack giữ nguyên logic)
+  // --- SUBMIT LOGIC ---
   const onSubmit = async (data: RecipeFormData) => {
-    if (!user) return Alert.alert(t("alert.error_title"), t("alert.login_required"));
+    if (!user)
+      return Alert.alert(t("alert.error_title"), t("alert.login_required"));
+
     setLoading(true);
     try {
       let finalThumbnailUrl = data.thumbnail;
       if (imageBase64) {
         setUploadingImage(true);
-        finalThumbnailUrl = await uploadImageToSupabase(data.thumbnail, imageBase64);
+        finalThumbnailUrl = await uploadImageToSupabase(
+          data.thumbnail,
+          imageBase64
+        );
         setUploadingImage(false);
       }
+
       const payload = {
-        title: data.title.trim(), description: data.description.trim(), time: data.time.trim(),
-        thumbnail: finalThumbnailUrl, ingredients: data.ingredients, steps: data.steps,
-        category: data.category, difficulty: data.difficulty, cuisine: recipeData?.cuisine || "Việt Nam",
+        title: data.title.trim(),
+        description: data.description.trim(),
+        time: data.time.trim(),
+        thumbnail: finalThumbnailUrl,
+        ingredients: data.ingredients,
+        steps: data.steps,
+        category: data.category,
+        difficulty: data.difficulty,
+        cuisine: recipeData?.cuisine || "Việt Nam",
         updated_at: new Date().toISOString(),
       };
+
       let error;
       if (isEdit) {
-        const { error: uErr } = await supabase.from("recipes").update({ ...payload, status: "pending" }).eq("id", recipeData.id);
+        const { error: uErr } = await supabase
+          .from("recipes")
+          .update({ ...payload, status: "pending" })
+          .eq("id", recipeData.id);
         error = uErr;
       } else {
-        const { error: iErr } = await supabase.from("recipes").insert({ ...payload, user_id: user.id, status: "pending", created_at: new Date().toISOString() });
+        const { error: iErr } = await supabase.from("recipes").insert({
+          ...payload,
+          user_id: user.id,
+          status: "pending",
+          created_at: new Date().toISOString(),
+        });
         error = iErr;
       }
+
       if (error) throw error;
-      Alert.alert(t("alert.success_title"), t("alert.recipe_submitted"), [{ text: "OK", onPress: () => { navigation.goBack(); if (route.params?.onSuccess) route.params.onSuccess(); }}]);
-    } catch (error: any) { Alert.alert(t("alert.error_title"), error.message || t("alert.save_error")); } finally { setLoading(false); setUploadingImage(false); }
+
+      Alert.alert(t("alert.success_title"), t("alert.recipe_submitted"), [
+        {
+          text: "OK",
+          onPress: () => {
+            navigation.goBack();
+            if (route.params?.onSuccess) route.params.onSuccess();
+          },
+        },
+      ]);
+    } catch (error: any) {
+      console.log("Submit Error:", error);
+      Alert.alert(
+        t("alert.error_title"),
+        error.message || t("alert.save_error")
+      );
+    } finally {
+      setLoading(false);
+      setUploadingImage(false);
+    }
+  };
+
+  // --- Xử lý khi Form không hợp lệ (Báo lỗi cho user biết) ---
+  const onInvalid = (errors: any) => {
+    console.log("Validation Errors:", errors);
+    // Nếu lỗi là ở Ingredients
+    if (errors.ingredients) {
+      Alert.alert(
+        "Thiếu thông tin nguyên liệu",
+        "Vui lòng kiểm tra lại cột 'Số lượng' hoặc 'Tên nguyên liệu'. Chúng không được để trống."
+      );
+      return;
+    }
+    
+    Alert.alert(
+      t("common.error") || "Chưa lưu được",
+      t("alert.check_fields") ||
+        "Vui lòng kiểm tra các mục báo đỏ (Ảnh, Tên, Số lượng)."
+    );
   };
 
   const handleGoBack = () => {
     if (formChanged) {
-      Alert.alert(t("alert.confirm_exit_title"), t("alert.confirm_exit_desc"), [{ text: t("common.cancel"), style: "cancel" }, { text: t("common.exit"), style: "destructive", onPress: () => navigation.goBack() }]);
-    } else { navigation.goBack(); }
+      Alert.alert(t("alert.confirm_exit_title"), t("alert.confirm_exit_desc"), [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("common.exit"),
+          style: "destructive",
+          onPress: () => navigation.goBack(),
+        },
+      ]);
+    } else {
+      navigation.goBack();
+    }
   };
 
-  const renderError = (field: keyof RecipeFormData) => errors[field] ? <AppText style={styles.errorText}>{errors[field]?.message}</AppText> : null;
+  const renderError = (field: keyof RecipeFormData) =>
+    errors[field] ? (
+      <AppText style={styles.errorText}>{errors[field]?.message}</AppText>
+    ) : null;
 
-  // --- STYLES ĐỘNG CHO INPUT ---
   const inputStyle = [
-    styles.input, 
-    { 
-      backgroundColor: theme.background_contrast, // Nền input khác nền chính
-      color: theme.primary_text, 
-      borderColor: theme.border 
-    }
+    styles.input,
+    {
+      backgroundColor: theme.background_contrast,
+      color: theme.primary_text,
+      borderColor: theme.border,
+    },
   ];
 
   return (
-    // 👇 3. Background động
-    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      
-      {/* HEADER */}
-      <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border, borderBottomWidth: 1 }]}>
+    <AppSafeView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: theme.background,
+            borderBottomColor: theme.border,
+            borderBottomWidth: 1,
+          },
+        ]}
+      >
         <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.primary_text} />
         </TouchableOpacity>
-        <AppText variant="bold" style={[styles.headerTitle, { color: theme.primary_text }]}>
-          {isEdit ? t("create_recipe.edit_title") : t("create_recipe.new_title")}
+        <AppText
+          variant="bold"
+          style={[styles.headerTitle, { color: theme.primary_text }]}
+        >
+          {isEdit
+            ? t("create_recipe.edit_title")
+            : t("create_recipe.new_title")}
         </AppText>
         <View style={{ width: 40 }} />
       </View>
@@ -259,67 +433,108 @@ const CreateRecipeScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* ACTION BUTTONS */}
+          {/* Action Bar */}
           <View style={styles.actionBar}>
             <TouchableOpacity
               style={[
                 styles.actionBtnPost,
                 { backgroundColor: theme.primary_color },
-                (!isValid || loading || uploadingImage) && styles.disabledBtn,
+                (loading || uploadingImage) && styles.disabledBtn,
               ]}
-              onPress={handleSubmit(onSubmit)}
-              disabled={!isValid || loading || uploadingImage}
+              // Gọi onInvalid để báo lỗi nếu form chưa đúng
+              onPress={handleSubmit(onSubmit, onInvalid)}
+              disabled={loading || uploadingImage}
             >
               {loading || uploadingImage ? (
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <ActivityIndicator size="small" color="#fff" style={{ marginRight: 8 }} />
-                  <AppText style={styles.btnPostText}>{uploadingImage ? t("create_recipe.uploading_image") : t("create_recipe.saving")}</AppText>
+                  <ActivityIndicator
+                    size="small"
+                    color="#fff"
+                    style={{ marginRight: 8 }}
+                  />
+                  <AppText style={styles.btnPostText}>
+                    {uploadingImage
+                      ? t("create_recipe.uploading_image")
+                      : t("create_recipe.saving")}
+                  </AppText>
                 </View>
               ) : (
-                <AppText style={styles.btnPostText}>{isEdit ? t("common.save_changes") : t("create_recipe.post")}</AppText>
+                <AppText style={styles.btnPostText}>
+                  {isEdit ? t("common.save_changes") : t("create_recipe.post")}
+                </AppText>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionBtnCancel, { backgroundColor: theme.background_contrast }]}
+              style={[
+                styles.actionBtnCancel,
+                { backgroundColor: theme.background_contrast },
+              ]}
               onPress={handleGoBack}
               disabled={loading}
             >
-              <AppText style={[styles.btnCancelText, { color: theme.placeholder_text }]}>{t("common.cancel")}</AppText>
+              <AppText
+                style={[
+                  styles.btnCancelText,
+                  { color: theme.placeholder_text },
+                ]}
+              >
+                {t("common.cancel")}
+              </AppText>
             </TouchableOpacity>
           </View>
 
-          {/* IMAGE UPLOAD */}
+          {/* Section: Thumbnail */}
           <View style={styles.section}>
             <View style={styles.labelRow}>
-              <AppText variant="bold" style={[styles.label, { color: theme.primary_text }]}>{t("create_recipe.form.thumbnail")} *</AppText>
+              <AppText
+                variant="bold"
+                style={[styles.label, { color: theme.primary_text }]}
+              >
+                {t("create_recipe.form.thumbnail")} *
+              </AppText>
               {renderError("thumbnail")}
             </View>
 
             <TouchableOpacity
               style={[
                 styles.uploadArea,
-                { 
-                    backgroundColor: theme.background_contrast, 
-                    borderColor: theme.border 
+                {
+                  backgroundColor: theme.background_contrast,
+                  borderColor: theme.border,
                 },
                 errors.thumbnail && styles.uploadAreaError,
-                watchThumbnail && { borderColor: theme.primary_color, borderWidth: 2 },
+                watchThumbnail && {
+                  borderColor: theme.primary_color,
+                  borderWidth: 2,
+                },
               ]}
               onPress={pickImage}
               disabled={uploadingImage}
             >
               {watchThumbnail ? (
                 <>
-                  <Image source={{ uri: watchThumbnail }} style={styles.uploadedImage} />
+                  <Image
+                    source={{ uri: watchThumbnail }}
+                    style={styles.uploadedImage}
+                  />
                   <View style={styles.imageOverlay}>
                     <MaterialIcons name="edit" size={24} color="#fff" />
                   </View>
                 </>
               ) : (
                 <View style={styles.uploadPlaceholder}>
-                  <MaterialIcons name="add-photo-alternate" size={48} color={theme.placeholder_text} />
-                  <AppText style={[styles.uploadText, { color: theme.placeholder_text }]}>
+                  <MaterialIcons
+                    name="add-photo-alternate"
+                    size={48}
+                    color={theme.placeholder_text}
+                  />
+                  <AppText
+                    style={[
+                      styles.uploadText,
+                      { color: theme.placeholder_text },
+                    ]}
+                  >
                     {t("create_recipe.placeholder.thumbnail")}
                   </AppText>
                 </View>
@@ -327,38 +542,54 @@ const CreateRecipeScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          {/* BASIC INFO */}
+          {/* Section: Basic Info */}
           <View style={styles.section}>
-            <AppText variant="bold" style={[styles.sectionTitle, { color: theme.primary_text }]}>{t("create_recipe.section_basic")}</AppText>
+            <AppText
+              variant="bold"
+              style={[styles.sectionTitle, { color: theme.primary_text }]}
+            >
+              {t("create_recipe.section_basic")}
+            </AppText>
 
-            {/* Title */}
             <View style={styles.inputGroup}>
-              <AppText style={[styles.inputLabel, { color: theme.primary_text }]}>{t("create_recipe.form.name")} *</AppText>
+              <AppText
+                style={[styles.inputLabel, { color: theme.primary_text }]}
+              >
+                {t("create_recipe.form.name")} *
+              </AppText>
               <Controller
-                control={control} name="title"
+                control={control}
+                name="title"
                 render={({ field: { onChange, value } }) => (
                   <TextInput
                     style={inputStyle}
                     placeholder={t("create_recipe.placeholder.name")}
                     placeholderTextColor={theme.placeholder_text}
-                    value={value} onChangeText={onChange}
+                    value={value}
+                    onChangeText={onChange}
                   />
                 )}
               />
               {renderError("title")}
             </View>
 
-            {/* Description */}
             <View style={styles.inputGroup}>
-              <AppText style={[styles.inputLabel, { color: theme.primary_text }]}>{t("create_recipe.form.description")} *</AppText>
+              <AppText
+                style={[styles.inputLabel, { color: theme.primary_text }]}
+              >
+                {t("create_recipe.form.description")} *
+              </AppText>
               <Controller
-                control={control} name="description"
+                control={control}
+                name="description"
                 render={({ field: { onChange, value } }) => (
                   <TextInput
                     style={[inputStyle, styles.textArea]}
                     placeholder={t("create_recipe.placeholder.description")}
                     placeholderTextColor={theme.placeholder_text}
-                    value={value} onChangeText={onChange} multiline
+                    value={value}
+                    onChangeText={onChange}
+                    multiline
                   />
                 )}
               />
@@ -368,15 +599,21 @@ const CreateRecipeScreen: React.FC = () => {
             {/* Time & Difficulty */}
             <View style={styles.row}>
               <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-                <AppText style={[styles.inputLabel, { color: theme.primary_text }]}>{t("create_recipe.form.time")} *</AppText>
+                <AppText
+                  style={[styles.inputLabel, { color: theme.primary_text }]}
+                >
+                  {t("create_recipe.form.time")} *
+                </AppText>
                 <Controller
-                  control={control} name="time"
+                  control={control}
+                  name="time"
                   render={({ field: { onChange, value } }) => (
                     <TextInput
                       style={inputStyle}
                       placeholder={t("create_recipe.placeholder.time")}
                       placeholderTextColor={theme.placeholder_text}
-                      value={value} onChangeText={onChange}
+                      value={value}
+                      onChangeText={onChange}
                     />
                   )}
                 />
@@ -384,9 +621,14 @@ const CreateRecipeScreen: React.FC = () => {
               </View>
 
               <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
-                <AppText style={[styles.inputLabel, { color: theme.primary_text }]}>{t("create_recipe.form.difficulty")} *</AppText>
+                <AppText
+                  style={[styles.inputLabel, { color: theme.primary_text }]}
+                >
+                  {t("create_recipe.form.difficulty")} *
+                </AppText>
                 <Controller
-                  control={control} name="difficulty"
+                  control={control}
+                  name="difficulty"
                   render={({ field: { onChange, value } }) => (
                     <View style={styles.selectContainer}>
                       {DIFFICULTY_OPTIONS.map((option) => (
@@ -394,8 +636,15 @@ const CreateRecipeScreen: React.FC = () => {
                           key={option.value}
                           style={[
                             styles.selectOption,
-                            { backgroundColor: theme.background_contrast, borderColor: theme.border, borderWidth: 1 },
-                            value === option.value && { backgroundColor: theme.primary_color, borderColor: theme.primary_color },
+                            {
+                              backgroundColor: theme.background_contrast,
+                              borderColor: theme.border,
+                              borderWidth: 1,
+                            },
+                            value === option.value && {
+                              backgroundColor: theme.primary_color,
+                              borderColor: theme.primary_color,
+                            },
                           ]}
                           onPress={() => onChange(option.value)}
                         >
@@ -403,7 +652,8 @@ const CreateRecipeScreen: React.FC = () => {
                             style={[
                               styles.selectOptionText,
                               { color: theme.placeholder_text },
-                              value === option.value && styles.selectOptionTextActive,
+                              value === option.value &&
+                                styles.selectOptionTextActive,
                             ]}
                           >
                             {t(`data_map.difficulty.${option.labelKey}`)}
@@ -416,11 +666,15 @@ const CreateRecipeScreen: React.FC = () => {
               </View>
             </View>
 
-            {/* Category */}
             <View style={styles.inputGroup}>
-              <AppText style={[styles.inputLabel, { color: theme.primary_text }]}>{t("create_recipe.form.category")} *</AppText>
+              <AppText
+                style={[styles.inputLabel, { color: theme.primary_text }]}
+              >
+                {t("create_recipe.form.category")} *
+              </AppText>
               <Controller
-                control={control} name="category"
+                control={control}
+                name="category"
                 render={({ field: { onChange, value } }) => (
                   <View style={styles.selectContainer}>
                     {CATEGORY_OPTIONS.map((option) => (
@@ -428,8 +682,17 @@ const CreateRecipeScreen: React.FC = () => {
                         key={option.value}
                         style={[
                           styles.selectOption,
-                          { width: "48%", marginBottom: 8, backgroundColor: theme.background_contrast, borderColor: theme.border, borderWidth: 1 },
-                          value === option.value && { backgroundColor: theme.primary_color, borderColor: theme.primary_color },
+                          {
+                            width: "48%",
+                            marginBottom: 8,
+                            backgroundColor: theme.background_contrast,
+                            borderColor: theme.border,
+                            borderWidth: 1,
+                          },
+                          value === option.value && {
+                            backgroundColor: theme.primary_color,
+                            borderColor: theme.primary_color,
+                          },
                         ]}
                         onPress={() => onChange(option.value)}
                       >
@@ -437,7 +700,8 @@ const CreateRecipeScreen: React.FC = () => {
                           style={[
                             styles.selectOptionText,
                             { color: theme.placeholder_text },
-                            value === option.value && styles.selectOptionTextActive,
+                            value === option.value &&
+                              styles.selectOptionTextActive,
                           ]}
                         >
                           {t(`data_map.category.${option.labelKey}`)}
@@ -450,71 +714,141 @@ const CreateRecipeScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* INGREDIENTS */}
+          {/* Section: Ingredients */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <AppText variant="bold" style={[styles.sectionTitle, { color: theme.primary_text }]}>{t("create_recipe.section_ingredients")} *</AppText>
+              <AppText
+                variant="bold"
+                style={[styles.sectionTitle, { color: theme.primary_text }]}
+              >
+                {t("create_recipe.section_ingredients")} *
+              </AppText>
               {renderError("ingredients")}
             </View>
 
             {watchIngredients.map((item, index) => (
-              <View key={item.id} style={[styles.itemCard, { backgroundColor: theme.background_contrast }]}>
-                <View style={[styles.numberBadge, { backgroundColor: theme.primary_color }]}>
+              <View
+                key={item.id}
+                style={[
+                  styles.itemCard,
+                  { backgroundColor: theme.background_contrast },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.numberBadge,
+                    { backgroundColor: theme.primary_color },
+                  ]}
+                >
                   <AppText style={styles.numberBadgeText}>{index + 1}</AppText>
                 </View>
                 <View style={{ flex: 1, gap: 8 }}>
                   <TextInput
-                    style={[inputStyle, { flex: 1, height: 40, paddingVertical: 0 }]}
+                    style={[
+                      inputStyle,
+                      { flex: 1, height: 40, paddingVertical: 0 },
+                    ]}
                     placeholder={t("create_recipe.placeholder.ing_name")}
                     placeholderTextColor={theme.placeholder_text}
                     value={item.name}
-                    onChangeText={(text) => updateIngredient(item.id, "name", text)}
+                    onChangeText={(text) =>
+                      updateIngredient(item.id, "name", text)
+                    }
                   />
+                  {/* Ô Số Lượng (Quantity) */}
                   <TextInput
-                    style={[inputStyle, { width: 120, height: 40, paddingVertical: 0 }]}
+                    style={[
+                      inputStyle,
+                      { width: 120, height: 40, paddingVertical: 0 },
+                      // Bôi đỏ nếu item này bị lỗi validation
+                      (errors?.ingredients as any)?.[index]?.quantity && { borderColor: "red", borderWidth: 1 }
+                    ]}
                     placeholder={t("create_recipe.placeholder.ing_amount")}
                     placeholderTextColor={theme.placeholder_text}
                     value={item.quantity}
-                    onChangeText={(text) => updateIngredient(item.id, "quantity", text)}
+                    onChangeText={(text) =>
+                      updateIngredient(item.id, "quantity", text)
+                    }
                   />
                 </View>
                 {watchIngredients.length > 1 && (
-                  <TouchableOpacity style={styles.removeButton} onPress={() => removeIngredient(item.id)}>
-                    <MaterialIcons name="close" size={20} color={theme.placeholder_text} />
+                  <TouchableOpacity
+                    style={styles.removeButton}
+                    onPress={() => removeIngredient(item.id)}
+                  >
+                    <MaterialIcons
+                      name="close"
+                      size={20}
+                      color={theme.placeholder_text}
+                    />
                   </TouchableOpacity>
                 )}
               </View>
             ))}
-            
-            <TouchableOpacity 
-                style={[styles.addButton, { borderColor: theme.primary_color, backgroundColor: isDarkMode ? 'transparent' : '#F0F9FF' }]} 
-                onPress={addIngredient}
+
+            <TouchableOpacity
+              style={[
+                styles.addButton,
+                {
+                  borderColor: theme.primary_color,
+                  backgroundColor: isDarkMode ? "transparent" : "#F0F9FF",
+                },
+              ]}
+              onPress={addIngredient}
             >
               <MaterialIcons name="add" size={20} color={theme.primary_color} />
-              <AppText style={[styles.addButtonText, { color: theme.primary_color }]}>{t("create_recipe.add_ingredient")}</AppText>
+              <AppText
+                style={[styles.addButtonText, { color: theme.primary_color }]}
+              >
+                {t("create_recipe.add_ingredient")}
+              </AppText>
             </TouchableOpacity>
           </View>
 
-          {/* STEPS */}
+          {/* Section: Steps */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <AppText variant="bold" style={[styles.sectionTitle, { color: theme.primary_text }]}>{t("create_recipe.section_steps")} *</AppText>
+              <AppText
+                variant="bold"
+                style={[styles.sectionTitle, { color: theme.primary_text }]}
+              >
+                {t("create_recipe.section_steps")} *
+              </AppText>
               {renderError("steps")}
             </View>
 
             {watchSteps.map((item, index) => (
-              <View key={item.id} style={[styles.stepCard, { backgroundColor: theme.background_contrast, borderColor: theme.border }]}>
+              <View
+                key={item.id}
+                style={[
+                  styles.stepCard,
+                  {
+                    backgroundColor: theme.background_contrast,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
                 <View style={styles.stepHeader}>
-                  <AppText variant="bold" style={[styles.stepTitleLabel, { color: theme.primary_color }]}>
+                  <AppText
+                    variant="bold"
+                    style={[
+                      styles.stepTitleLabel,
+                      { color: theme.primary_color },
+                    ]}
+                  >
                     {t("create_recipe.step")} {index + 1}
                   </AppText>
                   {watchSteps.length > 1 && (
                     <TouchableOpacity onPress={() => removeStep(item.id)}>
-                      <MaterialIcons name="delete-outline" size={20} color="#ff4444" />
+                      <MaterialIcons
+                        name="delete-outline"
+                        size={20}
+                        color="#ff4444"
+                      />
                     </TouchableOpacity>
                   )}
                 </View>
-                
+
                 <TextInput
                   style={[inputStyle, { marginBottom: 8 }]}
                   placeholder={t("create_recipe.placeholder.step_title")}
@@ -523,7 +857,11 @@ const CreateRecipeScreen: React.FC = () => {
                   onChangeText={(text) => updateStep(item.id, "title", text)}
                 />
                 <TextInput
-                  style={[inputStyle, styles.textArea, { height: 80, minHeight: 80 }]}
+                  style={[
+                    inputStyle,
+                    styles.textArea,
+                    { height: 80, minHeight: 80 },
+                  ]}
                   placeholder={t("create_recipe.placeholder.step_desc")}
                   placeholderTextColor={theme.placeholder_text}
                   value={item.content}
@@ -532,16 +870,26 @@ const CreateRecipeScreen: React.FC = () => {
                 />
               </View>
             ))}
-            
-            <TouchableOpacity 
-                style={[styles.addButton, { borderColor: theme.primary_color, backgroundColor: isDarkMode ? 'transparent' : '#F0F9FF' }]} 
-                onPress={addStep}
+
+            <TouchableOpacity
+              style={[
+                styles.addButton,
+                {
+                  borderColor: theme.primary_color,
+                  backgroundColor: isDarkMode ? "transparent" : "#F0F9FF",
+                },
+              ]}
+              onPress={addStep}
             >
               <MaterialIcons name="add" size={20} color={theme.primary_color} />
-              <AppText style={[styles.addButtonText, { color: theme.primary_color }]}>{t("create_recipe.add_step")}</AppText>
+              <AppText
+                style={[styles.addButtonText, { color: theme.primary_color }]}
+              >
+                {t("create_recipe.add_step")}
+              </AppText>
             </TouchableOpacity>
           </View>
-          
+
           <View style={{ height: 100 }} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -552,7 +900,9 @@ const CreateRecipeScreen: React.FC = () => {
 export default CreateRecipeScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
+  safeArea: {
+    flex: 1,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -561,14 +911,34 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "ios" ? 10 : 10,
     paddingBottom: 16,
   },
-  backButton: { padding: 8 },
-  headerTitle: { fontSize: 18, fontWeight: "700" },
-  container: { flex: 1 },
-  content: { padding: 20 },
-  section: { marginBottom: 30 },
-  sectionHeader: { marginBottom: 12 },
-  sectionTitle: { fontSize: 18, marginBottom: 4 },
-  actionBar: { flexDirection: "row", gap: 12, marginBottom: 24 },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: 20,
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionHeader: {
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  actionBar: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 24,
+  },
   actionBtnPost: {
     flex: 1,
     paddingVertical: 14,
@@ -584,18 +954,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: 'transparent'
+    borderColor: "transparent",
   },
-  btnPostText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  btnCancelText: { fontSize: 16, fontWeight: "600" },
-  disabledBtn: { opacity: 0.6 },
-  
-  // Form Labels
-  labelRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
-  label: { fontSize: 16, fontWeight: "600" },
-  inputLabel: { fontSize: 14, fontWeight: "600", marginBottom: 8 },
-  
-  // Upload Area
+  btnPostText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  btnCancelText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  disabledBtn: {
+    opacity: 0.6,
+  },
+  labelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
   uploadArea: {
     height: 200,
     borderRadius: 16,
@@ -605,17 +992,37 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
   },
-  uploadAreaError: { borderColor: "#EF4444", borderWidth: 2 },
-  uploadedImage: { width: "100%", height: "100%", resizeMode: "cover" },
-  imageOverlay: {
-    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.4)", alignItems: "center", justifyContent: "center",
+  uploadAreaError: {
+    borderColor: "#EF4444",
+    borderWidth: 2,
   },
-  uploadPlaceholder: { alignItems: "center", justifyContent: "center" },
-  uploadText: { fontSize: 15, marginTop: 8, fontWeight: "500" },
-  
-  // Inputs
-  inputGroup: { marginBottom: 20 },
+  uploadedImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  imageOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  uploadPlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  uploadText: {
+    fontSize: 15,
+    marginTop: 8,
+    fontWeight: "500",
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
   input: {
     borderWidth: 1,
     borderRadius: 10,
@@ -623,23 +1030,35 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
   },
-  textArea: { minHeight: 120, textAlignVertical: "top" },
-  row: { flexDirection: "row", marginHorizontal: -4 },
-  
-  // Select Chips
-  selectContainer: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
+  textArea: {
+    minHeight: 120,
+    textAlignVertical: "top",
+  },
+  row: {
+    flexDirection: "row",
+    marginHorizontal: -4,
+  },
+  selectContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
   selectOption: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 20, // Rounded pills
+    borderRadius: 20,
     marginBottom: 8,
     alignItems: "center",
     justifyContent: "center",
   },
-  selectOptionText: { fontSize: 14, fontWeight: "500" },
-  selectOptionTextActive: { color: "#fff", fontWeight: "700" },
-  
-  // Ingredient Row (Optimized)
+  selectOptionText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  selectOptionTextActive: {
+    color: "#fff",
+    fontWeight: "700",
+  },
   itemCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -648,23 +1067,37 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   numberBadge: {
-    width: 24, height: 24, borderRadius: 12,
-    alignItems: "center", justifyContent: "center", marginRight: 12,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
   },
-  numberBadgeText: { color: "#fff", fontSize: 12, fontWeight: "bold" },
-  removeButton: { padding: 8, marginLeft: 4 },
-  
-  // Step Card (Optimized)
+  numberBadgeText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  removeButton: {
+    padding: 8,
+    marginLeft: 4,
+  },
   stepCard: {
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    borderWidth: 1,
+    borderWidth: 1,  },
+  stepHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
-  stepHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
-  stepTitleLabel: { fontSize: 15, fontWeight: "700" },
-  
-  // Add Button
+  stepTitleLabel: {
+    fontSize: 15,
+    fontWeight: "700",
+  },
   addButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -675,6 +1108,15 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
     marginTop: 4,
   },
-  addButtonText: { fontSize: 15, fontWeight: "600", marginLeft: 8 },
-  errorText: { color: "#EF4444", fontSize: 12, fontWeight: "500", marginTop: 4 },
+  addButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginLeft: 8,
+  },
+  errorText: {
+    color: "#EF4444",
+    fontSize: 12,
+    fontWeight: "500",
+    marginTop: 4,
+  },
 });

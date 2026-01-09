@@ -1,5 +1,4 @@
-import { Roboto_400Regular } from "@expo-google-fonts/roboto";
-
+// Nhóm 9 - IE307.Q12
 export const AppFonts = {
     RobotoBold: "Roboto-Bold",
     RobotoMedium: "Roboto-Medium",

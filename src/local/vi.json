@@ -23,6 +23,9 @@
     "alert": "Thông báo",
     "no_results": "Không tìm thấy",
     "clear_all": "Xóa hết",
+    "save_changes": "Lưu thay đổi",
+
+    "joined": "Tham gia từ",
     "difficulty": {
       "easy": "Dễ",
       "medium": "Tr.bình",
@@ -30,6 +33,19 @@
     }
   },
   "auth": {
+    "reset_password_title": "Đặt lại mật khẩu",
+    "enter_otp_msg": "Nhập mã OTP đã được gửi tới email và mật khẩu mới.",
+    "fill_all": "Vui lòng điền đầy đủ thông tin",
+    "password_mismatch": "Mật khẩu xác nhận không khớp",
+    "password_reset_success": "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.",
+    "new_password": "Mật khẩu mới",
+    "confirm_password": "Xác nhận mật khẩu",
+    "confirm_reset": "Đổi mật khẩu",
+    "forgot_password_title": "Quên mật khẩu",
+    "forgot_password_desc": "Nhập địa chỉ email đã đăng ký của bạn. Chúng tôi sẽ gửi cho bạn một mã xác thực để đặt lại mật khẩu.",
+    "email_required": "Vui lòng nhập email",
+    "otp_sent": "Mã xác thực đã được gửi đến email của bạn.",
+    "send_code": "Gửi mã xác thực",
     "login_title": "ĐĂNG NHẬP",
     "register_title": "ĐĂNG KÝ",
     "login_button": "Đăng nhập",
@@ -87,6 +103,7 @@
     "over_60": "> 60 phút"
   },
   "search": {
+    "placeholderfol": "Tìm người",
     "placeholder": "Tìm tên món, mô tả...",
     "reset": "Thiết lập lại",
     "apply": "Tìm kiếm",

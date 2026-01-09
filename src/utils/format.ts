@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import { TFunction } from "i18next";
 
 /**
@@ -10,12 +11,10 @@ export const formatRecipeTime = (rawTime: string | number | null | undefined, t:
     return t("common.unknown_time", "N/A"); 
   }
 
-  // Nếu là số, dùng luôn. Nếu là chuỗi, lọc bỏ ký tự lạ để lấy số
   const timeNumber = typeof rawTime === 'number' 
     ? rawTime 
     : parseInt(String(rawTime).replace(/[^0-9]/g, ''), 10);
 
-  // Nếu sau khi lọc vẫn không ra số (NaN) thì trả về giá trị gốc
   if (isNaN(timeNumber)) {
     return String(rawTime);
   }

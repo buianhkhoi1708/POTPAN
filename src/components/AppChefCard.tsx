@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import {
   Pressable,
@@ -7,8 +8,9 @@ import {
   Platform,
   ViewStyle,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // 1. Import hook navigation
+import { useNavigation } from "@react-navigation/native";
 import AppText from "./AppText";
+import { useThemeStore } from "../store/useThemeStore";
 
 export type Chef = {
   id: any;
@@ -22,15 +24,12 @@ const CONTAINER_WIDTH = IMAGE_SIZE;
 interface ChefCardProps {
   item: Chef;
   style?: ViewStyle;
-  // onPress?: () => void; // Không bắt buộc truyền onPress từ ngoài nữa
 }
 
 const AppChefCard = ({ item, style }: ChefCardProps) => {
-  const navigation = useNavigation<any>(); // 2. Khởi tạo navigation
-
+  const navigation = useNavigation<any>();
+  const { theme } = useThemeStore();
   const displayName = item.full_name?.split(" ")[0] || "Chef";
-
-  // 3. Hàm xử lý chuyển trang
   const handlePress = () => {
     navigation.navigate("ChefProfileScreen", {
       chefId: item.id,
@@ -40,11 +39,16 @@ const AppChefCard = ({ item, style }: ChefCardProps) => {
   };
 
   return (
-    <Pressable
-      style={[styles.container, style]}
-      onPress={handlePress} // 4. Gắn hàm xử lý vào đây
-    >
-      <View style={styles.imageWrap}>
+    <Pressable style={[styles.container, style]} onPress={handlePress}>
+      <View
+        style={[
+          styles.imageWrap,
+          {
+            backgroundColor: theme.background_contrast,
+            borderColor: theme.border,
+          },
+        ]}
+      >
         <Image
           source={{
             uri: item.avatar_url || `https://i.pravatar.cc/150?u=${item.id}`,
@@ -53,8 +57,12 @@ const AppChefCard = ({ item, style }: ChefCardProps) => {
           resizeMode="cover"
         />
       </View>
-      
-      <AppText variant="bold" style={styles.name} numberOfLines={1}>
+
+      <AppText
+        variant="bold"
+        style={[styles.name, { color: theme.primary_text }]}
+        numberOfLines={1}
+      >
         {displayName}
       </AppText>
     </Pressable>
@@ -73,10 +81,8 @@ const styles = StyleSheet.create({
     height: IMAGE_SIZE,
     borderRadius: (IMAGE_SIZE || 80) / 2,
     overflow: "hidden",
-    backgroundColor: "#f5f5f5",
     marginBottom: 6,
     borderWidth: 1,
-    borderColor: '#eee',
   },
   image: {
     width: "100%",
@@ -84,7 +90,6 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 12,
-    color: "#333",
     textAlign: "center",
     width: "120%",
   },

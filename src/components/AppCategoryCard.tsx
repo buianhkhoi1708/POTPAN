@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { View, StyleSheet, Image, Pressable, ViewStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -5,7 +6,6 @@ import AppText from "./AppText";
 import { useThemeStore } from "../store/useThemeStore";
 import { useTranslation } from "react-i18next";
 
-// Định nghĩa kiểu dữ liệu cho props
 interface CategoryItemProps {
   item: {
     id: string;
@@ -13,12 +13,17 @@ interface CategoryItemProps {
     image: any;
     recipe_count: number;
   };
-  width: number; // Chiều rộng của card được tính toán từ bên ngoài
+  width: number;
   onPress: () => void;
   style?: ViewStyle;
 }
 
-const AppCategoryCard: React.FC<CategoryItemProps> = ({ item, width, onPress, style }) => {
+const AppCategoryCard: React.FC<CategoryItemProps> = ({
+  item,
+  width,
+  onPress,
+  style,
+}) => {
   const { theme, isDarkMode } = useThemeStore();
   const { t } = useTranslation();
 
@@ -53,7 +58,12 @@ const AppCategoryCard: React.FC<CategoryItemProps> = ({ item, width, onPress, st
         />
       </View>
 
-      <View style={[styles.infoWrap, { backgroundColor: theme.background_contrast }]}>
+      <View
+        style={[
+          styles.infoWrap,
+          { backgroundColor: theme.background_contrast },
+        ]}
+      >
         <AppText
           variant="bold"
           style={[styles.title, { color: theme.primary_text }]}
@@ -64,7 +74,9 @@ const AppCategoryCard: React.FC<CategoryItemProps> = ({ item, width, onPress, st
 
         <View style={styles.metaRow}>
           <View style={styles.badge}>
-            <AppText style={[styles.badgeText, { color: theme.placeholder_text }]}>
+            <AppText
+              style={[styles.badgeText, { color: theme.placeholder_text }]}
+            >
               {item.recipe_count > 0
                 ? `${item.recipe_count} ${t("common.items", "công thức")}`
                 : t("common.empty", "0 công thức")}
@@ -73,10 +85,18 @@ const AppCategoryCard: React.FC<CategoryItemProps> = ({ item, width, onPress, st
           <View
             style={[
               styles.arrowBtn,
-              { backgroundColor: isDarkMode ? "rgba(255,255,255,0.1)" : "#F7F7F7" },
+              {
+                backgroundColor: isDarkMode
+                  ? "rgba(255,255,255,0.1)"
+                  : "#F7F7F7",
+              },
             ]}
           >
-            <Ionicons name="arrow-forward" size={14} color={theme.placeholder_text} />
+            <Ionicons
+              name="arrow-forward"
+              size={14}
+              color={theme.placeholder_text}
+            />
           </View>
         </View>
       </View>
@@ -101,7 +121,10 @@ const styles = StyleSheet.create({
     height: 140,
     width: "100%",
   },
-  image: { width: "100%", height: "100%" },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
   infoWrap: {
     padding: 12,
   },

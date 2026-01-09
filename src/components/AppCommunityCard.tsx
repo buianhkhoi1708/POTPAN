@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { View, Image, Pressable, StyleSheet, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,7 +7,6 @@ import AppText from "./AppText";
 import { AppLightColor } from "../styles/color";
 import { formatRecipeTime } from "../utils/format";
 
-// Định nghĩa props
 interface CommunityCardProps {
   item: {
     id: any;
@@ -29,13 +29,10 @@ const IMAGE_H = 162;
 const OVERLAP = 64;
 const CARD_W = SCREEN_W - H_PADDING * 2;
 const CONTENT_W = CARD_W - IMAGE_W + OVERLAP;
-
-// Map ánh xạ độ khó (DB Tiếng Việt -> JSON Key Tiếng Anh)
 const DIFFICULTY_MAP: Record<string, string> = {
   "Dễ": "easy",
   "Trung bình": "medium",
   "Khó": "hard",
-  // Thêm dự phòng cho các trường hợp viết thường nếu cần
   "dễ": "easy",
   "trung bình": "medium",
   "khó": "hard"
@@ -44,10 +41,8 @@ const DIFFICULTY_MAP: Record<string, string> = {
 const AppCommunityCard: React.FC<CommunityCardProps> = ({ item, onPress }) => {
   const { t } = useTranslation();
 
-  // Helper format thời gian (đã import)
   const formattedTime = formatRecipeTime(item.time, t);
 
-  // Lấy key dịch độ khó
   const diffKey = DIFFICULTY_MAP[item.difficulty];
 
   return (
@@ -73,12 +68,12 @@ const AppCommunityCard: React.FC<CommunityCardProps> = ({ item, onPress }) => {
           </AppText>
 
           <AppText variant="light" style={styles.author} numberOfLines={1}>
-            {/* Dùng key community.by */}
+
             {t("community.by")} {item.authorName}
           </AppText>
         </View>
 
-        {/* Thông số Meta */}
+
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <Ionicons name="time-outline" size={14} color={AppLightColor.primary_color} />
@@ -90,7 +85,6 @@ const AppCommunityCard: React.FC<CommunityCardProps> = ({ item, onPress }) => {
           <View style={styles.metaItem}>
             <Ionicons name="bar-chart-outline" size={14} color={AppLightColor.primary_color} />
             <AppText variant="medium" style={styles.metaText}>
-              {/* Logic dịch độ khó: Map -> Dịch. Nếu không map được -> Hiện gốc */}
               {diffKey ? t(`data_map.difficulty.${diffKey}`) : item.difficulty}
             </AppText>
           </View>
@@ -126,11 +120,17 @@ const styles = StyleSheet.create({
     zIndex: 3,
     elevation: 5,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { 
+      width: 0, 
+      height: 4 
+    },
     shadowOpacity: 0.2,
     shadowRadius: 5,
   },
-  image: { width: "100%", height: "100%" },
+  image: { 
+    width: "100%", 
+    height: "100%" 
+  },
   contentCard: {
     width: CONTENT_W,
     height: 140,
@@ -146,10 +146,24 @@ const styles = StyleSheet.create({
     zIndex: 2,
     justifyContent: "space-between",
   },
-  textContainer: { flex: 1 },
-  title: { fontSize: 16, color: AppLightColor.primary_text, marginBottom: 4 },
-  desc: { fontSize: 12, color: "#666", marginBottom: 4 },
-  author: { fontSize: 11, color: AppLightColor.primary_color, fontWeight: "600" },
+  textContainer: { 
+    flex: 1 
+  },
+  title: { 
+    fontSize: 16, 
+    color: AppLightColor.primary_text, 
+    marginBottom: 4 
+  },
+  desc: { 
+    fontSize: 12, 
+    color: "#666", 
+    marginBottom: 4 
+  },
+  author: { 
+    fontSize: 11, 
+    color: AppLightColor.primary_color, 
+    fontWeight: "600" 
+  },
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -159,6 +173,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#f0f0f0",
   },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
-  metaText: { fontSize: 11, color: "#666", fontWeight: "600" },
+  metaItem: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    gap: 4 
+  },
+  metaText: { 
+    fontSize: 11, 
+    color: "#666", 
+    fontWeight: "600" 
+  },
 });

@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -10,32 +11,23 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppRecipeCard from "../components/AppRecipeCard";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
-
-// 👇 1. Import Theme Store
 import { useThemeStore } from "../store/useThemeStore";
-
-const { width } = Dimensions.get("window");
 
 const CollectionDetailScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  
-  // 👇 2. Lấy Theme
   const { theme, isDarkMode } = useThemeStore();
-
   const { collectionId, collectionName } = route.params as {
     collectionId: number | null;
     collectionName: string;
   };
-
   const [recipes, setRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -80,40 +72,47 @@ const CollectionDetailScreen = () => {
         variant="featured"
         onPress={() => navigation.navigate("RecipeDetailScreen", { item })}
         style={styles.cardStyle}
-        // AppRecipeCard đã tự xử lý Darkmode bên trong nó rồi
       />
     </View>
   );
 
   return (
-    // 👇 3. Background Screen Động
-    <AppSafeView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* HEADER */}
-      <View style={[styles.header, { borderBottomColor: theme.border, backgroundColor: theme.background }]}>
+    <AppSafeView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <View
+        style={[
+          styles.header,
+          {
+            borderBottomColor: theme.border,
+            backgroundColor: theme.background,
+          },
+        ]}
+      >
         <Pressable
           onPress={() => navigation.goBack()}
           style={styles.backButton}
           hitSlop={10}
         >
-          {/* 👇 Icon Back đổi màu theo theme */}
           <Ionicons name="arrow-back" size={24} color={theme.primary_text} />
         </Pressable>
-        
+
         <View style={styles.titleContainer}>
-          {/* 👇 Title màu động */}
-          <AppText variant="bold" style={[styles.headerTitle, { color: theme.primary_text }]} numberOfLines={1}>
+          <AppText
+            variant="bold"
+            style={[styles.headerTitle, { color: theme.primary_text }]}
+            numberOfLines={1}
+          >
             {collectionName}
           </AppText>
           <AppText style={[styles.subtitle, { color: theme.placeholder_text }]}>
             {recipes.length} {t("collection.count_suffix")}
           </AppText>
         </View>
-        
-        {/* Placeholder */}
+
         <View style={{ width: 32 }} />
       </View>
 
-      {/* BODY */}
       {loading ? (
         <View style={styles.centerBox}>
           <ActivityIndicator size="large" color={theme.primary_color} />
@@ -127,18 +126,22 @@ const CollectionDetailScreen = () => {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.centerBox}>
-              {/* 👇 Empty Icon đổi màu */}
-              <Ionicons 
-                name="folder-open-outline" 
-                size={64} 
-                color={isDarkMode ? theme.icon : "#ddd"} 
+              <Ionicons
+                name="folder-open-outline"
+                size={64}
+                color={isDarkMode ? theme.icon : "#ddd"}
               />
-              <AppText style={[styles.emptyText, { color: theme.placeholder_text }]}>
+              <AppText
+                style={[styles.emptyText, { color: theme.placeholder_text }]}
+              >
                 {t("collection.empty_msg")}
               </AppText>
-              
+
               <Pressable
-                style={[styles.exploreBtn, { backgroundColor: theme.primary_color }]}
+                style={[
+                  styles.exploreBtn,
+                  { backgroundColor: theme.primary_color },
+                ]}
                 onPress={() => navigation.navigate("HomeScreen")}
               >
                 <AppText variant="bold" style={{ color: "#fff" }}>
@@ -155,11 +158,10 @@ const CollectionDetailScreen = () => {
 
 export default CollectionDetailScreen;
 
-// Style Tĩnh (Layout)
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-
-  // Header
+  container: {
+    flex: 1,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -168,17 +170,36 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
   },
-  backButton: { padding: 4 },
-  titleContainer: { alignItems: "center", flex: 1, paddingHorizontal: 16 },
-  headerTitle: { fontSize: 18, textAlign: "center" },
-  subtitle: { fontSize: 12, marginTop: 2 },
+  backButton: {
+    padding: 4,
+  },
+  titleContainer: {
+    alignItems: "center",
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  headerTitle: {
+    fontSize: 18,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
 
-  // List
-  listContent: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 40 },
-  itemWrapper: { marginBottom: 20, alignItems: "center" },
-  cardStyle: { width: "100%" },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 40,
+  },
+  itemWrapper: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  cardStyle: {
+    width: "100%",
+  },
 
-  // Empty & Loading State
   centerBox: {
     flex: 1,
     alignItems: "center",

@@ -1,16 +1,20 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { View, StyleSheet, Image, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import AppText from "./AppText"; // Check lại đường dẫn import
-import { useThemeStore } from "../store/useThemeStore"; // Check lại đường dẫn import
+import AppText from "./AppText";
+import { useThemeStore } from "../store/useThemeStore";
 
 interface AppAdminUserItemProps {
   item: any;
   onDelete: (item: any) => void;
 }
 
-const AppAdminUserItem: React.FC<AppAdminUserItemProps> = ({ item, onDelete }) => {
+const AppAdminUserItem: React.FC<AppAdminUserItemProps> = ({
+  item,
+  onDelete,
+}) => {
   const { t } = useTranslation();
   const { theme, isDarkMode } = useThemeStore();
   const isAdmin = item.role === "admin";
@@ -95,20 +99,48 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: "hidden",
   },
-  cardHeader: { flexDirection: "row", padding: 16, alignItems: "center" },
-  avatar: { width: 56, height: 56, borderRadius: 28, borderWidth: 1 },
-  content: { flex: 1, marginLeft: 12, marginRight: 8 },
+  cardHeader: {
+    flexDirection: "row",
+    padding: 16,
+    alignItems: "center",
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
+  },
+  content: {
+    flex: 1,
+    marginLeft: 12,
+    marginRight: 8,
+  },
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     marginBottom: 2,
   },
-  userName: { fontSize: 16 },
-  adminBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  adminBadgeText: { color: "#fff", fontSize: 10, fontWeight: "bold" },
-  userEmail: { fontSize: 13, marginBottom: 4 },
-  userDate: { fontSize: 11 },
+  userName: {
+    fontSize: 16,
+  },
+  adminBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  adminBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  userEmail: {
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  userDate: {
+    fontSize: 11,
+  },
   btnIconAction: {
     width: 40,
     height: 40,

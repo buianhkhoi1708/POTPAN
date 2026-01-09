@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useState, useEffect, useRef } from "react";
 import {
   Modal,
@@ -18,12 +19,11 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { decode } from "base64-arraybuffer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTranslation } from "react-i18next"; // 👈 Import i18n
-
+import { useTranslation } from "react-i18next";
 import AppText from "./AppText";
-import { AppLightColor } from "../styles/color";
 import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
+import { useThemeStore } from "../store/useThemeStore";
 
 interface Collection {
   id: number;
@@ -40,9 +40,6 @@ interface Props {
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// IE307.Q12_Nhom9
-
-
 const AppCollectionModal: React.FC<Props> = ({
   visible,
   onClose,
@@ -51,23 +48,20 @@ const AppCollectionModal: React.FC<Props> = ({
 }) => {
   const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation(); // 👈 Init hook
-
+  const { t } = useTranslation();
+  const { theme, isDarkMode } = useThemeStore();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
-  
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
 
-  // Animation Refs
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
     if (visible && user) {
       fetchCollections();
-      // Slide Up Animation
       Animated.spring(translateY, {
         toValue: 0,
         useNativeDriver: true,
@@ -78,7 +72,6 @@ const AppCollectionModal: React.FC<Props> = ({
   }, [visible, user]);
 
   const handleClose = () => {
-    // Slide Down Animation
     Animated.timing(translateY, {
       toValue: SCREEN_HEIGHT,
       duration: 250,
@@ -97,28 +90,28 @@ const AppCollectionModal: React.FC<Props> = ({
       .eq("user_id", user?.id)
       .order("created_at", { ascending: false });
 
-    if (!error && data) {
-      setCollections(data);
-    }
+    if (!error && data) setCollections(data);
     setLoading(false);
   };
 
   const pickImage = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(t("collection_modal.permission_title"), t("collection_modal.permission_desc"));
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          t("collection_modal.permission_title"),
+          t("collection_modal.permission_desc")
+        );
         return;
       }
-
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [16, 9],
         quality: 0.5,
-        base64: true, 
+        base64: true,
       });
-
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
         setSelectedImage(asset.uri);
@@ -133,20 +126,21 @@ const AppCollectionModal: React.FC<Props> = ({
     try {
       const fileName = `${user?.id}/${Date.now()}.jpg`;
       const { error } = await supabase.storage
-        .from("collection-images") 
+        .from("collection-images")
         .upload(fileName, decode(base64Data), {
           contentType: "image/jpeg",
-          upsert: true
+          upsert: true,
         });
-
       if (error) throw error;
       const { data: publicData } = supabase.storage
         .from("collection-images")
         .getPublicUrl(fileName);
       return publicData.publicUrl;
     } catch (error: any) {
-      console.log("Upload lỗi:", error.message || error);
-      Alert.alert(t("collection_modal.upload_error"), t("collection_modal.network_error"));
+      Alert.alert(
+        t("collection_modal.upload_error"),
+        t("collection_modal.network_error")
+      );
       return null;
     }
   };
@@ -156,9 +150,7 @@ const AppCollectionModal: React.FC<Props> = ({
     setCreating(true);
     let imageUrl = null;
     try {
-      if (imageBase64) {
-        imageUrl = await uploadImageToSupabase(imageBase64);
-      }
+      if (imageBase64) imageUrl = await uploadImageToSupabase(imageBase64);
       const { data, error } = await supabase
         .from("collections")
         .insert({
@@ -177,7 +169,6 @@ const AppCollectionModal: React.FC<Props> = ({
         setImageBase64(null);
       }
     } catch (error) {
-      console.log(error);
       Alert.alert(t("common.error"), t("collection_modal.create_error"));
     } finally {
       setCreating(false);
@@ -186,24 +177,20 @@ const AppCollectionModal: React.FC<Props> = ({
 
   const handleSaveToCollection = async (collectionId: number | null) => {
     try {
-      // Xóa nếu đã lưu trước đó (để tránh trùng lặp hoặc chuyển collection)
       await supabase
         .from("saved_recipes")
         .delete()
         .eq("user_id", user?.id)
         .eq("recipe_id", recipeId);
-
       const { error } = await supabase.from("saved_recipes").insert({
         user_id: user?.id,
         recipe_id: recipeId,
         collection_id: collectionId,
       });
-
       if (error) throw error;
       onSaved();
       handleClose();
     } catch (error) {
-      console.log("Lỗi lưu:", error);
       Alert.alert(t("common.error"), t("collection_modal.save_error"));
     }
   };
@@ -213,24 +200,37 @@ const AppCollectionModal: React.FC<Props> = ({
       style={styles.collectionItem}
       onPress={() => handleSaveToCollection(item.id)}
     >
-      <View style={styles.folderIcon}>
+      <View
+        style={[
+          styles.folderIcon,
+          { backgroundColor: theme.background_contrast },
+        ]}
+      >
         {item.image ? (
-            <Image source={{ uri: item.image }} style={{ width: '100%', height: '100%' }} />
+          <Image
+            source={{ uri: item.image }}
+            style={{ width: "100%", height: "100%" }}
+          />
         ) : (
-            <Ionicons
-            name="folder-open"
-            size={24}
-            color={AppLightColor.primary_color}
-            />
+          <Ionicons name="folder-open" size={24} color={theme.primary_color} />
         )}
       </View>
       <View style={{ flex: 1 }}>
-        <AppText variant="bold" style={styles.collectionName}>
+        <AppText
+          variant="bold"
+          style={[styles.collectionName, { color: theme.primary_text }]}
+        >
           {item.name}
         </AppText>
-        <AppText style={styles.subText}>{t("collection_modal.save_here")}</AppText>
+        <AppText style={[styles.subText, { color: theme.placeholder_text }]}>
+          {t("collection_modal.save_here")}
+        </AppText>
       </View>
-      <Ionicons name="add-circle-outline" size={24} color="#ccc" />
+      <Ionicons
+        name="add-circle-outline"
+        size={24}
+        color={theme.placeholder_text}
+      />
     </Pressable>
   );
 
@@ -238,7 +238,7 @@ const AppCollectionModal: React.FC<Props> = ({
     <Modal
       visible={visible}
       transparent
-      animationType="none" // Tắt animation mặc định để dùng Animated của ta
+      animationType="none"
       statusBarTranslucent
       onRequestClose={handleClose}
     >
@@ -250,25 +250,29 @@ const AppCollectionModal: React.FC<Props> = ({
           <Animated.View
             style={[
               styles.modalContent,
-              { 
+              {
+                backgroundColor: theme.background,
                 paddingBottom: insets.bottom + 20,
-                transform: [{ translateY: translateY }] 
+                transform: [{ translateY: translateY }],
               },
             ]}
-            onStartShouldSetResponder={() => true} 
+            onStartShouldSetResponder={() => true}
           >
             <View style={styles.header}>
-              <AppText variant="bold" style={styles.title}>
+              <AppText
+                variant="bold"
+                style={[styles.title, { color: theme.primary_text }]}
+              >
                 {t("collection_modal.title")}
               </AppText>
               <Pressable onPress={handleClose} style={{ padding: 4 }}>
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={theme.primary_text} />
               </Pressable>
             </View>
 
             {loading ? (
               <ActivityIndicator
-                color={AppLightColor.primary_color}
+                color={theme.primary_color}
                 style={{ marginVertical: 20 }}
               />
             ) : (
@@ -281,49 +285,91 @@ const AppCollectionModal: React.FC<Props> = ({
               />
             )}
 
-            <View style={styles.createArea}>
-                <AppText variant="bold" style={{ marginBottom: 8, fontSize: 14 }}>
-                    {t("collection_modal.create_new")}
-                </AppText>
-                
-                {selectedImage && (
-                    <View style={styles.imagePreviewContainer}>
-                        <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
-                        <Pressable style={styles.removeImageBtn} onPress={() => {
-                            setSelectedImage(null);
-                            setImageBase64(null);
-                        }}>
-                            <Ionicons name="close-circle" size={20} color="#fff" />
-                        </Pressable>
-                    </View>
-                )}
+            <View style={[styles.createArea, { borderTopColor: theme.border }]}>
+              <AppText
+                variant="bold"
+                style={{
+                  marginBottom: 8,
+                  fontSize: 14,
+                  color: theme.primary_text,
+                }}
+              >
+                {t("collection_modal.create_new")}
+              </AppText>
 
-                <View style={styles.createBox}>
-                    <Pressable style={styles.pickImageBtn} onPress={pickImage}>
-                         <Ionicons name="image-outline" size={24} color={AppLightColor.primary_color} />
-                    </Pressable>
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder={t("collection_modal.placeholder_name")}
-                        value={newCollectionName}
-                        onChangeText={setNewCollectionName}
-                        placeholderTextColor="#999"
-                    />
-                    <Pressable
-                        style={styles.createBtn}
-                        onPress={handleCreateCollection}
-                        disabled={creating || !newCollectionName.trim()}
-                    >
-                        {creating ? (
-                        <ActivityIndicator color="#fff" size="small" />
-                        ) : (
-                        <Ionicons name="arrow-up" size={24} color="#fff" />
-                        )}
-                    </Pressable>
+              {selectedImage && (
+                <View
+                  style={[
+                    styles.imagePreviewContainer,
+                    { borderColor: theme.border },
+                  ]}
+                >
+                  <Image
+                    source={{ uri: selectedImage }}
+                    style={styles.imagePreview}
+                  />
+                  <Pressable
+                    style={styles.removeImageBtn}
+                    onPress={() => {
+                      setSelectedImage(null);
+                      setImageBase64(null);
+                    }}
+                  >
+                    <Ionicons name="close-circle" size={20} color="#fff" />
+                  </Pressable>
                 </View>
-            </View>
+              )}
 
+              <View style={styles.createBox}>
+                <Pressable
+                  style={[
+                    styles.pickImageBtn,
+                    {
+                      backgroundColor: isDarkMode
+                        ? theme.background_contrast
+                        : "#FFF0F0",
+                      borderColor: isDarkMode ? theme.border : "#FFD6D6",
+                    },
+                  ]}
+                  onPress={pickImage}
+                >
+                  <Ionicons
+                    name="image-outline"
+                    size={24}
+                    color={theme.primary_color}
+                  />
+                </Pressable>
+
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: theme.background_contrast,
+                      borderColor: theme.border,
+                      color: theme.primary_text,
+                    },
+                  ]}
+                  placeholder={t("collection_modal.placeholder_name")}
+                  placeholderTextColor={theme.placeholder_text}
+                  value={newCollectionName}
+                  onChangeText={setNewCollectionName}
+                />
+                <Pressable
+                  style={[
+                    styles.createBtn,
+                    { backgroundColor: theme.primary_color },
+                  ]}
+                  onPress={handleCreateCollection}
+                  disabled={creating || !newCollectionName.trim()}
+                >
+                  {creating ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Ionicons name="arrow-up" size={24} color="#fff" />
+                  )}
+                </Pressable>
+              </View>
+            </View>
           </Animated.View>
         </Pressable>
       </KeyboardAvoidingView>
@@ -340,12 +386,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#fff",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
-    maxHeight: "85%", 
-    width: '100%',
+    maxHeight: "85%",
+    width: "100%",
   },
   header: {
     flexDirection: "row",
@@ -353,7 +398,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  title: { fontSize: 18, color: "#333" },
+  title: {
+    fontSize: 18,
+  },
 
   collectionItem: {
     flexDirection: "row",
@@ -365,18 +412,20 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: "#f5f5f5",
     alignItems: "center",
     justifyContent: "center",
-    overflow: 'hidden'
+    overflow: "hidden",
   },
-  collectionName: { fontSize: 16, color: "#333" },
-  subText: { fontSize: 12, color: "#888" },
+  collectionName: {
+    fontSize: 16,
+  },
+  subText: {
+    fontSize: 12,
+  },
   createArea: {
-      marginTop: 12,
-      paddingTop: 12,
-      borderTopWidth: 1,
-      borderTopColor: '#f0f0f0'
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
   },
   createBox: {
     flexDirection: "row",
@@ -385,51 +434,44 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: "#f9f9f9",
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 48,
     borderWidth: 1,
-    borderColor: "#eee",
-    color: "#333",
   },
   createBtn: {
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: AppLightColor.primary_color,
     alignItems: "center",
     justifyContent: "center",
   },
   pickImageBtn: {
-    width: 48, 
-    height: 48, 
-    borderRadius: 12, 
-    backgroundColor: '#FFF0F0', 
-    alignItems: 'center', 
-    justifyContent: 'center',
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
-    borderColor: '#FFD6D6'
   },
   imagePreviewContainer: {
-      width: 100,
-      height: 56,
-      marginBottom: 10,
-      borderRadius: 8,
-      overflow: 'hidden',
-      position: 'relative',
-      borderWidth: 1,
-      borderColor: '#eee'
+    width: 100,
+    height: 56,
+    marginBottom: 10,
+    borderRadius: 8,
+    overflow: "hidden",
+    position: "relative",
+    borderWidth: 1,
   },
   imagePreview: {
-      width: '100%',
-      height: '100%'
+    width: "100%",
+    height: "100%",
   },
   removeImageBtn: {
-      position: 'absolute',
-      top: 2,
-      right: 2,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      borderRadius: 10
-  }
+    position: "absolute",
+    top: 2,
+    right: 2,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 10,
+  },
 });

@@ -1,13 +1,13 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { ScrollView, Pressable, StyleSheet, ViewStyle } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // 1. Import hook navigation
+import { useNavigation } from "@react-navigation/native";
 import AppText from "./AppText";
 import { AppLightColor } from "../styles/color";
 
 export type CategoryItem = {
   id: string;
   label: string;
-  // 👇 Thêm dbValue (optional) để nếu dùng đa ngôn ngữ thì vẫn query đúng database
   dbValue?: string;
 };
 
@@ -24,7 +24,6 @@ const AppCategoryList = ({
   onSelect,
   style,
 }: HomeCategoryListProps) => {
-  // 2. Khởi tạo navigation
   const navigation = useNavigation<any>();
 
   return (
@@ -40,12 +39,10 @@ const AppCategoryList = ({
             key={cat.id}
             onPress={() => {
               onSelect(cat.id);
-
-              // 👇 3. Điều hướng sang màn hình CategoryDetail
               navigation.navigate("CategoryDetailScreen", {
                 categoryId: cat.id,
-                categoryTitle: cat.label, // Dùng để hiển thị tiêu đề Header (Tiếng Anh/Việt đều được)
-                categoryDbValue: cat.dbValue, //
+                categoryTitle: cat.label,
+                categoryDbValue: cat.dbValue,
               });
             }}
             style={[styles.categoryItem, isActive && styles.categoryItemActive]}

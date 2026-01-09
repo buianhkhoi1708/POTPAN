@@ -1,8 +1,7 @@
-// src/screens/Introduce3.tsx
+// Nhóm 9 - IE307.Q12
 import { ImageBackground, StyleSheet, View } from "react-native";
 import React from "react";
-import { useTranslation } from "react-i18next"; // 👈 Import i18n
-
+import { useTranslation } from "react-i18next";
 import AppText from "../components/AppText";
 import AppSafeView from "../components/AppSafeView";
 import { AppLightColor } from "../styles/color";
@@ -10,7 +9,7 @@ import { AppFonts } from "../styles/fonts";
 import AppIntroduceNavBar from "../components/AppIntroduceNavBar";
 
 const Introduce3Screen = () => {
-  const { t } = useTranslation(); // 👈 Khởi tạo hook
+  const { t } = useTranslation();
 
   return (
     <AppSafeView style={styles.safe}>
@@ -20,17 +19,15 @@ const Introduce3Screen = () => {
       >
         <View style={styles.textContainer}>
           <View style={styles.text1Container}>
-            {/* Tiêu đề */}
             <AppText variant="bold" style={styles.text}>
               {t("intro.step3.title")}
             </AppText>
           </View>
-          {/* Phụ đề */}
+
           <AppText variant="light" style={styles.text1}>
             {t("intro.step3.subtitle")}
           </AppText>
 
-          {/* Danh sách tính năng */}
           <View style={styles.text2Container}>
             <View style={styles.textDisCon}>
               <AppText variant="bold" style={styles.textDis}>

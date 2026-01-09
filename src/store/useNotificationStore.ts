@@ -1,18 +1,17 @@
-// src/store/useNotificationStore.ts
-import { create } from 'zustand';
-import { supabase } from '../config/supabaseClient';
+// Nhóm 9 - IE307.Q12
+import { create } from "zustand";
+import { supabase } from "../config/supabaseClient";
 
 interface NotificationState {
   unreadCount: number;
   fetchUnreadCount: (userId: string) => Promise<void>;
-  markAllAsRead: (userId: string) => Promise<void>; // 👈 Thêm hàm này
+  markAllAsRead: (userId: string) => Promise<void>;
 }
 
 export const useNotificationStore = create<NotificationState>((set) => ({
   unreadCount: 0,
 
   fetchUnreadCount: async (userId: string) => {
-    // ... (code cũ giữ nguyên)
     try {
       const { count, error } = await supabase
         .from("notifications")
@@ -25,21 +24,17 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     }
   },
 
-  // 👇 LOGIC MỚI: Vừa xóa UI vừa update Database
   markAllAsRead: async (userId: string) => {
-    // 1. Cập nhật giao diện về 0 NGAY LẬP TỨC (Optimistic UI)
     set({ unreadCount: 0 });
 
     try {
-      // 2. Cập nhật ngầm trong Database
       await supabase
-        .from('notifications')
+        .from("notifications")
         .update({ is_read: true })
-        .eq('user_id', userId)
-        .eq('is_read', false); // Chỉ update những cái đang chưa đọc
+        .eq("user_id", userId)
+        .eq("is_read", false);
     } catch (err) {
       console.log("Lỗi update trạng thái đọc:", err);
-      // Nếu lỗi thì kệ, không cần hiện lại số để tránh trải nghiệm giật cục
     }
   },
 }));

@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { View, StyleSheet, Modal, TouchableOpacity } from "react-native";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -11,7 +12,7 @@ type Props = {
   onShare: () => void;
   recipeTitle: string;
   totalSteps: number;
-  timeUsed: number; // tính bằng giây
+  timeUsed: number;
 };
 
 const AppCongratulationsModal = ({
@@ -126,9 +127,22 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 24,
   },
-  statItem: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
-  statText: { fontSize: 14, color: "#666", marginLeft: 8, flex: 1 },
-  buttonContainer: { flexDirection: "row", gap: 12, width: "100%" },
+  statItem: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginBottom: 8 
+  },
+  statText: { 
+    fontSize: 14, 
+    color: "#666", 
+    marginLeft: 8, 
+    flex: 1 
+  },
+  buttonContainer: { 
+    flexDirection: "row", 
+    gap: 12, 
+    width: "100%" 
+  },
   button: {
     flex: 1,
     paddingVertical: 14,
@@ -138,9 +152,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
   },
-  buttonShare: { backgroundColor: "#2196F3" },
-  buttonClose: { backgroundColor: PRIMARY_COLOR },
-  buttonText: { color: "#fff", fontSize: 15, fontWeight: "600" },
+  buttonShare: { 
+    backgroundColor: "#2196F3" 
+  },
+  buttonClose: { 
+    backgroundColor: PRIMARY_COLOR 
+  },
+  buttonText: { 
+    color: "#fff", 
+    fontSize: 15, 
+    fontWeight: "600" 
+  },
 });
 
 export default AppCongratulationsModal;

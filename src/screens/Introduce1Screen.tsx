@@ -1,8 +1,7 @@
-// src/screens/Introduce1.tsx
+// Nhóm 9 - IE307.Q12
 import { ImageBackground, StyleSheet, View } from "react-native";
 import React from "react";
-import { useTranslation } from "react-i18next"; // 👈 Import i18n
-
+import { useTranslation } from "react-i18next"; 
 import AppText from "../components/AppText";
 import AppSafeView from "../components/AppSafeView";
 import { AppLightColor } from "../styles/color";
@@ -11,7 +10,7 @@ import AppIntroduceNavBar from "../components/AppIntroduceNavBar";
 import Flag from "../assets/icons/flag.svg";
 
 const Introduce1Screen = () => {
-  const { t } = useTranslation(); // 👈 Khởi tạo hook
+  const { t } = useTranslation();
 
   return (
     <AppSafeView style={styles.safe}>
@@ -21,13 +20,12 @@ const Introduce1Screen = () => {
       >
         <View style={styles.textContainer}>
           <View style={styles.text1Container}>
-            {/* Tiêu đề */}
+
             <AppText variant="bold" style={styles.text}>
               {t("intro.step1.title")}
             </AppText>
             <Flag />
           </View>
-          {/* Phụ đề */}
           <AppText variant="light" style={styles.text1}>
             {t("intro.step1.subtitle")}
           </AppText>

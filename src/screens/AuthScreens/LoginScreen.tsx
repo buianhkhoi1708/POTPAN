@@ -120,7 +120,6 @@ const LoginScreen = () => {
             </AppText>
 
             <View style={styles.formContainer}>
-              {/* Email */}
               <View style={styles.inputWrapper}>
                 <AppText
                   variant="medium"
@@ -137,7 +136,7 @@ const LoginScreen = () => {
                         styles.inputValue,
                         {
                           color: theme.primary_text,
-                          backgroundColor: theme.background_contrast,
+                          backgroundColor: theme.background,
                         },
                       ]}
                       placeholder={t("auth.email_placeholder")}
@@ -161,7 +160,6 @@ const LoginScreen = () => {
                 <ErrorMsg name="email" />
               </View>
 
-              {/* Mật khẩu */}
               <View style={styles.inputWrapper}>
                 <AppText
                   style={[
@@ -180,7 +178,7 @@ const LoginScreen = () => {
                         styles.inputValue,
                         {
                           color: theme.primary_text,
-                          backgroundColor: theme.background_contrast,
+                          backgroundColor: theme.background,
                         },
                       ]}
                       placeholder={t("auth.password_placeholder")}
@@ -202,9 +200,7 @@ const LoginScreen = () => {
                 <ErrorMsg name="password" />
 
                 <TouchableOpacity
-                  onPress={() =>
-                    Alert.alert("Thông báo", "Tính năng đang phát triển")
-                  }
+                  onPress={() => navigation.navigate("ForgotPasswordScreen")}
                 >
                   <AppText style={styles.forgotPassword}>
                     {t("auth.forgot_password")}
@@ -213,7 +209,6 @@ const LoginScreen = () => {
               </View>
             </View>
 
-            {/* Button */}
             {isLoading ? (
               <View style={[styles.loginButton, { backgroundColor: "#ccc" }]}>
                 <ActivityIndicator color="#fff" />
@@ -230,7 +225,6 @@ const LoginScreen = () => {
               />
             )}
 
-            {/* Footer */}
             <View style={styles.footerContainer}>
               <AppText
                 variant="light"
@@ -252,7 +246,6 @@ const LoginScreen = () => {
                 {t("auth.or_social")}
               </AppText>
 
-              {/* Đăng nhập mạng xã hội */}
               <View style={styles.socialContainer}>
                 {socialButtons.map((btn, index) => (
                   <Pressable
@@ -286,14 +279,14 @@ const LoginScreen = () => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1 
+  safeArea: {
+    flex: 1,
   },
-  keyboardContainer: { 
-    flex: 1 
+  keyboardContainer: {
+    flex: 1,
   },
-  scrollContainer: { 
-    flexGrow: 1 
+  scrollContainer: {
+    flexGrow: 1,
   },
   mainContent: {
     flex: 1,
@@ -309,13 +302,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     fontFamily: AppFonts.RobotoSlabBold,
   },
-  formContainer: { 
-    width: "100%", 
-    marginBottom: 32 
+  formContainer: {
+    width: "100%",
+    marginBottom: 32,
   },
-  inputWrapper: { 
-    width: "100%", 
-    paddingHorizontal: 0 
+  inputWrapper: {
+    width: "100%",
+    paddingHorizontal: 0,
   },
   inputLabel: {
     fontSize: 17,
@@ -332,9 +325,9 @@ const styles = StyleSheet.create({
     width: 280,
     paddingHorizontal: 12,
   },
-  inputIcon: { 
+  inputIcon: {
     marginLeft: 6,
-    marginRight: 3, 
+    marginRight: 3,
   },
   forgotPassword: {
     marginTop: 8,
@@ -353,25 +346,25 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
   },
-  loginButtonText: { 
-    color: "#ffffff", 
-    fontSize: 20, 
-    fontWeight: "800" 
+  loginButtonText: {
+    color: "#ffffff",
+    fontSize: 20,
+    fontWeight: "800",
   },
-  footerContainer: { 
-    marginTop: 24, 
-    alignItems: "center" 
+  footerContainer: {
+    marginTop: 24,
+    alignItems: "center",
   },
-  footerText: { 
-    fontSize: 16, 
-    fontFamily: AppFonts.RobotoMedium 
+  footerText: {
+    fontSize: 16,
+    fontFamily: AppFonts.RobotoMedium,
   },
-  signupLink: { 
-    fontWeight: "800" 
+  signupLink: {
+    fontWeight: "800",
   },
-  orText: { 
-    marginTop: 18, 
-    fontSize: 14 
+  orText: {
+    marginTop: 18,
+    fontSize: 14,
   },
   socialContainer: {
     flexDirection: "row",

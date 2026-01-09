@@ -1,17 +1,12 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
 import AppLogo from "../components/AppLogo";
 import { AppLightColor } from "../styles/color";
-import { RootStackParamList } from "../type/types";
-
 
 const StartingScreen = () => {
-
-
   return (
     <AppSafeView style={styles.container}>
       <View style={styles.container1}>

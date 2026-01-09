@@ -1,117 +1,140 @@
+// Nhóm 9 - IE307.Q12
 import React, { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useTranslation } from "react-i18next"; // 👈 Import i18n
-
+import { View, StyleSheet, Switch, ScrollView } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
+import { Ionicons } from "@expo/vector-icons";
+import * as Notifications from "expo-notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import AppSafeView from "../components/AppSafeView";
 import AppText from "../components/AppText";
-import AppBottomSpace from "../components/AppBottomSpace";
-import AppMainNavBar, { type MainTabKey } from "../components/AppMainNavBar";
-import AppHeader from "../components/AppHeader"; // 👈 Header chung
-import { AppLightColor } from "../styles/color";
+import AppHeader from "../components/AppHeader";
+import { useThemeStore } from "../store/useThemeStore";
 
-// Giữ lại icon Toggle
-import ToggleOnIcon from "../assets/images/button-active.svg";
-import ToggleOffIcon from "../assets/images/button-off.svg";
+Notifications.setNotificationHandler({
+  handleNotification: async () => {
+    const savedSetting = await AsyncStorage.getItem("SHOW_POPUP_IN_APP");
+    const shouldShow = savedSetting === "true" || savedSetting === null;
 
-const ROBOTO_SLAB_BOLD = "RobotoSlab-Bold";
-const LABEL_FONT_SIZE = 20;
+    return {
+      shouldShowAlert: shouldShow,
+      shouldPlaySound: shouldShow,
+      shouldSetBadge: false,
+      shouldShowBanner: shouldShow,
+      shouldShowList: shouldShow,
+    };
+  },
+});
 
-const NotificationSettingsScreen: React.FC = () => {
-  const navigation = useNavigation<any>();
-  const isFocused = useIsFocused();
-  const { t } = useTranslation(); // 👈 Init hook
+const NotificationSettingsScreen = () => {
+  const navigation = useNavigation();
+  const { t } = useTranslation();
+  const { theme } = useThemeStore();
 
-  const [activeTab, setActiveTab] = useState<MainTabKey>("profile");
-
-  // State giả lập (Trong thực tế nên lưu vào Async Storage hoặc Database)
-  const [general, setGeneral] = useState(true);
-  const [sound, setSound] = useState(true);
-  const [sfx, setSfx] = useState(true);
-  const [vibrate, setVibrate] = useState(true);
+  const [isEnabled, setIsEnabled] = useState(true);
 
   useEffect(() => {
-    if (isFocused) setActiveTab("profile");
-  }, [isFocused]);
+    const loadSettings = async () => {
+      const saved = await AsyncStorage.getItem("SHOW_POPUP_IN_APP");
+      setIsEnabled(saved === "true" || saved === null);
+    };
+    loadSettings();
+  }, []);
 
-  const Row = ({
-    label,
-    value,
-    onToggle,
-  }: {
-    label: string;
-    value: boolean;
-    onToggle: () => void;
-  }) => {
-    const Icon = value ? ToggleOnIcon : ToggleOffIcon;
-    return (
-      <View style={styles.row}>
-        <AppText variant="bold" style={styles.rowLabel}>
-          {label}
-        </AppText>
+  const toggleSwitch = async () => {
+    const newValue = !isEnabled;
+    setIsEnabled(newValue);
 
-        <Pressable onPress={onToggle} hitSlop={10} style={styles.toggleBtn}>
-          <Icon width={40} height={22} />
-        </Pressable>
-      </View>
-    );
+    await AsyncStorage.setItem("SHOW_POPUP_IN_APP", String(newValue));
+    console.log("Cập nhật trạng thái hiển thị Popup:", newValue);
   };
 
-  return (
-    <AppSafeView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* HEADER CHUNG */}
-        <AppHeader
-          title={t("settings.notifications")} // "Thông báo"
-          showBack={true}
-          onBackPress={() => navigation.goBack()}
-          showSearch={false}
-          showNotifications={false}
-        />
-
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+  const SettingRow = ({ title, desc, value, onToggle }: any) => (
+    <View style={[styles.row, { backgroundColor: theme.background_contrast }]}>
+      <View style={{ flex: 1, paddingRight: 16 }}>
+        <AppText
+          variant="bold"
+          style={{ fontSize: 16, color: theme.primary_text, marginBottom: 4 }}
         >
-          <View style={styles.rowsWrap}>
-            <Row
-              label={t("notification_settings.general")}
-              value={general}
-              onToggle={() => setGeneral((v) => !v)}
-            />
-            <Row
-              label={t("notification_settings.sound")}
-              value={sound}
-              onToggle={() => setSound((v) => !v)}
-            />
-            <Row
-              label={t("notification_settings.sfx")}
-              value={sfx}
-              onToggle={() => setSfx((v) => !v)}
-            />
-            <Row
-              label={t("notification_settings.vibrate")}
-              value={vibrate}
-              onToggle={() => setVibrate((v) => !v)}
+          {title}
+        </AppText>
+        <AppText style={{ fontSize: 13, color: theme.placeholder_text }}>
+          {desc}
+        </AppText>
+      </View>
+      <Switch
+        trackColor={{ false: "#767577", true: theme.primary_color }}
+        thumbColor={"#f4f3f4"}
+        ios_backgroundColor="#3e3e3e"
+        onValueChange={onToggle}
+        value={value}
+      />
+    </View>
+  );
+
+  return (
+    <AppSafeView style={{ flex: 1, backgroundColor: theme.background }}>
+      <AppHeader
+        title={t("settings.notifications")}
+        showBack
+        onBackPress={() => navigation.goBack()}
+        showNotifications={false}
+      />
+
+      <ScrollView contentContainerStyle={{ padding: 20 }}>
+
+        <View style={styles.infoBox}>
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: theme.background_contrast },
+            ]}
+          >
+            <Ionicons
+              name="notifications"
+              size={32}
+              color={theme.primary_color}
             />
           </View>
+          <AppText
+            style={{
+              textAlign: "center",
+              color: theme.placeholder_text,
+              lineHeight: 22,
+              marginTop: 12,
+            }}
+          >
+            {t(
+              "settings.noti_desc",
+              "Tùy chỉnh cách ứng dụng hiển thị thông báo khi bạn đang sử dụng."
+            )}
+          </AppText>
+        </View>
 
-          <AppBottomSpace height={90} />
-        </ScrollView>
+    
+        <AppText
+          style={[styles.sectionTitle, { color: theme.placeholder_text }]}
+        >
+          {t("settings.group_general", "Cài đặt chung")}
+        </AppText>
 
-        {/* BOTTOM NAV */}
-        <AppMainNavBar
-          activeTab={activeTab}
-          onTabPress={(tab) => {
-            setActiveTab(tab);
-            if (tab === "home") navigation.navigate("HomeScreen");
-            if (tab === "world") navigation.navigate("CommunityScreen");
-            if (tab === "profile") navigation.navigate("ProfileScreen");
-            if (tab === "category") navigation.navigate("CategoriesScreen");
-          }}
+        <SettingRow
+          title={t("settings.in_app_popup", "Thông báo nổi (Popup)")}
+          desc={
+            isEnabled
+              ? t(
+                  "settings.popup_on_desc",
+                  "Hiển thị banner thông báo phía trên màn hình khi có tin mới."
+                )
+              : t(
+                  "settings.popup_off_desc",
+                  "Ẩn banner thông báo để tránh làm phiền khi đang dùng ứng dụng."
+                )
+          }
+          value={isEnabled}
+          onToggle={toggleSwitch}
         />
-      </View>
+      </ScrollView>
     </AppSafeView>
   );
 };
@@ -119,31 +142,43 @@ const NotificationSettingsScreen: React.FC = () => {
 export default NotificationSettingsScreen;
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: "#fff" },
-  container: { flex: 1, backgroundColor: "#fff" },
-
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },
-
-  // Đã xóa các style header cũ (header, headerTitle...) vì dùng AppHeader
-
-  rowsWrap: { marginTop: 6, rowGap: 22 },
-
+  infoBox: {
+    alignItems: "center",
+    marginBottom: 40,
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 10,
+    marginLeft: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-  },
-  rowLabel: {
-    fontSize: LABEL_FONT_SIZE,
-    fontWeight: "900",
-    color: AppLightColor.primary_color,
-    fontFamily: ROBOTO_SLAB_BOLD,
-  },
-  toggleBtn: {
-    width: 46,
-    height: 28,
-    alignItems: "flex-end",
-    justifyContent: "center",
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
 });

@@ -1,4 +1,4 @@
-// IE307.Q12_Nhom9
+// Nhóm 9 - IE307.Q12
 import React, { useState, useMemo } from "react";
 import {
   Modal,
@@ -14,8 +14,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next"; 
 import AppText from "./AppText";
-import { AppLightColor } from "../styles/color";
 import { AppFonts } from "../styles/fonts";
+import { useThemeStore } from "../store/useThemeStore";
 
 export interface SearchFilters {
   keyword: string;
@@ -37,14 +37,12 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
   onSubmit,
 }) => {
   const { t } = useTranslation();
-
+  const { theme, isDarkMode } = useThemeStore();
   const [keyword, setKeyword] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
-
-
   const filterCategories = useMemo(() => [
     { id: "Món mặn", label: t("data_map.category.Món mặn") },
     { id: "Món canh", label: t("data_map.category.Món canh") },
@@ -59,20 +57,17 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
     { id: "International", label: t("search.filters.cuisine_int") },
   ], [t]);
 
-
   const filterDifficulty = useMemo(() => [
     { id: "Dễ", label: t("data_map.difficulty.easy") },
     { id: "Trung bình", label: t("data_map.difficulty.medium") },
     { id: "Khó", label: t("data_map.difficulty.hard") },
   ], [t]);
-
  
   const filterTime = useMemo(() => [
     { id: "under_30", label: t("time.under_30") },
     { id: "30_60", label: t("time.30_60") },
     { id: "over_60", label: t("time.over_60") },
   ], [t]);
-// IE307.Q12_Nhom9
 
   const handleReset = () => {
     setKeyword("");
@@ -101,7 +96,7 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
     onSelect: (id: string | null) => void
   ) => (
     <View style={styles.sectionContainer}>
-      <AppText variant="bold" style={styles.sectionTitle}>
+      <AppText variant="bold" style={[styles.sectionTitle, { color: theme.primary_text }]}>
         {title}
       </AppText>
       <View style={styles.chipContainer}>
@@ -110,12 +105,23 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
           return (
             <Pressable
               key={item.id}
-              style={[styles.chip, isActive && styles.chipActive]}
+              style={[
+                styles.chip,
+                { 
+                    backgroundColor: isActive 
+                        ? (isDarkMode ? theme.background : "#fff0f0") 
+                        : theme.background_contrast 
+                },
+                isActive && { borderColor: theme.primary_color, borderWidth: 1 }
+              ]}
               onPress={() => onSelect(isActive ? null : item.id)}
             >
               <AppText
                 variant={isActive ? "bold" : "light"}
-                style={[styles.chipText, isActive && styles.chipTextActive]}
+                style={[
+                    styles.chipText, 
+                    { color: isActive ? theme.primary_color : theme.primary_text }
+                ]}
               >
                 {item.label}
               </AppText>
@@ -131,22 +137,29 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.backdrop}>
           <Pressable style={styles.backdropLayer} onPress={onClose} />
-          <View style={styles.sheet}>
-            {/* Search Bar */}
-            <View style={styles.searchBar}>
-              <Ionicons name="search" size={20} color={AppLightColor.primary_color} />
+          
+          <View style={[styles.sheet, { backgroundColor: theme.background }]}>
+            
+            <View style={[
+                styles.searchBar, 
+                { 
+                    backgroundColor: isDarkMode ? theme.background_contrast : "#fff0f0", 
+                    borderColor: isDarkMode ? theme.border : "#ffe3e2" 
+                }
+            ]}>
+              <Ionicons name="search" size={20} color={theme.primary_color} />
               <TextInput
                 value={keyword}
                 onChangeText={setKeyword}
                 placeholder={t("search.placeholder")} 
-                placeholderTextColor="#ffb6b3"
-                style={styles.searchInput}
+                placeholderTextColor={theme.placeholder_text}
+                style={[styles.searchInput, { color: theme.primary_text }]}
                 returnKeyType="search"
                 onSubmitEditing={handleSubmit}
               />
               {keyword.length > 0 && (
                 <Pressable onPress={() => setKeyword("")}>
-                  <Ionicons name="close-circle" size={18} color="#ffb6b3" />
+                  <Ionicons name="close-circle" size={18} color={theme.placeholder_text} />
                 </Pressable>
               )}
             </View>
@@ -158,11 +171,11 @@ const AppSearchModal: React.FC<SearchRecipeModalProps> = ({
               {renderFilterSection(t("search.sections.time"), filterTime, selectedTime, setSelectedTime)}
             </ScrollView>
 
-            <View style={styles.footer}>
+            <View style={[styles.footer, { borderTopColor: theme.border }]}>
               <Pressable style={styles.resetBtn} onPress={handleReset}>
-                <AppText style={styles.resetText}>{t("search.reset")}</AppText>
+                <AppText style={[styles.resetText, { color: theme.placeholder_text }]}>{t("search.reset")}</AppText>
               </Pressable>
-              <Pressable style={styles.submitBtn} onPress={handleSubmit}>
+              <Pressable style={[styles.submitBtn, { backgroundColor: theme.primary_color }]} onPress={handleSubmit}>
                 <AppText variant="bold" style={styles.submitText}>
                   {t("search.apply")}
                 </AppText>
@@ -191,7 +204,6 @@ const styles = StyleSheet.create({
     width: "90%",
     maxHeight: "80%",
     borderRadius: 24,
-    backgroundColor: "#ffffff",
     padding: 24,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
@@ -202,19 +214,16 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff0f0",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#ffe3e2",
   },
   searchInput: {
     flex: 1,
     marginLeft: 10,
     fontSize: 16,
-    color: "#333",
     fontFamily: AppFonts.RobotoMedium,
     height: 40,
   },
@@ -223,25 +232,27 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 15,
     marginBottom: 10,
-    color: AppLightColor.primary_text,
     fontWeight: "700",
   },
-  chipContainer: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chipContainer: { 
+    flexDirection: "row", 
+    flexWrap: "wrap", 
+    gap: 8 
+  },
   chip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "#f5f5f5",
     marginBottom: 8,
     marginRight: 8,
   },
   chipActive: {
-    backgroundColor: "#fff0f0",
-    borderColor: AppLightColor.primary_color,
-    borderWidth: 1,
+
   },
-  chipText: { fontSize: 13, color: "#666" },
-  chipTextActive: { color: AppLightColor.primary_color },
+  chipText: { fontSize: 13 },
+  chipTextActive: { 
+
+  },
   footer: {
     flexDirection: "row",
     alignItems: "center",
@@ -249,15 +260,21 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
   },
-  resetBtn: { padding: 10 },
-  resetText: { color: "#999", fontSize: 14, textDecorationLine: "underline" },
+  resetBtn: { 
+    padding: 10 
+  },
+  resetText: { 
+    fontSize: 14, 
+    textDecorationLine: "underline" 
+  },
   submitBtn: {
-    backgroundColor: AppLightColor.primary_color,
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 24,
   },
-  submitText: { color: "#fff", fontSize: 15 },
+  submitText: { 
+    color: "#fff", 
+    fontSize: 15 
+  },
 });

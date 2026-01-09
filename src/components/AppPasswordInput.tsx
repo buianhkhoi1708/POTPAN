@@ -1,8 +1,8 @@
+// Nhóm 9 - IE307.Q12
 import React, { ReactNode, useState } from "react";
 import {
   View,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
   TextInputProps,
   StyleProp,

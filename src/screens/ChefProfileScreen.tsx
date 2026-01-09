@@ -1,3 +1,4 @@
+// Nhóm 9 - IE307.Q12
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -20,7 +21,7 @@ import AppRecipeCard from "../components/AppRecipeCard";
 import { useThemeStore } from "../store/useThemeStore";
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = (width - 48) / 2; 
+const CARD_WIDTH = (width - 48) / 2;
 
 const ChefProfileScreen = () => {
   const navigation = useNavigation<any>();
@@ -42,25 +43,45 @@ const ChefProfileScreen = () => {
         setLoading(true);
 
         const { data: userData, error: userError } = await supabase
-          .from("users").select("*").eq("id", chefId).single();
+          .from("users")
+          .select("*")
+          .eq("id", chefId)
+          .single();
         if (!userError) setChefProfile(userData);
 
         const { data: recipeData } = await supabase
-          .from("recipes").select("*").eq("user_id", chefId).order("created_at", { ascending: false });
+          .from("recipes")
+          .select("*")
+          .eq("user_id", chefId)
+          .order("created_at", { ascending: false });
         setChefRecipes(recipeData || []);
 
-        const { count: followers } = await supabase.from("follows").select("*", { count: "exact", head: true }).eq("following_id", chefId);
-        const { count: following } = await supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", chefId);
+        const { count: followers } = await supabase
+          .from("follows")
+          .select("*", { count: "exact", head: true })
+          .eq("following_id", chefId);
+        const { count: following } = await supabase
+          .from("follows")
+          .select("*", { count: "exact", head: true })
+          .eq("follower_id", chefId);
 
         setFollowerCount(followers || 0);
         setFollowingCount(following || 0);
 
         if (currentUser) {
-          const { data: followCheck } = await supabase.from("follows").select("*").eq("follower_id", currentUser.id).eq("following_id", chefId).single();
+          const { data: followCheck } = await supabase
+            .from("follows")
+            .select("*")
+            .eq("follower_id", currentUser.id)
+            .eq("following_id", chefId)
+            .single();
           setIsFollowing(!!followCheck);
         }
-      } catch (error) { console.log("Lỗi tải profile:", error); } 
-      finally { setLoading(false); }
+      } catch (error) {
+        console.log("Lỗi tải profile:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     if (chefId) fetchData();
@@ -77,10 +98,16 @@ const ChefProfileScreen = () => {
 
     try {
       if (newStatus) {
-        const { error } = await supabase.from("follows").insert({ follower_id: currentUser.id, following_id: chefId });
+        const { error } = await supabase
+          .from("follows")
+          .insert({ follower_id: currentUser.id, following_id: chefId });
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("follows").delete().eq("follower_id", currentUser.id).eq("following_id", chefId);
+        const { error } = await supabase
+          .from("follows")
+          .delete()
+          .eq("follower_id", currentUser.id)
+          .eq("following_id", chefId);
         if (error) throw error;
       }
     } catch (err) {
@@ -90,63 +117,96 @@ const ChefProfileScreen = () => {
     }
   };
 
-
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      {/* Top Nav */}
       <View style={styles.topNav}>
         <Pressable
           onPress={() => navigation.goBack()}
-
-          style={[styles.iconCircle, { backgroundColor: theme.background_contrast }]}
+          style={[
+            styles.iconCircle,
+            { backgroundColor: theme.background_contrast },
+          ]}
         >
-          {/* 👇 Icon màu động */}
           <Ionicons name="arrow-back" size={24} color={theme.icon} />
         </Pressable>
         <View style={{ flexDirection: "row", gap: 10 }}>
-          <Pressable style={[styles.iconCircle, { backgroundColor: theme.background_contrast }]}>
-            <Ionicons name="share-social-outline" size={22} color={theme.icon} />
+          <Pressable
+            style={[
+              styles.iconCircle,
+              { backgroundColor: theme.background_contrast },
+            ]}
+          >
+            <Ionicons
+              name="share-social-outline"
+              size={22}
+              color={theme.icon}
+            />
           </Pressable>
         </View>
       </View>
 
-      {/* Info Profile */}
       <View style={styles.profileRow}>
         <View style={styles.avatarWrapper}>
           <Image
-            source={{ uri: chefProfile?.avatar_url || chefAvatar || "https://i.pravatar.cc/300" }}
+            source={{
+              uri:
+                chefProfile?.avatar_url ||
+                chefAvatar ||
+                "https://i.pravatar.cc/300",
+            }}
             style={[styles.avatar, { borderColor: theme.border }]}
           />
           {chefProfile?.verified && (
-            <View style={[styles.verifiedBadge, { borderColor: theme.background }]}>
+            <View
+              style={[styles.verifiedBadge, { borderColor: theme.background }]}
+            >
               <Ionicons name="checkmark" size={10} color="#fff" />
             </View>
           )}
         </View>
 
         <View style={styles.infoCol}>
-          <AppText variant="bold" style={[styles.nameText, { color: theme.primary_text }]}>
+          <AppText
+            variant="bold"
+            style={[styles.nameText, { color: theme.primary_text }]}
+          >
             {chefProfile?.full_name || chefName || t("chef.anonymous")}
           </AppText>
-          <AppText variant="medium" style={[styles.handleText, { color: theme.placeholder_text }]}>
+          <AppText
+            variant="medium"
+            style={[styles.handleText, { color: theme.placeholder_text }]}
+          >
             @{chefProfile?.username || "chef"}
           </AppText>
-          <AppText style={[styles.bioText, { color: theme.primary_text }]} numberOfLines={3}>
+          <AppText
+            style={[styles.bioText, { color: theme.primary_text }]}
+            numberOfLines={3}
+          >
             {chefProfile?.bio || t("chef.default_bio")}
           </AppText>
         </View>
       </View>
 
-      {/* Nút Action */}
       {currentUser?.id !== chefId && (
         <View style={styles.buttonRow}>
           <Pressable
             style={[
               styles.actionBtn,
-              // 👇 Logic màu nút Follow/Following
-              isFollowing 
-                ? [styles.followingBtn, { backgroundColor: theme.background, borderColor: theme.primary_color }] 
-                : [styles.followBtn, { backgroundColor: theme.primary_color, shadowColor: theme.primary_color }]
+              isFollowing
+                ? [
+                    styles.followingBtn,
+                    {
+                      backgroundColor: theme.background,
+                      borderColor: theme.primary_color,
+                    },
+                  ]
+                : [
+                    styles.followBtn,
+                    {
+                      backgroundColor: theme.primary_color,
+                      shadowColor: theme.primary_color,
+                    },
+                  ],
             ]}
             onPress={handleToggleFollow}
           >
@@ -154,67 +214,123 @@ const ChefProfileScreen = () => {
               variant="bold"
               style={[
                 styles.actionBtnText,
-                isFollowing ? { color: theme.primary_color } : { color: "#fff" },
+                isFollowing
+                  ? { color: theme.primary_color }
+                  : { color: "#fff" },
               ]}
             >
               {isFollowing ? t("chef.following") : t("chef.follow")}
             </AppText>
           </Pressable>
 
-          <Pressable style={[
-              styles.actionBtn, 
-              styles.messageBtn, 
-              { backgroundColor: theme.background_contrast, borderColor: theme.border }
-          ]}>
-            <AppText variant="bold" style={[styles.actionBtnText, { color: theme.primary_text }]}>
+          <Pressable
+            style={[
+              styles.actionBtn,
+              styles.messageBtn,
+              {
+                backgroundColor: theme.background_contrast,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <AppText
+              variant="bold"
+              style={[styles.actionBtnText, { color: theme.primary_text }]}
+            >
               {t("chef.message")}
             </AppText>
           </Pressable>
         </View>
       )}
 
-      {/* Stats */}
-      <View style={[
-          styles.statsContainer, 
-          { backgroundColor: theme.background, borderBottomColor: theme.border }
-      ]}>
+      <View
+        style={[
+          styles.statsContainer,
+          {
+            backgroundColor: theme.background,
+            borderBottomColor: theme.border,
+          },
+        ]}
+      >
         <View style={styles.statItem}>
-          <AppText variant="bold" style={[styles.statNumber, { color: theme.primary_text }]}>
+          <AppText
+            variant="bold"
+            style={[styles.statNumber, { color: theme.primary_text }]}
+          >
             {chefRecipes.length}
           </AppText>
-          <AppText style={[styles.statLabel, { color: theme.placeholder_text }]}>{t("profile.recipes")}</AppText>
+          <AppText
+            style={[styles.statLabel, { color: theme.placeholder_text }]}
+          >
+            {t("profile.recipes")}
+          </AppText>
         </View>
-        
-        <View style={[styles.verticalDivider, { backgroundColor: theme.border }]} />
+
+        <View
+          style={[styles.verticalDivider, { backgroundColor: theme.border }]}
+        />
 
         <Pressable
           style={styles.statItem}
-          onPress={() => navigation.navigate("FollowScreen", { type: "following", userId: chefId })}
+          onPress={() =>
+            navigation.navigate("FollowScreen", {
+              type: "following",
+              userId: chefId,
+            })
+          }
         >
-          <AppText variant="bold" style={[styles.statNumber, { color: theme.primary_text }]}>
+          <AppText
+            variant="bold"
+            style={[styles.statNumber, { color: theme.primary_text }]}
+          >
             {followingCount}
           </AppText>
-          <AppText style={[styles.statLabel, { color: theme.placeholder_text }]}>{t("profile.following")}</AppText>
+          <AppText
+            style={[styles.statLabel, { color: theme.placeholder_text }]}
+          >
+            {t("profile.following")}
+          </AppText>
         </Pressable>
-        
-        <View style={[styles.verticalDivider, { backgroundColor: theme.border }]} />
+
+        <View
+          style={[styles.verticalDivider, { backgroundColor: theme.border }]}
+        />
 
         <Pressable
           style={styles.statItem}
-          onPress={() => navigation.navigate("FollowScreen", { type: "followers", userId: chefId })}
+          onPress={() =>
+            navigation.navigate("FollowScreen", {
+              type: "followers",
+              userId: chefId,
+            })
+          }
         >
-          <AppText variant="bold" style={[styles.statNumber, { color: theme.primary_text }]}>
+          <AppText
+            variant="bold"
+            style={[styles.statNumber, { color: theme.primary_text }]}
+          >
             {followerCount}
           </AppText>
-          <AppText style={[styles.statLabel, { color: theme.placeholder_text }]}>{t("profile.followers")}</AppText>
+          <AppText
+            style={[styles.statLabel, { color: theme.placeholder_text }]}
+          >
+            {t("profile.followers")}
+          </AppText>
         </Pressable>
       </View>
 
       <View style={styles.sectionHeader}>
-        <AppText variant="bold" style={[styles.sectionTitle, { color: theme.primary_text }]}>
+        <AppText
+          variant="bold"
+          style={[styles.sectionTitle, { color: theme.primary_text }]}
+        >
           {t("chef.recipe_list")}
         </AppText>
-        <Ionicons name="restaurant-outline" size={18} color={theme.primary_color} />
+        <Ionicons
+          name="restaurant-outline"
+          size={18}
+          color={theme.primary_color}
+        />
       </View>
     </View>
   );
@@ -223,13 +339,14 @@ const ChefProfileScreen = () => {
     <AppRecipeCard
       item={item}
       onPress={() => navigation.push("RecipeDetailScreen", { item })}
-      style={{ width: CARD_WIDTH, marginBottom: 12 }} 
+      style={{ width: CARD_WIDTH, marginBottom: 12 }}
     />
   );
 
   return (
-    // 👇 3. Áp dụng Background Screen
-    <AppSafeView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+    <AppSafeView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.primary_color} />
@@ -258,11 +375,17 @@ const ChefProfileScreen = () => {
 
 export default ChefProfileScreen;
 
-// Style tĩnh (Layout)
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerContainer: { paddingHorizontal: 16, paddingTop: 10 },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
   topNav: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -274,7 +397,10 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     marginBottom: 20,
   },
-  avatarWrapper: { position: "relative", marginRight: 16 },
+  avatarWrapper: {
+    position: "relative",
+    marginRight: 16,
+  },
   avatar: {
     width: 80,
     height: 80,
@@ -293,10 +419,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 2,
   },
-  infoCol: { flex: 1, justifyContent: "center", paddingTop: 4 },
-  nameText: { fontSize: 22, marginBottom: 2 },
-  handleText: { fontSize: 14, marginBottom: 8 },
-  bioText: { fontSize: 14, lineHeight: 20 },
+  infoCol: {
+    flex: 1,
+    justifyContent: "center",
+    paddingTop: 4,
+  },
+  nameText: {
+    fontSize: 22,
+    marginBottom: 2,
+  },
+  handleText: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  bioText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
   iconCircle: {
     width: 40,
     height: 40,
@@ -337,18 +476,33 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     marginBottom: 16,
   },
-  statItem: { alignItems: "center", flex: 1 },
-  statNumber: { fontSize: 18 },
-  statLabel: { fontSize: 12, marginTop: 2 },
-  verticalDivider: { width: 1, height: "60%" },
+  statItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  statNumber: {
+    fontSize: 18,
+  },
+  statLabel: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  verticalDivider: {
+    width: 1,
+    height: "60%",
+  },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     marginBottom: 16,
   },
-  sectionTitle: { fontSize: 18 },
-  listContent: { paddingBottom: 40 },
+  sectionTitle: {
+    fontSize: 18,
+  },
+  listContent: {
+    paddingBottom: 40,
+  },
   columnWrapper: {
     justifyContent: "space-between",
     paddingHorizontal: 16,

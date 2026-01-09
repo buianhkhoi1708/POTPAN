@@ -1,12 +1,9 @@
+// Nhóm 9 - IE307.Q12
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons"; // 👇 1. Import Ionicons
+import { Ionicons } from "@expo/vector-icons"; //
 import { AppLightColor } from "../styles/color";
-// Không cần import SVG nữa
-
-// Nếu bạn chưa có file types, có thể dùng any tạm thời hoặc import đúng đường dẫn
-// import { RootStackParamList } from "../type/types"; 
 
 export type MainTabKey = "home" | "world" | "category" | "profile";
 
@@ -17,41 +14,40 @@ interface MainBottomNavProps {
 
 type TabConfig = {
   key: MainTabKey;
-  iconName: keyof typeof Ionicons.glyphMap;       // Tên icon khi chưa chọn
-  activeIconName: keyof typeof Ionicons.glyphMap; // Tên icon khi đang chọn
+  iconName: keyof typeof Ionicons.glyphMap;
+  activeIconName: keyof typeof Ionicons.glyphMap;
 };
 
-// 👇 2. Cấu hình Icon
 const TABS: TabConfig[] = [
-  { 
-    key: "home", 
-    iconName: "home-outline", 
-    activeIconName: "home" 
+  {
+    key: "home",
+    iconName: "home-outline",
+    activeIconName: "home",
   },
-  { 
-    key: "world", 
-    iconName: "earth-outline", // Hoặc dùng "people-outline" nếu muốn biểu tượng nhóm người
-    activeIconName: "earth" 
+  {
+    key: "world",
+    iconName: "earth-outline",
+    activeIconName: "earth",
   },
-  { 
-    key: "category", 
-    iconName: "grid-outline", 
-    activeIconName: "grid" 
+  {
+    key: "category",
+    iconName: "grid-outline",
+    activeIconName: "grid",
   },
-  { 
-    key: "profile", 
-    iconName: "person-outline", 
-    activeIconName: "person" 
+  {
+    key: "profile",
+    iconName: "person-outline",
+    activeIconName: "person",
   },
 ];
 
 const AppMainNavBar = ({ activeTab, onTabPress }: MainBottomNavProps) => {
-  const navigation = useNavigation<any>(); // Dùng any để tránh lỗi type nếu chưa config kỹ
+  const navigation = useNavigation<any>();
 
   const ROUTE_BY_TAB: Record<MainTabKey, string> = {
     home: "HomeScreen",
     world: "CommunityScreen",
-    category: "CategoriesScreen", 
+    category: "CategoriesScreen",
     profile: "ProfileScreen",
   };
 
@@ -69,7 +65,7 @@ const AppMainNavBar = ({ activeTab, onTabPress }: MainBottomNavProps) => {
       <View style={styles.container}>
         {TABS.map((tab) => {
           const isActive = tab.key === activeTab;
-          
+
           return (
             <Pressable
               key={tab.key}
@@ -77,14 +73,10 @@ const AppMainNavBar = ({ activeTab, onTabPress }: MainBottomNavProps) => {
               onPress={() => handlePress(tab.key)}
               android_ripple={{ color: "#ffe0dd", borderless: true }}
             >
-              {/* 👇 3. Render Ionicons */}
-              <Ionicons 
-                name={isActive ? tab.activeIconName : tab.iconName} 
-                size={22} 
-                // Logic màu: 
-                // - Nếu Active (nền trắng) -> Icon màu Chính
-                // - Nếu Inactive (nền màu chính) -> Icon màu Trắng
-                color={isActive ? AppLightColor.primary_color : "#ffffff"} 
+              <Ionicons
+                name={isActive ? tab.activeIconName : tab.iconName}
+                size={22}
+                color={isActive ? AppLightColor.primary_color : "#ffffff"}
               />
             </Pressable>
           );
@@ -103,22 +95,19 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 24,
     alignItems: "center",
-    // pointerEvents="box-none" ở View cha giúp bấm xuyên qua vùng trống 
-    // (nhưng style này phải hỗ trợ bởi props pointerEvents ở trên)
   },
   container: {
-    width: "80%", // Tăng nhẹ chiều rộng để thoáng hơn
+    width: "80%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderRadius: 999,
     backgroundColor: AppLightColor.primary_color,
     paddingHorizontal: 24,
-    paddingVertical: 10, // Tăng padding dọc một chút
-    // Shadow
+    paddingVertical: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2, // Đậm hơn chút cho nổi
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 8,
   },
@@ -133,7 +122,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     paddingHorizontal: 18,
     paddingVertical: 8,
-    // Thêm shadow nhẹ cho nút active
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

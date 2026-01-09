@@ -18,20 +18,10 @@ import AppHeader from "../components/AppHeader";
 import { useTranslation } from "react-i18next";
 import { useThemeStore } from "../store/useThemeStore";
 import AppCategoryCard from "../components/AppCategoryCard";
+import { CategoryItem } from "../type/types";
 
 const { width } = Dimensions.get("window");
 
-// Types
-type CategoryItem = {
-  id: string;
-  name: string;
-  dbValue: string;
-  key: string;
-  image: any;
-  recipe_count: number;
-};
-
-// Static Data
 const staticCategories = [
   { id: "1", dbValue: "Món mặn", key: "savory", image: require("../assets/images/c1m3.jpg") },
   { id: "2", dbValue: "Món canh", key: "soup", image: require("../assets/images/c2m3.webp") },

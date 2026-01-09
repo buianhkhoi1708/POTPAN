@@ -1,6 +1,6 @@
+// Nhóm 9 - IE307.Q12
 import * as yup from "yup";
 
-// --- 1. Schema Đăng ký ---
 export const getRegisterSchema = (t: any) =>
   yup.object().shape({
     fullName: yup
@@ -25,7 +25,6 @@ export const getRegisterSchema = (t: any) =>
       .oneOf([yup.ref("password")], t("validation.password_mismatch")),
   });
 
-// --- 2. Schema Đăng nhập ---
 export const getLoginSchema = (t: any) =>
   yup.object().shape({
     email: yup
@@ -35,7 +34,6 @@ export const getLoginSchema = (t: any) =>
     password: yup.string().required(t("validation.required")),
   });
 
-// --- 3. Schema Tạo công thức ---
 export const getRecipeSchema = (t: any) =>
   yup.object().shape({
     title: yup
@@ -51,8 +49,10 @@ export const getRecipeSchema = (t: any) =>
     time: yup
       .string()
       .required(t("validation.required"))
-      // Cập nhật regex để chấp nhận cả tiếng Anh lẫn tiếng Việt
-      .matches(/^\d+\s*(phút|giờ|ngày|mins|hours|days)?$/, t("validation.time_format")),
+      .matches(
+        /^\d+\s*(phút|giờ|ngày|mins|hours|days)?$/,
+        t("validation.time_format")
+      ),
     difficulty: yup.string().required(t("validation.required")),
     category: yup.string().required(t("validation.required")),
     thumbnail: yup.string().required(t("validation.image_required")),
@@ -85,7 +85,6 @@ export const getRecipeSchema = (t: any) =>
       .required(t("validation.required")),
   });
 
-// --- 4. Schema Chỉnh sửa hồ sơ ---
 export const getProfileSchema = (t: any) =>
   yup.object().shape({
     fullName: yup
@@ -102,7 +101,6 @@ export const getProfileSchema = (t: any) =>
       .matches(/^(0[3|5|7|8|9])+([0-9]{8})$/, t("validation.phone_invalid")),
   });
 
-// --- 5. Schema Tìm kiếm ---
 export const getSearchSchema = (t: any) =>
   yup.object().shape({
     query: yup.string().min(2, t("validation.min_length", { min: 2 })),

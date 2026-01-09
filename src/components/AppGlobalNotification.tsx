@@ -1,24 +1,21 @@
-// components/GlobalNotification.tsx
+// Nhóm 9 - IE307.Q12
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Pressable, Platform, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { supabase } from '../config/supabaseClient'; // Đường dẫn file config của bạn
-import { useAuthStore } from '../store/useAuthStore'; // Đường dẫn store auth của bạn
-import { navigate } from '../utils/RootNavigation'; // File vừa tạo ở Bước 1
+import { supabase } from '../config/supabaseClient';
+import { useAuthStore } from '../store/useAuthStore';
+import { navigate } from '../utils/RootNavigation';
 import { AppLightColor } from '../styles/color';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GlobalNotification = () => {
   const { user } = useAuthStore();
   const [notification, setNotification] = useState<any>(null);
   
-  // Animation: Bắt đầu ẩn ở phía trên (-150px)
   const translateY = useRef(new Animated.Value(-150)).current;
 
-  // --- 1. LẮNG NGHE REALTIME ---
   useEffect(() => {
     if (!user) return;
-
-    console.log("Đang lắng nghe thông báo cho user:", user.id);
 
     const subscription = supabase
       .channel('global_notifications')
@@ -28,7 +25,7 @@ const GlobalNotification = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`, // Chỉ nhận thông báo của mình
+          filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
           const newNoti = payload.new;
@@ -42,19 +39,28 @@ const GlobalNotification = () => {
     };
   }, [user]);
 
-  // --- 2. HIỆU ỨNG HIỂN THỊ ---
-  const showNotification = (data: any) => {
+  const showNotification = async (data: any) => {
+    try {
+      const savedSetting = await AsyncStorage.getItem('SHOW_POPUP_IN_APP');
+      const isEnabled = savedSetting === 'true' || savedSetting === null;
+
+      if (!isEnabled) {
+        console.log("Global Notification bị chặn do cài đặt của User.");
+        return; 
+      }
+    } catch (error) {
+      console.log("Lỗi đọc setting notification:", error);
+    }
+
     setNotification(data);
 
-    // Trượt xuống
     Animated.spring(translateY, {
-      toValue: 0, // Vị trí hiển thị (ngay dưới tai thỏ)
+      toValue: 0, 
       useNativeDriver: true,
       speed: 12,
       bounciness: 8,
     }).start();
 
-    // Tự động ẩn sau 4 giây
     setTimeout(() => {
       hideNotification();
     }, 4000);
@@ -62,21 +68,20 @@ const GlobalNotification = () => {
 
   const hideNotification = () => {
     Animated.timing(translateY, {
-      toValue: -150, // Trượt ngược lên trên
+      toValue: -150, 
       duration: 300,
       useNativeDriver: true,
     }).start(() => setNotification(null));
   };
 
-  // --- 3. XỬ LÝ KHI BẤM VÀO ---
   const handlePress = () => {
     hideNotification();
-    if (notification?.recipe_id) {
-      // Chuyển hướng đến màn hình chi tiết món ăn
-      // Đảm bảo tên màn hình 'RecipeDetailScreen' đúng với Stack của bạn
-      navigate('RecipeDetailScreen', { 
-        item: { id: notification.recipe_id, title: "Chi tiết món ăn" } 
-      });
+    if (notification?.data?.recipeId) {
+       navigate('RecipeDetailScreen', { item: { id: notification.data.recipeId } });
+    } else if (notification?.recipe_id) {
+       navigate('RecipeDetailScreen', { item: { id: notification.recipe_id } });
+    } else {
+       navigate('NotificationScreen');
     }
   };
 
@@ -93,7 +98,6 @@ const GlobalNotification = () => {
             <Text style={styles.title} numberOfLines={1}>{notification.title}</Text>
             <Text style={styles.message} numberOfLines={2}>{notification.message}</Text>
           </View>
-          {/* Nút đóng nhỏ */}
           <Pressable onPress={hideNotification} style={{ padding: 5 }}>
             <Ionicons name="close" size={20} color="#999" />
           </Pressable>
@@ -111,17 +115,16 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 9999, // Đảm bảo luôn nằm trên cùng
+    zIndex: 9999, 
     backgroundColor: '#fff',
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,
-    // Shadow đẹp
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 10,
-    paddingTop: Platform.OS === 'android' ? 35 : 0, // Fix tai thỏ Android
+    paddingTop: Platform.OS === 'android' ? 35 : 0, 
   },
   content: {
     flexDirection: 'row',
@@ -133,7 +136,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: AppLightColor.primary_color, // Màu chủ đạo của app
+    backgroundColor: AppLightColor.primary_color,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
