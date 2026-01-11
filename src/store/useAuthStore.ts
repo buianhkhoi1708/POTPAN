@@ -52,6 +52,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   profile: null,
   isLoading: false,
 
+  // --- 1. LOGIN ---
   login: async (email, password) => {
     set({ isLoading: true });
     try {
@@ -69,28 +70,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  // --- 2. REGISTER (ĐÃ SỬA: Để SQL Trigger tự tạo Profile) ---
   register: async (email, password, name, phone) => {
     set({ isLoading: true });
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name, phone: phone } },
+        options: { 
+          // Truyền data vào đây để SQL Trigger bắt lấy và tạo bên bảng users
+          data: { 
+            full_name: name, 
+            phone: phone 
+          } 
+        },
       });
 
       if (error) throw error;
       if (!data.user) throw new Error("Đăng ký thất bại");
 
-      const { error: dbError } = await supabase.from("users").insert({
-        id: data.user.id,
-        email: email,
-        full_name: name,
-        phone_number: phone,
-        role: "user",
-      });
-
-      if (dbError) throw dbError;
-
+      // LƯU Ý: Đã xóa đoạn code insert thủ công ở đây để tránh lỗi Duplicate Key
+      
       set({ isLoading: false });
       return Promise.resolve();
     } catch (error: any) {
@@ -99,6 +99,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  // --- 3. QUẢN LÝ SESSION ---
   setSession: async (session) => {
     if (session) {
       set({ user: session.user, session: session, isLoading: true });
@@ -106,6 +107,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } else {
       set({ user: null, session: null, profile: null, isLoading: false });
     }
+  },
+
+  checkSession: async () => {
+    set({ isLoading: true });
+    const { data } = await supabase.auth.getSession();
+    await get().setSession(data.session);
+    set({ isLoading: false });
   },
 
   // --- 4. LOGOUT ---
@@ -121,16 +129,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  checkSession: async () => {
-    set({ isLoading: true });
-    const { data } = await supabase.auth.getSession();
-    await get().setSession(data.session);
-    set({ isLoading: false });
-  },
-
+  // --- 5. XÓA TÀI KHOẢN ---
   deleteAccount: async () => {
     set({ isLoading: true });
     try {
+      // Gọi hàm RPC bên database (Cần chạy SQL tạo hàm delete_user trước)
       const { error } = await supabase.rpc("delete_user");
       if (error) throw error;
       set({ user: null, session: null, profile: null, isLoading: false });
@@ -141,12 +144,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  // --- 6. LẤY PROFILE (ĐÃ SỬA: Chỉ Select, không Insert) ---
   fetchUserProfile: async () => {
     const currentUser = get().user;
-    if (!currentUser) {
-      set({ isLoading: false });
-      return;
-    }
+    if (!currentUser) return;
 
     try {
       const { data, error } = await supabase
@@ -155,38 +156,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .eq("id", currentUser.id)
         .single();
 
-      if (error && error.code !== "PGRST116") throw error;
+      if (error) throw error;
+      
+      // Cập nhật profile vào store
+      set({ profile: data, isLoading: false });
 
-      if (!data) {
-        console.log(
-          "⚠️ Chưa có profile (lần đầu login Google), đang tạo mới..."
-        );
-
-        const meta = currentUser.user_metadata;
-        const newProfile = {
-          id: currentUser.id,
-          email: currentUser.email || "",
-          full_name: meta.full_name || meta.name || "Người dùng mới",
-          avatar_url: meta.avatar_url || meta.picture || null,
-          role: "user",
-          phone_number: null,
-        };
-
-        const { error: insertError } = await supabase
-          .from("users")
-          .insert(newProfile);
-        if (insertError) throw insertError;
-
-        set({ profile: newProfile as UserProfile, isLoading: false });
-      } else {
-        set({ profile: data, isLoading: false });
-      }
     } catch (error) {
       console.log("❌ Lỗi lấy profile:", error);
+      // Dù lỗi cũng phải tắt loading để App không bị treo
       set({ isLoading: false });
     }
   },
 
+  // --- 7. CẬP NHẬT PROFILE ---
   updateProfile: async (name, phone, avatar_url, username, bio, website) => {
     const currentUser = get().user;
     if (!currentUser) return;
