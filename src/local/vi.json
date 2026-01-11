@@ -1,6 +1,7 @@
 {
   "common": {
     "loading": "Đang tải dữ liệu...",
+    "note": "Lưu ý",
     "error": "Có lỗi xảy ra",
     "success": "Thành công",
     "cancel": "Hủy",

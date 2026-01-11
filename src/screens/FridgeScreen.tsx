@@ -126,10 +126,7 @@ const IngredientGroup = React.memo(
 const FridgeScreen = () => {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
-
-  // 👇 2. Lấy Theme
   const { theme, isDarkMode } = useThemeStore();
-
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -142,7 +139,6 @@ const FridgeScreen = () => {
   const selectedCount = useMemo(() => selectedItems.length, [selectedItems]);
 
   const findRecipes = async () => {
-    // 1. Kiểm tra đầu vào: Nên chọn ít nhất 2 nguyên liệu
     if (selectedCount < 2) {
       Alert.alert(
         t("common.note"), 
@@ -153,7 +149,6 @@ const FridgeScreen = () => {
 
     setLoading(true);
     try {
-      // 2. Gọi hàm SQL mới
       const { data, error } = await supabase.rpc(
         "find_recipes_by_ingredients", 
         { selected_ingredients: selectedItems }
@@ -161,20 +156,17 @@ const FridgeScreen = () => {
 
       if (error) throw error;
 
-      // 3. Xử lý khi không có kết quả
       if (!data || data.length === 0) {
         Alert.alert(
           t("common.no_results"), 
-          // Thông báo giải thích rõ về logic 80%
           t("fridge.strict_filter_hint", "Không tìm thấy món nào đáp ứng đủ 80% nguyên liệu bạn chọn. Hãy thử chọn thêm các loại gia vị hoặc rau củ phổ biến xem sao!")
         );
         return;
       }
 
-      // 4. Chuyển sang màn hình kết quả
       navigation.navigate("SearchResultScreen", {
         recipes: data,
-        title: t("fridge.suggested_title"), // "Gợi ý từ tủ lạnh"
+        title: t("fridge.suggested_title"), 
         searchQuery: selectedItems.join(", "),
         isFridgeSearch: true,
       });

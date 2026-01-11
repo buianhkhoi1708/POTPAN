@@ -34,6 +34,7 @@ import { supabase } from "../config/supabaseClient";
 import { useAuthStore } from "../store/useAuthStore";
 import { useThemeStore } from "../store/useThemeStore";
 import { Recipe } from "../type/types";
+
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_MARGIN = 16;
 const CARD_WIDTH = SCREEN_WIDTH - 40;
