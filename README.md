@@ -1,4 +1,4 @@
-##POTPAN 🍳
+POTPAN 🍳
 Smart Fridge & Recipe Suggestion App
 
 Course: IE307.Q12 - Group 9
@@ -14,7 +14,7 @@ Recipe Finder: Suggests dishes based on available ingredients.
 
 Profile Management: Update personal info and avatar.
 
-🛠 ##Tech Stack
+🛠 Tech Stack
 Frontend: React Native (Expo SDK 50), TypeScript.
 
 State Management: Zustand.
