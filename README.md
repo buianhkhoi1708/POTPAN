@@ -1,6 +1,8 @@
 POTPAN 🍳
 Smart Fridge & Recipe Suggestion App
 
+Course: IE307.Q12 - Group 9
+
 POTPAN helps users manage their fridge inventory and suggests recipes based on available ingredients using a smart matching algorithm.
 
 ✨ Key Features
@@ -30,12 +32,12 @@ npm install
 Create a .env file in the root directory:
 
 Đoạn mã
+
 EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-
 3. Run App
-
 Bash
+
 npx expo start
 Press i for iOS Simulator.
 
