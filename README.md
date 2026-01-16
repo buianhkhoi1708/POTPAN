@@ -5,7 +5,7 @@ Course: IE307.Q12 - Group 9
 
 POTPAN helps users manage their fridge inventory and suggests recipes based on available ingredients using a smart matching algorithm.
 
-✨ ##Key Features
+✨ Key Features
 Authentication: Secure Login/Register (Supabase Auth).
 
 Smart Fridge: Manage ingredients by categories.
