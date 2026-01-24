@@ -52,7 +52,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   profile: null,
   isLoading: false,
 
-  // --- 1. LOGIN ---
   login: async (email, password) => {
     set({ isLoading: true });
     try {
@@ -70,7 +69,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  // --- 2. REGISTER (ĐÃ SỬA: Để SQL Trigger tự tạo Profile) ---
   register: async (email, password, name, phone) => {
     set({ isLoading: true });
     try {
@@ -78,7 +76,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         email,
         password,
         options: { 
-          // Truyền data vào đây để SQL Trigger bắt lấy và tạo bên bảng users
           data: { 
             full_name: name, 
             phone: phone 
@@ -88,8 +85,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       if (error) throw error;
       if (!data.user) throw new Error("Đăng ký thất bại");
-
-      // LƯU Ý: Đã xóa đoạn code insert thủ công ở đây để tránh lỗi Duplicate Key
       
       set({ isLoading: false });
       return Promise.resolve();
@@ -99,7 +94,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  // --- 3. QUẢN LÝ SESSION ---
   setSession: async (session) => {
     if (session) {
       set({ user: session.user, session: session, isLoading: true });
@@ -116,7 +110,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: false });
   },
 
-  // --- 4. LOGOUT ---
   logout: async () => {
     set({ isLoading: true });
     try {
@@ -129,11 +122,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  // --- 5. XÓA TÀI KHOẢN ---
+
   deleteAccount: async () => {
     set({ isLoading: true });
     try {
-      // Gọi hàm RPC bên database (Cần chạy SQL tạo hàm delete_user trước)
       const { error } = await supabase.rpc("delete_user");
       if (error) throw error;
       set({ user: null, session: null, profile: null, isLoading: false });
@@ -144,7 +136,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  // --- 6. LẤY PROFILE (ĐÃ SỬA: Chỉ Select, không Insert) ---
   fetchUserProfile: async () => {
     const currentUser = get().user;
     if (!currentUser) return;
@@ -158,17 +149,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       if (error) throw error;
       
-      // Cập nhật profile vào store
       set({ profile: data, isLoading: false });
 
     } catch (error) {
       console.log("❌ Lỗi lấy profile:", error);
-      // Dù lỗi cũng phải tắt loading để App không bị treo
       set({ isLoading: false });
     }
   },
 
-  // --- 7. CẬP NHẬT PROFILE ---
   updateProfile: async (name, phone, avatar_url, username, bio, website) => {
     const currentUser = get().user;
     if (!currentUser) return;

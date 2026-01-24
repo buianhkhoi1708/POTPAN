@@ -51,7 +51,7 @@ const AppChefCard = ({ item, style }: ChefCardProps) => {
       >
         <Image
           source={{
-            uri: item.avatar_url || `https://i.pravatar.cc/150?u=${item.id}`,
+            uri: item.avatar_url || `https://vfqnjeoqxxapqqurdkoi.supabase.co/storage/v1/object/public/avatars/users/default.jpg`,
           }}
           style={styles.image}
           resizeMode="cover"

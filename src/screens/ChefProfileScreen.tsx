@@ -152,7 +152,7 @@ const ChefProfileScreen = () => {
               uri:
                 chefProfile?.avatar_url ||
                 chefAvatar ||
-                "https://i.pravatar.cc/300",
+                "https://vfqnjeoqxxapqqurdkoi.supabase.co/storage/v1/object/public/avatars/users/default.jpg",
             }}
             style={[styles.avatar, { borderColor: theme.border }]}
           />
