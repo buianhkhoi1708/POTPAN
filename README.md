@@ -1,44 +1,128 @@
-POTPAN 🍳
-Smart Fridge & Recipe Suggestion App
+# POTPAN 🍳
+### Smart Fridge & Recipe Suggestion App
 
-Course: IE307.Q12 - Group 9
+POTPAN is a smart mobile application that helps users manage ingredients inside their fridge and discover delicious recipes based on available food items. Built with modern mobile technologies, POTPAN provides a simple and intuitive cooking experience powered by smart ingredient matching.
 
-POTPAN helps users manage their fridge inventory and suggests recipes based on available ingredients using a smart matching algorithm.
+---
 
-✨ Key Features
-Authentication: Secure Login/Register (Supabase Auth).
+## ✨ Features
 
-Smart Fridge: Manage ingredients by categories.
+### 🔐 Authentication
+- Secure Login & Register using Supabase Authentication
+- Persistent user sessions
+- Protected user data
 
-Recipe Finder: Suggests dishes based on available ingredients.
+### 🥬 Smart Fridge Management
+- Add, update, and remove ingredients
+- Organize ingredients by categories
+- Easy ingredient tracking
 
-Profile Management: Update personal info and avatar.
+### 🍽 Recipe Suggestion
+- Smart recipe recommendations based on available ingredients
+- Reduce food waste efficiently
+- Quick meal discovery
 
-🛠 Tech Stack
-Frontend: React Native (Expo SDK 50), TypeScript.
+### 👤 Profile Management
+- Update personal information
+- Upload and change avatar
+- Personalized user experience
 
-State Management: Zustand.
+---
 
-##Backend: Supabase.
+## 🛠 Tech Stack
 
-🚀 Getting Started
-1. Installation
-Bash
+| Technology | Description |
+|---|---|
+| React Native | Mobile application framework |
+| Expo SDK 50 | Development platform |
+| TypeScript | Type-safe JavaScript |
+| Zustand | State management |
+| Supabase | Backend-as-a-Service |
+| Supabase Auth | Authentication system |
 
+---
+
+## 🚀 Getting Started
+
+### 1. Clone Repository
+
+```bash
 git clone https://github.com/buianhkhoi1708/potpan.git
 cd potpan
+```
+
+### 2. Install Dependencies
+
+```bash
 npm install
-2. Environment Setup
-Create a .env file in the root directory:
+```
 
-Đoạn mã
+### 3. Environment Setup
 
+Create a `.env` file in the root directory:
+
+```env
 EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-3. Run App
-Bash
+```
 
+### 4. Run The App
+
+```bash
 npx expo start
-Press i for iOS Simulator.
+```
 
-Press a for Android Emulator.
+Then:
+
+- Press `i` → Open iOS Simulator
+- Press `a` → Open Android Emulator
+- Scan QR Code → Run on physical device with Expo Go
+
+---
+
+## 📂 Project Structure
+
+```bash
+potpan/
+│── assets/             # Images & static files
+│── components/         # Reusable UI components
+│── screens/            # Application screens
+│── services/           # API & Supabase services
+│── store/              # Zustand state management
+│── types/              # TypeScript definitions
+│── utils/              # Utility functions
+│── App.tsx             # Main entry point
+```
+
+---
+
+## 🎯 Project Goals
+
+- Help users manage fridge ingredients effectively
+- Suggest recipes intelligently
+- Reduce food waste
+- Improve cooking convenience
+
+---
+
+## 👨‍💻 Team Information
+
+**Course:** IE307.Q12  
+**Group:** 9
+
+---
+
+## 📌 Future Improvements
+
+- AI-powered recipe recommendations
+- Expiration date tracking
+- Nutrition analysis
+- Shopping list generation
+- Barcode scanner integration
+- Multi-language support
+
+---
+
+## 📄 License
+
+This project is developed for educational purposes.
